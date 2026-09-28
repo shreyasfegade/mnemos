@@ -100,3 +100,5 @@ python/eval/cache/
 python/eval/e8/data/
 *.npy
 python/eval/results/**/*.npz
+.venv-fw/
+tools/bin/

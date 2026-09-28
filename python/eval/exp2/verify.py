@@ -1032,7 +1032,16 @@ EXTRACTORS = {
 }
 
 
+def _with_round3() -> None:
+    """Append the third round's registered checks. Imported late: they import ``Check`` from here."""
+    from eval.exp2 import verify_r3
+
+    CHECKS.extend(verify_r3.CHECKS)
+    EXTRACTORS.update(verify_r3.EXTRACTORS)
+
+
 def main() -> None:
+    _with_round3()
     measured: dict[str, float] = {}
     errors: list[str] = []
     for key, fn in EXTRACTORS.items():
