@@ -167,6 +167,41 @@ impl Slab {
         Ok(())
     }
 
+    /// Read `n` consecutive slots starting at absolute slot `g`. Used by the sweep, whose read set
+    /// is the cursor's range and therefore a function of the clock alone.
+    ///
+    /// # Errors
+    /// I/O failures.
+    pub fn read_slots(&self, g: u64, n: usize, out: &mut [u8]) -> Result<()> {
+        let len = n * self.geo.slot_len();
+        pread(&self.file, &mut out[..len], self.geo.slot_offset(g))?;
+        Ok(())
+    }
+
+    /// Write consecutive slot images starting at absolute slot `g`. Returns bytes written.
+    ///
+    /// # Errors
+    /// I/O failures.
+    pub fn write_slots(&mut self, g: u64, image: &[u8]) -> Result<u64> {
+        debug_assert_eq!(image.len() % self.geo.slot_len(), 0);
+        pwrite(&self.file, image, self.geo.slot_offset(g))?;
+        Ok(image.len() as u64)
+    }
+
+    /// Read the sealed header of absolute slot `g`, and nothing after it. Mnemos-M/disk's search
+    /// reads this for each candidate in its probed partitions.
+    ///
+    /// # Errors
+    /// I/O failures.
+    pub fn read_header(&self, g: u64, out: &mut [u8]) -> Result<()> {
+        pread(
+            &self.file,
+            &mut out[..self.geo.header_ct()],
+            self.geo.slot_offset(g),
+        )?;
+        Ok(())
+    }
+
     /// Flush file data to stable storage.
     ///
     /// # Errors

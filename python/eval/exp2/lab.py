@@ -89,7 +89,13 @@ def create(kind: str, dir_: Path, centroids, overrides: dict, ablation: dict | N
         blocks = over.get("m", {}).get("payload_blocks", 1)
         block = over["crypto"]["block_size_bytes"]
         resident = over.get("m", {}).get("payload_residency", "memory")
-        per = (16 + dim + 4) + (blocks * block if resident == "memory" else 0)
+        hdr_resident = over.get("m", {}).get("header_residency", "memory") == "memory"
+        ivf = over.get("m", {}).get("search", "exact") == "ivf"
+        per = (
+            (16 + dim + 4 if hdr_resident else 0)
+            + (blocks * block if resident == "memory" else 0)
+            + (2 if ivf else 0)
+        )
         need = b * c * per + (16 + dim + 4) + blocks * block + (1 << 16)
         over["memory"] = dict(over.get("memory", {}))
         over["memory"]["arena_bytes"] = max(over["memory"].get("arena_bytes", 0), need)

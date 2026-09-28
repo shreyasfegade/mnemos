@@ -655,6 +655,11 @@ impl PyEngineM {
         d.set_item("purged", st.purged)?;
         d.set_item("region_reads", st.region_reads)?;
         d.set_item("resident_bytes", st.resident_bytes)?;
+        d.set_item("slot_writes", st.slot_writes)?;
+        d.set_item("journal_bytes_written", st.journal_bytes_written)?;
+        d.set_item("slot_reads", st.slot_reads)?;
+        d.set_item("sweep", g.sweep)?;
+        d.set_item("sweep_slots", g.sweep_slots)?;
         d.set_item("slot_len", g.slot_len())?;
         d.set_item("region_len", g.region_len())?;
         d.set_item("max_record_bytes", g.max_record_bytes())?;

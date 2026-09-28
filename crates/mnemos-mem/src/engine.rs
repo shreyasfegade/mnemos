@@ -28,6 +28,7 @@ use rand_chacha::ChaCha20Rng;
 use zeroize::Zeroize;
 
 use crate::geometry::MGeometry;
+use crate::journal;
 use crate::slabs::Slab;
 use crate::Ablation;
 
@@ -38,6 +39,7 @@ mod info {
     pub const MANIFEST: &[u8] = b"mnemos/m/manifest";
     pub const TABLE: &[u8] = b"mnemos/m/table";
     pub const TAG: &[u8] = b"mnemos/m/tag";
+    pub const JOURNAL: &[u8] = b"mnemos/m/journal";
 }
 
 struct Keys {
@@ -46,6 +48,7 @@ struct Keys {
     manifest: DerivedKey,
     table: DerivedKey,
     tag: DerivedKey,
+    journal: DerivedKey,
 }
 
 impl Keys {
@@ -56,6 +59,7 @@ impl Keys {
             manifest: derive_key(master, info::MANIFEST)?,
             table: derive_key(master, info::TABLE)?,
             tag: derive_key(master, info::TAG)?,
+            journal: derive_key(master, info::JOURNAL)?,
         })
     }
 }
@@ -68,10 +72,16 @@ fn header_aad(slot: u32) -> [u8; 14] {
     a
 }
 
-/// A record accepted by `put` and not yet written. Holds ciphertext and its already-chosen slot.
+/// `Staged::slot` under the sweep, where a record's slot is not chosen until the cursor reaches a
+/// free one.
+const UNPLACED: u32 = u32::MAX;
+
+/// A record accepted by `put` and not yet written. Holds ciphertext and, under region flushes, its
+/// already-chosen slot.
 struct Staged {
     tag: Tag,
-    /// Absolute slot index, drawn uniformly at `put` time. **Rule 1.**
+    /// Absolute slot index, drawn uniformly at `put` time under region flushes (**Rule 1**), or
+    /// [`UNPLACED`] under the sweep.
     slot: u32,
     /// Nearest-centroid partition, for the in-memory index under `m.search = "ivf"`; 0 otherwise.
     /// Computed from the header's own codes so put and unlock can never disagree.
@@ -102,6 +112,13 @@ pub struct MStats {
     pub region_reads: u64,
     /// Bytes the resident index occupies.
     pub resident_bytes: u64,
+    /// Slots rewritten by the sweep.
+    pub slot_writes: u64,
+    /// Bytes written to the sweep's journal.
+    pub journal_bytes_written: u64,
+    /// Slots read from disk after unlock: the sweep's cursor range when content is not resident,
+    /// and Mnemos-M/disk's candidate headers and result payloads.
+    pub slot_reads: u64,
 }
 
 /// A Mnemos-M store.
@@ -123,6 +140,8 @@ pub struct EngineM {
     table: Option<Table>,
 
     occupancy: Vec<bool>,
+    /// Number of `true` entries in `occupancy`, kept so the sweep's capacity check is O(1).
+    occupied: usize,
     slot_tag: Vec<[u8; 16]>,
     where_tag: HashMap<[u8; 16], u32>,
     /// Free slots, in no particular order. A `put` draws uniformly from this.
@@ -137,6 +156,9 @@ pub struct EngineM {
     last_flush: Instant,
     stats: MStats,
 }
+
+/// A search candidate: a placed slot (`Ok(g)`) or a staged record (`Err(i)`).
+type Key = std::result::Result<u32, usize>;
 
 /// Nearest-centroid partition of a header, read straight from its codes.
 ///
@@ -168,6 +190,17 @@ fn score_raw(q: &QuantVec, codes: &[u8], scale: f32) -> f32 {
     acc as f32 * q.scale * scale
 }
 
+/// Ablations that have no meaning under the sweep are refused rather than silently ignored.
+fn check_ablation(geo: &MGeometry, abl: Ablation) -> Result<()> {
+    if geo.sweep && (abl.content_placement || abl.no_padding) {
+        return Err(Error::Params(
+            "m: the content_placement and no_padding ablations are defined for flush_mode =              \"regions\" only"
+                .into(),
+        ));
+    }
+    Ok(())
+}
+
 impl EngineM {
     /// Arena size: the resident index plus one slot's worth of scratch.
     fn arena_size(geo: &MGeometry) -> usize {
@@ -189,6 +222,7 @@ impl EngineM {
         abl: Ablation,
     ) -> Result<Self> {
         let geo = MGeometry::from_params(&params)?;
+        check_ablation(&geo, abl)?;
         if centroids.len() != geo.regions as usize {
             return Err(Error::Format(format!(
                 "expected {} centroids, got {}",
@@ -247,6 +281,7 @@ impl EngineM {
             arena: Mutex::new(Some(arena)),
             table: Some(table),
             occupancy: vec![false; geo.slots()],
+            occupied: 0,
             slot_tag: vec![[0u8; 16]; geo.slots()],
             where_tag: HashMap::new(),
             free: (0..geo.slots() as u32).collect(),
@@ -272,6 +307,7 @@ impl EngineM {
         abl: Ablation,
     ) -> Result<Self> {
         let geo = MGeometry::from_params(&params)?;
+        check_ablation(&geo, abl)?;
         let slab = Slab::open(dir, geo)?;
         Ok(Self {
             dir: dir.to_path_buf(),
@@ -287,6 +323,7 @@ impl EngineM {
             arena: Mutex::new(None),
             table: None,
             occupancy: vec![false; geo.slots()],
+            occupied: 0,
             slot_tag: vec![[0u8; 16]; geo.slots()],
             where_tag: HashMap::new(),
             free: Vec::new(),
@@ -390,10 +427,47 @@ impl EngineM {
     /// # Errors
     /// As [`SearchableMemory::flush`].
     pub fn close(&mut self) -> Result<()> {
-        if self.keys.is_some() && (!self.staged.is_empty() || self.dirty) {
-            self.flush()?;
+        if self.keys.is_some() {
+            if self.geo.sweep {
+                self.lock_sweep()?;
+                // `lock` would sweep again; the store has just done so.
+                self.lock_now();
+                return Ok(());
+            } else if !self.staged.is_empty() || self.dirty {
+                self.flush()?;
+            }
         }
         self.lock();
+        Ok(())
+    }
+
+    /// Drop the keys and everything decrypted, without flushing.
+    fn lock_now(&mut self) {
+        self.keys = None;
+        self.table = None;
+        // Dropping the arena zeroises the resident index, which is where every plaintext lives.
+        *self.arena.lock() = None;
+        self.where_tag.clear();
+        self.free.clear();
+        self.slot_tag.iter_mut().for_each(Zeroize::zeroize);
+        self.staged.clear();
+        self.occupied = 0;
+        self.events.emit(LeakEvent::KeyOp { unlock: false });
+    }
+
+    /// The sweep's lock: one flush, always, so that locking is not itself evidence of a write,
+    /// then more only while the backlog exceeds what the journal can hold.
+    ///
+    /// The second clause is the sweep's one residual: it runs only when the agent staged records
+    /// faster than the cursor found free slots for them, and then the number of extra flushes at
+    /// lock reveals that the backlog exceeded `journal_slots`. Its size is bounded by
+    /// `journal_slots` and the placement rate `sweep_slots * (1 - load)` per flush, and E21
+    /// measures how often a realistic write rate reaches it.
+    fn lock_sweep(&mut self) -> Result<()> {
+        self.flush()?;
+        while self.staged.len() > self.geo.journal_slots as usize {
+            self.flush()?;
+        }
         Ok(())
     }
 
@@ -441,7 +515,7 @@ impl EngineM {
         let sl = geo.slot_len();
         let hct = geo.header_ct();
         let (hpt, ppt) = (geo.header_pt, geo.payload_pt);
-        let res_hdr = geo.slots() * hpt;
+        let res_hdr = geo.resident_header_bytes();
         let res_bytes = geo.resident_bytes();
         let (k_header, k_payload) = {
             let k = self.keys()?;
@@ -453,17 +527,7 @@ impl EngineM {
 
         // Purge first, while `self` is freely mutable.
         for i in 0..cap {
-            let g = base + i;
-            if self.occupancy[g] && self.tomb_set.contains(&self.slot_tag[g]) {
-                let t = self.slot_tag[g];
-                self.occupancy[g] = false;
-                self.where_tag.remove(&t);
-                self.tomb_set.remove(&t);
-                self.tombstones.retain(|x| *x != t);
-                self.slot_tag[g] = [0u8; 16];
-                self.free.push(g as u32);
-                self.stats.purged += 1;
-            }
+            self.purge_if_tombstoned(base + i);
         }
 
         let target: Option<usize> = place
@@ -531,6 +595,7 @@ impl EngineM {
 
         if let (Some(g), Some(st)) = (target, place) {
             self.occupancy[g] = true;
+            self.occupied += 1;
             self.slot_tag[g] = st.tag.0;
             self.where_tag.insert(st.tag.0, g as u32);
         }
@@ -543,6 +608,252 @@ impl EngineM {
         });
         self.stats.region_writes += 1;
         self.stats.region_bytes_written += written;
+        Ok(())
+    }
+
+    /// Free slot `g` if it holds a tombstoned record. Shared by both flush modes.
+    fn purge_if_tombstoned(&mut self, g: usize) {
+        if self.occupancy[g] && self.tomb_set.contains(&self.slot_tag[g]) {
+            let t = self.slot_tag[g];
+            self.occupancy[g] = false;
+            self.occupied -= 1;
+            self.where_tag.remove(&t);
+            self.tomb_set.remove(&t);
+            self.tombstones.retain(|x| *x != t);
+            self.slot_tag[g] = [0u8; 16];
+            self.free.push(g as u32);
+            self.stats.purged += 1;
+        }
+    }
+
+    /// One flush under `flush_mode = "sweep"`.
+    ///
+    /// Rewrites the `sweep_slots` slots after the cursor and nothing else in the slab, then the
+    /// manifest and the journal, whose lengths are fixed. Which slots are written is a function of
+    /// the cursor, which moves by `sweep_slots` per flush from a start drawn at unlock, so the
+    /// whole write pattern is a function of the clock. Every slot written is a fresh sealing:
+    /// a live record re-encrypted, a staged record placed in a free slot, or random bytes in a
+    /// free slot, and without the key the three are the same distribution.
+    fn sweep_flush(&mut self) -> Result<Epoch> {
+        let geo = self.geo;
+        let n = geo.slots();
+        let k = geo.sweep_slots as usize;
+        let e = self.epoch;
+        if self.staged.is_empty() {
+            self.stats.empty_flushes += 1;
+        }
+        let start = self.cursor as usize;
+        let first = k.min(n - start);
+        self.sweep_run(start, first, e)?;
+        if k > first {
+            self.sweep_run(0, k - first, e)?;
+        }
+        self.cursor = ((start + k) % n) as u32;
+
+        self.epoch += 1;
+        self.write_manifest()?;
+        self.write_journal()?;
+        if self.durable {
+            self.slab.sync()?;
+        }
+        self.events.emit(LeakEvent::EpochFlush {
+            epoch: Epoch(e),
+            record_count: geo.sweep_slots,
+        });
+        self.stats.flushes += 1;
+        self.dirty = false;
+        self.last_flush = Instant::now();
+        Ok(Epoch(self.epoch))
+    }
+
+    /// Rewrite the contiguous slots `s..s + len`.
+    // One pass per slot kind -- placed, live, free -- inside one arena borrow; splitting it would
+    // hand plaintext across a function boundary for no gain in clarity.
+    #[allow(clippy::too_many_lines)]
+    fn sweep_run(&mut self, s: usize, len: usize, epoch: u64) -> Result<()> {
+        let geo = self.geo;
+        let sl = geo.slot_len();
+        let hct = geo.header_ct();
+        let (hpt, ppt) = (geo.header_pt, geo.payload_pt);
+        let res_hdr = geo.resident_header_bytes();
+        let res_bytes = geo.resident_bytes();
+        let (k_header, k_payload) = {
+            let k = self.keys()?;
+            (k.header.0, k.payload.0)
+        };
+
+        for g in s..s + len {
+            self.purge_if_tombstoned(g);
+        }
+        // Placement, oldest staged record first, into whichever free slots the cursor reached.
+        let mut places: Vec<Option<Staged>> = Vec::with_capacity(len);
+        for g in s..s + len {
+            if !self.occupancy[g] && !self.staged.is_empty() {
+                places.push(Some(self.staged.remove(0)));
+            } else {
+                places.push(None);
+            }
+        }
+
+        // Content that is not resident is read back from the cursor range itself. The read set is
+        // the same range the write is about to cover, so it too is a function of the clock.
+        let resident = geo.header_resident && geo.payload_resident;
+        let mut current = Vec::new();
+        if !resident {
+            current = vec![0u8; len * sl];
+            self.slab.read_slots(s as u64, len, &mut current)?;
+            let cap = self.geo.capacity as usize;
+            for g in s..s + len {
+                self.events.emit(LeakEvent::RegionSlotRead {
+                    region: (g / cap) as u32,
+                    slot: (g % cap) as u32,
+                });
+            }
+            self.stats.slot_reads += len as u64;
+        }
+
+        let mut image: Vec<u8> = Vec::with_capacity(len * sl);
+        let mut guard = self.arena.lock();
+        let arena = guard.as_mut().ok_or(Error::Locked)?;
+        let result = (|| -> Result<()> {
+            let buf = arena.buffer_mut();
+            let (res, scratch) = buf.split_at_mut(res_bytes);
+            let (hdrs, pays) = res.split_at_mut(res_hdr);
+            let (hs, rest) = scratch.split_at_mut(hpt);
+            let ps = &mut rest[..ppt];
+            for (j, g) in (s..s + len).enumerate() {
+                let aad = header_aad(g as u32);
+                if let Some(st) = &places[j] {
+                    open_in_place(&k_header, &st.header_ct, STAGED_AAD, hs)?;
+                    if geo.header_resident {
+                        hdrs[g * hpt..(g + 1) * hpt].copy_from_slice(hs);
+                    }
+                    if geo.index_ivf {
+                        let o = geo.part_ids_offset() + g * PART_ID_LEN;
+                        pays[o..o + PART_ID_LEN].copy_from_slice(&st.part.to_le_bytes());
+                    }
+                    seal_in_place(&k_header, hs, &aad, &mut image)?;
+                    if geo.payload_resident {
+                        open_in_place(&k_payload, &st.payload_ct, st.tag.as_bytes(), ps)?;
+                        pays[g * ppt..(g + 1) * ppt].copy_from_slice(ps);
+                        ps.zeroize();
+                    }
+                    image.extend_from_slice(&st.payload_ct);
+                } else if self.occupancy[g] {
+                    let tag = self.slot_tag[g];
+                    if geo.header_resident {
+                        hs.copy_from_slice(&hdrs[g * hpt..(g + 1) * hpt]);
+                    } else {
+                        open_in_place(&k_header, &current[j * sl..j * sl + hct], &aad, hs)?;
+                    }
+                    seal_in_place(&k_header, hs, &aad, &mut image)?;
+                    if geo.payload_resident {
+                        ps.copy_from_slice(&pays[g * ppt..(g + 1) * ppt]);
+                    } else {
+                        open_in_place(&k_payload, &current[j * sl + hct..(j + 1) * sl], &tag, ps)?;
+                    }
+                    seal_in_place(&k_payload, ps, &tag, &mut image)?;
+                } else {
+                    random_into(&mut image, sl);
+                }
+            }
+            Ok(())
+        })();
+        {
+            let buf = arena.buffer_mut();
+            buf[res_bytes..].zeroize();
+        }
+        drop(guard);
+        current.zeroize();
+        result?;
+
+        for (j, g) in (s..s + len).enumerate() {
+            if let Some(st) = &places[j] {
+                self.occupancy[g] = true;
+                self.occupied += 1;
+                self.slot_tag[g] = st.tag.0;
+                self.where_tag.insert(st.tag.0, g as u32);
+            }
+        }
+
+        let written = self.slab.write_slots(s as u64, &image)?;
+        let cap = self.geo.capacity as usize;
+        let mut g = s;
+        while g < s + len {
+            let region = g / cap;
+            let end = ((region + 1) * cap).min(s + len);
+            self.events.emit(LeakEvent::RegionWrite {
+                region: region as u32,
+                epoch: Epoch(epoch),
+                slots: ((g % cap) as u32..=((end - 1) % cap) as u32).collect(),
+            });
+            g = end;
+        }
+        self.stats.slot_writes += len as u64;
+        self.stats.region_bytes_written += written;
+        Ok(())
+    }
+
+    /// Rewrite the journal with the oldest `journal_slots` staged records, or none.
+    fn write_journal(&mut self) -> Result<()> {
+        let key = self.keys()?.journal.0;
+        let j = self.geo.journal_slots as usize;
+        let entries: Vec<journal::Entry> = self
+            .staged
+            .iter()
+            .take(j)
+            .map(|st| journal::Entry {
+                tag: st.tag.0,
+                header_ct: st.header_ct.clone(),
+                payload_ct: st.payload_ct.clone(),
+            })
+            .collect();
+        let refs: Vec<&journal::Entry> = entries.iter().collect();
+        let n = journal::write(&self.dir, &key, &self.geo, self.epoch, &refs, self.durable)?;
+        self.stats.journal_bytes_written += n;
+        self.events.emit(LeakEvent::JournalWrite {
+            epoch: Epoch(self.epoch),
+        });
+        Ok(())
+    }
+
+    /// At unlock, return journaled records that were never placed to the staging queue.
+    ///
+    /// A record can be both placed and journaled if a flush was interrupted between the slab write
+    /// and the journal write; its tag is then already resident and the journal copy is dropped.
+    fn restore_journal(&mut self) -> Result<()> {
+        let (key, k_header) = {
+            let k = self.keys()?;
+            (k.journal.0, k.header.0)
+        };
+        let geo = self.geo;
+        for e in journal::read(&self.dir, &key, &geo)? {
+            if self.where_tag.contains_key(&e.tag) {
+                continue;
+            }
+            let mut part = 0u16;
+            if geo.index_ivf {
+                let table = self.table.as_ref().ok_or(Error::Locked)?;
+                let res_bytes = geo.resident_bytes();
+                let mut guard = self.arena.lock();
+                let arena = guard.as_mut().ok_or(Error::Locked)?;
+                let buf = arena.buffer_mut();
+                let hs = &mut buf[res_bytes..res_bytes + geo.header_pt];
+                let r = open_in_place(&k_header, &e.header_ct, STAGED_AAD, hs);
+                if r.is_ok() {
+                    part = part_of(table, &hs[ID_LEN..ID_LEN + geo.dim]);
+                }
+                hs.zeroize();
+                r?;
+            }
+            self.staged.push(Staged {
+                tag: Tag(e.tag),
+                slot: UNPLACED,
+                part,
+                header_ct: e.header_ct,
+                payload_ct: e.payload_ct,
+            });
+        }
         Ok(())
     }
 
@@ -592,7 +903,7 @@ impl EngineM {
         let sl = geo.slot_len();
         let hct = geo.header_ct();
         let (hpt, ppt) = (geo.header_pt, geo.payload_pt);
-        let res_hdr = geo.slots() * hpt;
+        let res_hdr = geo.resident_header_bytes();
         let res_bytes = geo.resident_bytes();
         let k_header = self.keys()?.header.0;
         let k_payload = self.keys()?.payload.0;
@@ -629,7 +940,9 @@ impl EngineM {
                         }
                         let aad = header_aad(g as u32);
                         open_in_place(&k_header, &buf[i * sl..i * sl + hct], &aad, hs)?;
-                        hdrs[g * hpt..(g + 1) * hpt].copy_from_slice(hs);
+                        if geo.header_resident {
+                            hdrs[g * hpt..(g + 1) * hpt].copy_from_slice(hs);
+                        }
                         if let Some(t) = &table {
                             let part = part_of(t, &hs[ID_LEN..ID_LEN + geo.dim]);
                             let o = geo.part_ids_offset() + g * PART_ID_LEN;
@@ -660,8 +973,11 @@ impl EngineM {
                 self.where_tag.insert(tag, (base + i) as u32);
             }
         }
+        self.occupied = 0;
         for g in 0..geo.slots() {
-            if !self.occupancy[g] {
+            if self.occupancy[g] {
+                self.occupied += 1;
+            } else {
                 self.free.push(g as u32);
             }
         }
@@ -689,11 +1005,24 @@ impl SearchableMemory for EngineM {
         self.keys()?;
 
         // Rule 1. The slot is drawn before the record's content has influenced anything on disk.
-        let slot = match self.choose_slot(embedding) {
-            Ok(s) => s,
-            Err(e) => {
+        // Under the sweep it is not drawn at all: the record takes the first free slot the cursor
+        // reaches, and all `put` checks is the global bound, which counts staged records too.
+        let slot = if geo.sweep {
+            if self.occupied + self.staged.len() >= geo.slots() {
                 self.stats.refused += 1;
-                return Err(e);
+                return Err(Error::CapacityExceeded {
+                    live: geo.slots() as u64,
+                    n_max: geo.slots() as u64,
+                });
+            }
+            UNPLACED
+        } else {
+            match self.choose_slot(embedding) {
+                Ok(s) => s,
+                Err(e) => {
+                    self.stats.refused += 1;
+                    return Err(e);
+                }
             }
         };
 
@@ -763,55 +1092,106 @@ impl SearchableMemory for EngineM {
     }
 
     /// **Rule 4.** Ranks the resident index and touches no disk.
+    ///
+    /// Staged records are ranked too, from their staged ciphertexts in the arena scratch, so a
+    /// record is searchable from the moment `put` returns whatever the flush mode. Under
+    /// Mnemos-M/disk (`header_residency = "disk"`) the resident index is only a position map and
+    /// each slot's partition, and the headers of the probed partitions' records are read by
+    /// position: invisible to the W class, which sees no reads, and visible to RW by design.
+    // Ranking and payload retrieval each hold the arena for exactly as long as plaintext exists;
+    // the length is the price of not copying plaintext out of it.
+    #[allow(clippy::too_many_lines)]
     fn search(&self, query: &QuantVec) -> Result<Vec<Hit>> {
         let geo = self.geo;
         let keys = self.keys()?;
         let sl = geo.slot_len();
         let hct = geo.header_ct();
         let (hpt, ppt) = (geo.header_pt, geo.payload_pt);
-        let res_hdr = geo.slots() * hpt;
+        let res_hdr = geo.resident_header_bytes();
         let res_bytes = geo.resident_bytes();
 
         let probe = self.probe_mask(query)?;
 
-        // Candidate ranking, entirely in the locked arena.
-        let mut cands: Vec<(f32, u32, [u8; 16])> = {
+        let mut cands: Vec<(f32, Key, [u8; 16])> = Vec::new();
+        {
             let mut guard = self.arena.lock();
             let arena = guard.as_mut().ok_or(Error::Locked)?;
-            let buf = arena.buffer_mut();
-            let (hdrs, rest) = buf.split_at(res_hdr);
-            let ids = &rest[geo.part_ids_offset()..];
-            let mut c: Vec<(f32, u32, [u8; 16])> = Vec::new();
-            for g in 0..geo.slots() {
-                if !self.occupancy[g] || self.tomb_set.contains(&self.slot_tag[g]) {
-                    continue;
-                }
-                if let Some(m) = &probe {
-                    let o = g * PART_ID_LEN;
-                    let part = u16::from_le_bytes([ids[o], ids[o + 1]]);
-                    if !m[part as usize] {
+            let r = (|| -> Result<()> {
+                let buf = arena.buffer_mut();
+                let (resident, scratch) = buf.split_at_mut(res_bytes);
+                let (hdrs, rest) = resident.split_at(res_hdr);
+                let ids = &rest[geo.part_ids_offset()..];
+                let hs = &mut scratch[..hpt];
+                let mut hdr_ct = vec![0u8; hct];
+                for g in 0..geo.slots() {
+                    if !self.occupancy[g] || self.tomb_set.contains(&self.slot_tag[g]) {
                         continue;
                     }
+                    if let Some(m) = &probe {
+                        let o = g * PART_ID_LEN;
+                        let part = u16::from_le_bytes([ids[o], ids[o + 1]]);
+                        if !m[part as usize] {
+                            continue;
+                        }
+                    }
+                    let h: &[u8] = if geo.header_resident {
+                        &hdrs[g * hpt..(g + 1) * hpt]
+                    } else {
+                        let cap = geo.capacity;
+                        self.events.emit(LeakEvent::RegionSlotRead {
+                            region: g as u32 / cap,
+                            slot: g as u32 % cap,
+                        });
+                        self.slab.read_header(g as u64, &mut hdr_ct)?;
+                        open_in_place(&keys.header.0, &hdr_ct, &header_aad(g as u32), hs)?;
+                        hs
+                    };
+                    let scale = f32::from_le_bytes(
+                        h[ID_LEN + geo.dim..hpt]
+                            .try_into()
+                            .map_err(|_| Error::Crypto)?,
+                    );
+                    let score = score_raw(query, &h[ID_LEN..ID_LEN + geo.dim], scale);
+                    let mut id = [0u8; 16];
+                    id.copy_from_slice(&h[..ID_LEN]);
+                    cands.push((score, Ok(g as u32), id));
                 }
-                let off = g * hpt;
-                let scale = f32::from_le_bytes(
-                    hdrs[off + ID_LEN + geo.dim..off + hpt]
-                        .try_into()
-                        .map_err(|_| Error::Crypto)?,
-                );
-                let score = score_raw(query, &hdrs[off + ID_LEN..off + ID_LEN + geo.dim], scale);
-                let mut id = [0u8; 16];
-                id.copy_from_slice(&hdrs[off..off + ID_LEN]);
-                c.push((score, g as u32, id));
-            }
-            c
-        };
+                for (i, st) in self.staged.iter().enumerate() {
+                    if let Some(m) = &probe {
+                        if !m[st.part as usize] {
+                            continue;
+                        }
+                    }
+                    open_in_place(&keys.header.0, &st.header_ct, STAGED_AAD, hs)?;
+                    let scale = f32::from_le_bytes(
+                        hs[ID_LEN + geo.dim..hpt]
+                            .try_into()
+                            .map_err(|_| Error::Crypto)?,
+                    );
+                    let score = score_raw(query, &hs[ID_LEN..ID_LEN + geo.dim], scale);
+                    let mut id = [0u8; 16];
+                    id.copy_from_slice(&hs[..ID_LEN]);
+                    cands.push((score, Err(i), id));
+                }
+                hs.zeroize();
+                Ok(())
+            })();
+            let buf = arena.buffer_mut();
+            buf[res_bytes..].zeroize();
+            r?;
+        }
         // Top-k by selection, then order only those: the same result as a full sort under the
-        // same total order (score descending, slot ascending), without sorting every candidate.
-        let order = |a: &(f32, u32, [u8; 16]), b: &(f32, u32, [u8; 16])| {
+        // same total order (score descending, placed before staged, slot ascending).
+        let rank = |k: &Key| -> (u8, usize) {
+            match k {
+                Ok(g) => (0, *g as usize),
+                Err(i) => (1, *i),
+            }
+        };
+        let order = |a: &(f32, Key, [u8; 16]), b: &(f32, Key, [u8; 16])| {
             b.0.partial_cmp(&a.0)
                 .unwrap_or(std::cmp::Ordering::Equal)
-                .then(a.1.cmp(&b.1))
+                .then(rank(&a.1).cmp(&rank(&b.1)))
         };
         if cands.len() > geo.top_k {
             cands.select_nth_unstable_by(geo.top_k - 1, order);
@@ -822,15 +1202,17 @@ impl SearchableMemory for EngineM {
         // Payloads. Resident by default, so still no disk access. The `disk_search` ablation
         // makes the read set depend on the results, which is the channel it exists to measure.
         let mut hits = Vec::with_capacity(cands.len());
-        for (score, g, id) in cands {
-            let region = g / geo.capacity;
-            let slot = g % geo.capacity;
+        for (score, key, id) in cands {
             let mut disk: Option<Vec<u8>> = None;
-            if !geo.payload_resident || self.abl.disk_search {
-                self.events.emit(LeakEvent::RegionSlotRead { region, slot });
-                let mut scratch = vec![0u8; sl];
-                self.slab.read_slot(region, slot, &mut scratch)?;
-                disk = Some(scratch);
+            if let Ok(g) = key {
+                if !geo.payload_resident || self.abl.disk_search {
+                    let region = g / geo.capacity;
+                    let slot = g % geo.capacity;
+                    self.events.emit(LeakEvent::RegionSlotRead { region, slot });
+                    let mut scratch = vec![0u8; sl];
+                    self.slab.read_slot(region, slot, &mut scratch)?;
+                    disk = Some(scratch);
+                }
             }
             let mut guard = self.arena.lock();
             let arena = guard.as_mut().ok_or(Error::Locked)?;
@@ -838,12 +1220,20 @@ impl SearchableMemory for EngineM {
                 let buf = arena.buffer_mut();
                 let (resident, scratch) = buf.split_at_mut(res_bytes);
                 let ps = &mut scratch[hpt..hpt + ppt];
-                if let Some(d) = &disk {
-                    let tag = self.slot_tag[g as usize];
-                    open_in_place(&keys.payload.0, &d[hct..sl], &tag, ps)?;
-                } else {
-                    let pays = &resident[res_hdr..];
-                    ps.copy_from_slice(&pays[g as usize * ppt..(g as usize + 1) * ppt]);
+                match key {
+                    Err(i) => {
+                        let st = &self.staged[i];
+                        open_in_place(&keys.payload.0, &st.payload_ct, st.tag.as_bytes(), ps)?;
+                    }
+                    Ok(g) => {
+                        if let Some(d) = &disk {
+                            let tag = self.slot_tag[g as usize];
+                            open_in_place(&keys.payload.0, &d[hct..sl], &tag, ps)?;
+                        } else {
+                            let pays = &resident[res_hdr..];
+                            ps.copy_from_slice(&pays[g as usize * ppt..(g as usize + 1) * ppt]);
+                        }
+                    }
                 }
                 decode_frame(ps)
             })();
@@ -881,7 +1271,9 @@ impl SearchableMemory for EngineM {
         let tag = prf::tag_for(&self.keys()?.tag, id, 0);
         if let Some(pos) = self.staged.iter().position(|s| prf::tags_equal(s.tag, tag)) {
             let st = self.staged.remove(pos);
-            self.free.push(st.slot);
+            if st.slot != UNPLACED {
+                self.free.push(st.slot);
+            }
             return Ok(());
         }
         if !self.where_tag.contains_key(&tag.0) {
@@ -910,6 +1302,9 @@ impl SearchableMemory for EngineM {
     /// region is a function of its content and only the padding is uniform.
     fn flush(&mut self) -> Result<Epoch> {
         self.keys()?;
+        if self.geo.sweep {
+            return self.sweep_flush();
+        }
         let geo = self.geo;
         let e = self.epoch;
         let w = geo.epoch_writes as usize;
@@ -984,7 +1379,11 @@ impl SearchableMemory for EngineM {
         self.epoch = m.epoch;
         // The cursor's start is drawn afresh, so its position cannot be read back as the number
         // of flushes the store performed before this session.
-        self.cursor = rand::rngs::OsRng.gen_range(0..self.geo.regions);
+        self.cursor = if self.geo.sweep {
+            rand::rngs::OsRng.gen_range(0..self.geo.slots() as u32)
+        } else {
+            rand::rngs::OsRng.gen_range(0..self.geo.regions)
+        };
         self.occupancy = m.occupancy;
         self.tomb_set = m.tombstones.iter().copied().collect();
         self.tombstones = m.tombstones;
@@ -995,24 +1394,21 @@ impl SearchableMemory for EngineM {
             self.params.memory.lock_pages,
         )?);
         self.rebuild_resident()?;
+        self.restore_journal()?;
         self.last_flush = Instant::now();
         self.events.emit(LeakEvent::KeyOp { unlock: true });
         Ok(())
     }
 
     fn lock(&mut self) {
-        if self.keys.is_some() && (!self.staged.is_empty() || self.dirty) {
-            let _ = self.flush();
+        if self.keys.is_some() {
+            if self.geo.sweep {
+                let _ = self.lock_sweep();
+            } else if !self.staged.is_empty() || self.dirty {
+                let _ = self.flush();
+            }
         }
-        self.keys = None;
-        self.table = None;
-        // Dropping the arena zeroises the resident index, which is where every plaintext lives.
-        *self.arena.lock() = None;
-        self.where_tag.clear();
-        self.free.clear();
-        self.slot_tag.iter_mut().for_each(Zeroize::zeroize);
-        self.staged.clear();
-        self.events.emit(LeakEvent::KeyOp { unlock: false });
+        self.lock_now();
     }
 }
 

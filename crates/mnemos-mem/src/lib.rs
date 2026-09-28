@@ -62,6 +62,7 @@
 
 pub mod engine;
 pub mod geometry;
+pub mod journal;
 pub mod slabs;
 
 pub use engine::{EngineM, MStats};

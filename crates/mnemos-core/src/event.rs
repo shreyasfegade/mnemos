@@ -120,6 +120,13 @@ pub enum LeakEvent {
         slots: Vec<SlotAddr>,
     },
 
+    /// Mnemos-M sweep: the fixed-size sealed journal was rewritten. Happens on every flush,
+    /// whether it holds staged records or none.
+    JournalWrite {
+        /// Epoch.
+        epoch: Epoch,
+    },
+
     /// The manifest was rewritten. Happens every epoch whether or not anything changed, so
     /// its occurrence carries no information.
     ManifestWrite {
@@ -165,9 +172,11 @@ pub enum LeakEvent {
         region: u32,
     },
 
-    /// Mnemos v2, **evaluation ablation only**: one slot re-read after ranking. The shipped
-    /// engine never emits this; it exists so experiment E5 can measure the result-dependent
-    /// read channel that v1's separate record store has.
+    /// One slot read by position. Mnemos-P emits it only under the evaluation ablation that
+    /// re-reads results, which exists so experiment E5 can measure the result-dependent read
+    /// channel. Mnemos-M emits it for the sweep's read of the cursor range when content is not
+    /// resident, which depends on the clock alone, and for Mnemos-M/disk's search, which reads
+    /// its candidates' headers and is visible to the RW class by design.
     RegionSlotRead {
         /// Physical region index.
         region: u32,

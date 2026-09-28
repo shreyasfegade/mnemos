@@ -581,3 +581,74 @@ fn tombstoned_records_leave_the_disk_within_one_cursor_sweep() {
     assert_eq!(e.tombstones_len(), 0);
     assert_eq!(e.stats().purged, 1);
 }
+
+/// Every 16-byte chunk of every rewritten region differs from what was there before.
+///
+/// Slot granularity is what `assert_explained` checks. This is finer: if a whole-region rewrite
+/// re-sealed live slots under fresh nonces but left, say, a free slot's bytes or a payload tail
+/// untouched, a byte diff inside the region would still say which slots were live. Two sealings of
+/// anything agree on a given 16-byte chunk with probability 2^-128, so one unchanged chunk is a
+/// defect, not bad luck. a reader.
+fn unchanged_chunks(e: &EngineV2, a: &Snapshot, b: &Snapshot, region: u32) -> usize {
+    let g = e.geometry();
+    let key = PathBuf::from("partitions.bin");
+    let (x, y) = (&a[&key], &b[&key]);
+    let off = g.region_offset(region) as usize;
+    let len = g.capacity as usize * g.slot_len();
+    x[off..off + len]
+        .chunks(16)
+        .zip(y[off..off + len].chunks(16))
+        .filter(|(p, q)| p == q)
+        .count()
+}
+
+#[test]
+fn a_whole_region_rewrite_changes_every_byte_of_the_region() {
+    let dir = tempfile::tempdir().unwrap();
+    let (mut e, sink) = store(dir.path(), Ablation::default());
+    // A mix of live, deleted and never-used slots in the regions about to be rewritten.
+    let ids: Vec<_> = (0..8)
+        .map(|i| e.put(&format!("live {i}"), "{}", &unit(i)).unwrap())
+        .collect();
+    e.flush().unwrap();
+    e.delete(ids[1]).unwrap();
+    e.delete(ids[4]).unwrap();
+    let _ = sink.drain();
+    for round in 0..6 {
+        e.put(&format!("new {round}"), "{}", &unit(round)).unwrap();
+        let before = snapshot(dir.path());
+        e.flush().unwrap();
+        let after = snapshot(dir.path());
+        for (r, slots) in region_writes(&sink.drain()) {
+            assert!(slots.is_empty());
+            assert_eq!(
+                unchanged_chunks(&e, &before, &after, r),
+                0,
+                "round {round}: region {r} was 'rewritten' but kept some of its bytes"
+            );
+        }
+    }
+}
+
+#[test]
+fn slot_writes_only_ablation_leaves_unchanged_bytes_in_the_region() {
+    // Negative control: a per-slot write leaves the rest of its region byte-identical, which is
+    // exactly what the full-churn test above must be able to see.
+    let dir = tempfile::tempdir().unwrap();
+    let abl = Ablation {
+        slot_writes_only: true,
+        ..Ablation::default()
+    };
+    let (mut e, sink) = store(dir.path(), abl);
+    warm(&mut e, 4);
+    let _ = sink.drain();
+    e.put("x", "{}", &unit(5)).unwrap();
+    let before = snapshot(dir.path());
+    e.flush().unwrap();
+    let after = snapshot(dir.path());
+    let writes = region_writes(&sink.drain());
+    assert!(
+        unchanged_chunks(&e, &before, &after, writes[0].0) > 0,
+        "negative control: a per-slot write must leave most of its region untouched"
+    );
+}

@@ -324,6 +324,7 @@ fn every_event_variant_appears_in_the_document() {
         "RegionWrite",
         "RegionRead",
         "RegionSlotRead",
+        "JournalWrite",
     ];
     for v in variants {
         assert!(
@@ -352,7 +353,8 @@ fn exhaustiveness_reminder(e: &LeakEvent) {
         | LeakEvent::KeyOp { .. }
         | LeakEvent::RegionWrite { .. }
         | LeakEvent::RegionRead { .. }
-        | LeakEvent::RegionSlotRead { .. } => {}
+        | LeakEvent::RegionSlotRead { .. }
+        | LeakEvent::JournalWrite { .. } => {}
     }
     // If this match stops compiling, a variant was added. Add its row to
     // docs/leakage-profile.md and to `variants` above before making it compile again.

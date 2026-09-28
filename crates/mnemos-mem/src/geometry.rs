@@ -15,6 +15,8 @@ pub const FILE_HEADER_LEN: u64 = 64;
 pub const PART_ID_LEN: usize = 2;
 
 /// Store geometry.
+// Each flag is an independent configuration switch read from `params.toml`, as in `Ablation`.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct MGeometry {
     /// Regions, `R`. The rewrite unit; not a partition, because nothing is partitioned.
@@ -41,6 +43,14 @@ pub struct MGeometry {
     pub index_ivf: bool,
     /// Partitions probed per search when `index_ivf`.
     pub probe: u32,
+    /// `flush_mode = "sweep"`: a flush rewrites `sweep_slots` slots after a cursor.
+    pub sweep: bool,
+    /// Slots rewritten per flush under the sweep.
+    pub sweep_slots: u32,
+    /// Staged records the sealed journal holds under the sweep.
+    pub journal_slots: u32,
+    /// Whether headers are decrypted at unlock and held resident. `false` is Mnemos-M/disk.
+    pub header_resident: bool,
 }
 
 impl MGeometry {
@@ -89,6 +99,27 @@ impl MGeometry {
         if index_ivf && p.index.buckets > u32::from(u16::MAX) {
             return bad("ivf search stores partition ids as u16");
         }
+        let sweep = match m.flush_mode.as_str() {
+            "regions" => false,
+            "sweep" => true,
+            other => return bad(&format!("unknown flush_mode {other:?}")),
+        };
+        if sweep && (m.sweep_slots == 0 || m.journal_slots == 0) {
+            return bad("sweep_slots and journal_slots must be at least 1");
+        }
+        let slots = u64::from(p.index.buckets) * u64::from(p.index.bucket_capacity);
+        if sweep && u64::from(m.sweep_slots) > slots {
+            return bad("sweep_slots cannot exceed the number of slots");
+        }
+        let header_resident = match m.header_residency.as_str() {
+            "memory" => true,
+            "disk" => false,
+            other => return bad(&format!("unknown header_residency {other:?}")),
+        };
+        if !header_resident && (!index_ivf || payload_resident || !sweep) {
+            return bad("header_residency = \"disk\" needs search = \"ivf\", \
+                 payload_residency = \"disk\" and flush_mode = \"sweep\"");
+        }
         Ok(Self {
             regions: p.index.buckets,
             capacity: p.index.bucket_capacity,
@@ -102,6 +133,10 @@ impl MGeometry {
             tombstone_capacity: m.tombstone_capacity as usize,
             index_ivf,
             probe: m.probe_width,
+            sweep,
+            sweep_slots: m.sweep_slots,
+            journal_slots: m.journal_slots,
+            header_resident,
         })
     }
 
@@ -135,6 +170,23 @@ impl MGeometry {
         self.regions as usize * self.capacity as usize
     }
 
+    /// Byte offset of an absolute slot in `slab.bin`. Regions are contiguous, so slot `g` of the
+    /// whole file sits at `FILE_HEADER_LEN + g * slot_len` whatever its region.
+    #[must_use]
+    pub const fn slot_offset(&self, g: u64) -> u64 {
+        FILE_HEADER_LEN + g * self.slot_len() as u64
+    }
+
+    /// Bytes of resident headers at the start of the arena: all of them, or none for M/disk.
+    #[must_use]
+    pub const fn resident_header_bytes(&self) -> usize {
+        if self.header_resident {
+            self.slots() * self.header_pt
+        } else {
+            0
+        }
+    }
+
     /// Byte offset of a region in `slab.bin`.
     #[must_use]
     pub const fn region_offset(&self, region: u32) -> u64 {
@@ -153,10 +205,15 @@ impl MGeometry {
     /// estimated, and reported in the statistics an experiment reads.
     #[must_use]
     pub const fn resident_bytes(&self) -> usize {
-        let per = if self.payload_resident {
-            self.header_pt + self.payload_pt
-        } else {
+        let h = if self.header_resident {
             self.header_pt
+        } else {
+            0
+        };
+        let per = if self.payload_resident {
+            h + self.payload_pt
+        } else {
+            h
         };
         let ids = if self.index_ivf { PART_ID_LEN } else { 0 };
         self.slots() * (per + ids)

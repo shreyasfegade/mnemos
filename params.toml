@@ -134,9 +134,21 @@ payload_residency   = "memory"
 # Delta: flush every this many milliseconds while unlocked, whether or not anything was written.
 # This is what removes write timing, closes the derived-write channel, and turns the deletion
 # bound from "within B flushes" into "within B*Delta milliseconds".
-flush_ms            = 500
-tombstone_capacity  = 4096
+flush_ms            = 10000
+# Pending deletions the manifest holds. The manifest is rewritten on every flush, so its size is a
+# per-flush cost; 512 bounds it at ~8 KiB plus the occupancy bitmap.
+tombstone_capacity  = 512
 durable             = true
+# "sweep" (shipped since 2026-09-28): each flush rewrites the next `sweep_slots` slots after a
+# cursor, in the manner of a deterministic write-only ORAM, and a fixed-size sealed journal holds
+# staged records until the cursor reaches a free slot. "regions": the earlier design, w+1 uniformly
+# drawn whole regions per flush, about 5.4 MB per flush at this geometry. Kept as an ablation.
+flush_mode          = "sweep"
+sweep_slots         = 8
+journal_slots       = 4
+# "memory": headers resident (Mnemos-M). "disk": Mnemos-M/disk, for stores larger than memory;
+# needs search = "ivf", payload_residency = "disk".
+header_residency    = "memory"
 
 [targets.performance]
 # Reference: N=10_000, Windows 11, 8-core Ryzen-class, NVMe, no GPU.

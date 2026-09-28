@@ -421,3 +421,343 @@ fn unlock_reads_every_region_once_and_writes_nothing() {
         .iter()
         .any(|h| h.memory.text == "m3"));
 }
+
+// ------------------------------------------------------------------------------------------------
+// The sweep (`flush_mode = "sweep"`), the revision's answer to the flush-volume question: a flush
+// rewrites the `sweep_slots` slots after a cursor, the journal and the manifest, and nothing else.
+
+const K: u32 = 4;
+const J: u32 = 4;
+
+fn params_sweep() -> Params {
+    let mut p = params();
+    p.m.flush_mode = "sweep".into();
+    p.m.sweep_slots = K;
+    p.m.journal_slots = J;
+    p
+}
+
+/// Every slot whose bytes changed, as absolute slot indices.
+fn changed_slots(e: &EngineM, a: &Snapshot, b: &Snapshot) -> BTreeSet<u32> {
+    let cap = e.geometry().capacity;
+    changed_regions(e, a, b)
+        .into_iter()
+        .flat_map(|(r, ss)| ss.into_iter().map(move |s| r * cap + s))
+        .collect()
+}
+
+/// The slots the events announce, as absolute indices. A sweep event always lists its slots.
+fn announced_slots(e: &EngineM, events: &[LeakEvent]) -> BTreeSet<u32> {
+    let cap = e.geometry().capacity;
+    let mut out = BTreeSet::new();
+    for ev in events {
+        if let LeakEvent::RegionWrite { region, slots, .. } = ev {
+            assert!(!slots.is_empty(), "a sweep write must name its slots");
+            out.extend(slots.iter().map(|s| region * cap + s));
+        }
+    }
+    out
+}
+
+fn assert_explained_sweep(e: &EngineM, before: &Snapshot, after: &Snapshot, events: &[LeakEvent]) {
+    let changed = changed_slots(e, before, after);
+    let announced = announced_slots(e, events);
+    // Every announced slot is rewritten under a fresh nonce, so every one of them must differ, and
+    // nothing unannounced may differ.
+    assert_eq!(changed, announced, "slab changes and sweep events disagree");
+    let files = changed_files(before, after);
+    for f in &files {
+        assert!(
+            f == "slab.bin" || f == "manifest.enc" || f == "journal.enc",
+            "unmodelled file changed: {f}"
+        );
+    }
+    let journal = events
+        .iter()
+        .any(|ev| matches!(ev, LeakEvent::JournalWrite { .. }));
+    assert_eq!(
+        files.contains("journal.enc"),
+        journal,
+        "journal change and event disagree"
+    );
+}
+
+fn expected_range(start: u32, k: u32, n: u32) -> BTreeSet<u32> {
+    (0..k).map(|j| (start + j) % n).collect()
+}
+
+#[test]
+fn a_sweep_flush_writes_the_cursor_range_whatever_is_staged() {
+    for real in [0usize, 1, 3, 7] {
+        let dir = tempfile::tempdir().unwrap();
+        let (mut e, sink) = store_with(dir.path(), Ablation::default(), params_sweep());
+        e.flush().unwrap();
+        let first = announced_slots(&e, &sink.drain());
+        let n = e.geometry().slots() as u32;
+        // The first range may wrap; its start is the slot whose predecessor it does not contain.
+        let start0 = *first
+            .iter()
+            .find(|s| !first.contains(&((**s + n - 1) % n)))
+            .unwrap();
+        let start = (start0 + K) % n;
+
+        for i in 0..real {
+            e.put(&format!("r{i}"), "{}", &unit(i)).unwrap();
+        }
+        let before = snapshot(dir.path());
+        e.flush().unwrap();
+        let after = snapshot(dir.path());
+        let events = sink.drain();
+
+        assert_eq!(
+            announced_slots(&e, &events),
+            expected_range(start, K, n),
+            "with {real} staged the sweep wrote somewhere other than the cursor range"
+        );
+        assert_explained_sweep(&e, &before, &after, &events);
+    }
+}
+
+#[test]
+fn sweep_bytes_per_flush_do_not_depend_on_what_was_staged() {
+    let mut totals = Vec::new();
+    for real in [0usize, 2, 4, 9] {
+        let dir = tempfile::tempdir().unwrap();
+        let (mut e, _sink) = store_with(dir.path(), Ablation::default(), params_sweep());
+        for i in 0..real {
+            e.put(&format!("r{i}"), "{}", &unit(i)).unwrap();
+        }
+        let s0 = e.stats();
+        let before = snapshot(dir.path());
+        e.flush().unwrap();
+        let after = snapshot(dir.path());
+        let s1 = e.stats();
+        let sizes: Vec<usize> = ["slab.bin", "manifest.enc", "journal.enc"]
+            .iter()
+            .map(|f| after[Path::new(f)].len())
+            .collect();
+        totals.push((
+            s1.region_bytes_written - s0.region_bytes_written,
+            s1.slot_writes - s0.slot_writes,
+            sizes,
+            changed_files(&before, &after),
+        ));
+    }
+    assert!(
+        totals.windows(2).all(|w| w[0] == w[1]),
+        "sweep volume depends on what was staged: {totals:?}"
+    );
+}
+
+#[test]
+fn the_sweep_wraps_around_the_end_of_the_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let (mut e, sink) = store_with(dir.path(), Ablation::default(), params_sweep());
+    let n = e.geometry().slots() as u32;
+    let mut covered = BTreeSet::new();
+    for _ in 0..n.div_ceil(K) {
+        let before = snapshot(dir.path());
+        e.flush().unwrap();
+        let after = snapshot(dir.path());
+        let events = sink.drain();
+        let a = announced_slots(&e, &events);
+        assert_eq!(a.len(), K as usize);
+        assert_explained_sweep(&e, &before, &after, &events);
+        covered.extend(a);
+    }
+    assert_eq!(
+        covered.len(),
+        n as usize,
+        "a full sweep must cover every slot"
+    );
+}
+
+#[test]
+fn a_staged_record_is_searchable_before_it_is_placed_and_survives_a_crash() {
+    let dir = tempfile::tempdir().unwrap();
+    let p = params_sweep();
+    let (mut e, _sink) = store_with(dir.path(), Ablation::default(), p.clone());
+    // More records than one flush can place: the rest wait in the journal.
+    let ids: Vec<_> = (0..7)
+        .map(|i| e.put(&format!("j{i}"), "{}", &unit(i)).unwrap())
+        .collect();
+    for (i, id) in ids.iter().enumerate() {
+        assert_eq!(
+            e.search(&unit(i)).unwrap()[0].memory.id,
+            *id,
+            "j{i} unsearchable while staged"
+        );
+    }
+    e.flush().unwrap();
+    assert_eq!(e.staged_len(), 7 - K as usize);
+    // A crash: the engine disappears without locking, so nothing beyond the last flush is written.
+    drop(e);
+
+    let ks = SoftwareKeystore::open_at(&dir.path().join("k"), true).unwrap();
+    let mut e = EngineM::open(dir.path(), p, Box::new(ks), Ablation::default()).unwrap();
+    e.unlock().unwrap();
+    for (i, id) in ids.iter().enumerate() {
+        assert_eq!(
+            e.search(&unit(i)).unwrap()[0].memory.id,
+            *id,
+            "j{i} lost across a crash"
+        );
+    }
+}
+
+#[test]
+fn locking_a_sweep_store_writes_the_same_whether_or_not_anything_was_staged() {
+    let mut shapes = Vec::new();
+    for real in [0usize, 2] {
+        let dir = tempfile::tempdir().unwrap();
+        let (mut e, sink) = store_with(dir.path(), Ablation::default(), params_sweep());
+        e.flush().unwrap();
+        let _ = sink.drain();
+        for i in 0..real {
+            e.put(&format!("r{i}"), "{}", &unit(i)).unwrap();
+        }
+        let cap = e.geometry().capacity;
+        e.close().unwrap();
+        let events = sink.drain();
+        let flushes = events
+            .iter()
+            .filter(|ev| matches!(ev, LeakEvent::EpochFlush { .. }))
+            .count();
+        let slots: usize = events
+            .iter()
+            .map(|ev| match ev {
+                LeakEvent::RegionWrite { slots, .. } => slots.len(),
+                _ => 0,
+            })
+            .sum();
+        let journals = events
+            .iter()
+            .filter(|ev| matches!(ev, LeakEvent::JournalWrite { .. }))
+            .count();
+        let _ = cap;
+        shapes.push((flushes, slots, journals));
+    }
+    assert_eq!(
+        shapes[0], shapes[1],
+        "lock reveals whether the agent wrote: {shapes:?}"
+    );
+    assert_eq!(shapes[0].0, 1, "lock performs exactly one flush");
+}
+
+#[test]
+fn sweep_tombstones_leave_the_disk_within_one_full_sweep() {
+    let dir = tempfile::tempdir().unwrap();
+    let (mut e, _) = store_with(dir.path(), Ablation::default(), params_sweep());
+    let id = e.put("to delete", "{}", &unit(2)).unwrap();
+    while e.staged_len() > 0 {
+        e.flush().unwrap();
+    }
+    e.delete(id).unwrap();
+    let n = e.geometry().slots() as u32;
+    for _ in 0..n.div_ceil(K) {
+        e.flush().unwrap();
+    }
+    assert_eq!(e.tombstones_len(), 0);
+    assert_eq!(e.stats().purged, 1);
+}
+
+#[test]
+fn sweep_on_demand_ablation_reveals_whether_the_agent_wrote() {
+    // Negative control for the clock: with flushes triggered by writes, an idle tick writes
+    // nothing and a busy one writes, which is the occurrence channel the clock closes.
+    let dir = tempfile::tempdir().unwrap();
+    let abl = Ablation {
+        on_demand_flush: true,
+        ..Ablation::default()
+    };
+    let mut p = params_sweep();
+    p.m.flush_ms = 1;
+    let (mut e, sink) = store_with(dir.path(), abl, p);
+    std::thread::sleep(std::time::Duration::from_millis(3));
+    assert!(e.tick().unwrap().is_none(), "idle on-demand tick flushed");
+    assert!(sink.drain().is_empty());
+    e.put("x", "{}", &unit(0)).unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(3));
+    assert!(
+        e.tick().unwrap().is_some(),
+        "busy on-demand tick did not flush"
+    );
+}
+
+// ------------------------------------------------------------------------------------------------
+// Mnemos-M/disk: headers and payloads on disk, a position map and partition ids resident.
+
+fn params_disk() -> Params {
+    let mut p = params_sweep();
+    p.m.search = "ivf".into();
+    p.m.probe_width = 2;
+    p.m.payload_residency = "disk".into();
+    p.m.header_residency = "disk".into();
+    p
+}
+
+#[test]
+fn m_disk_search_reads_only_slots_by_position_and_writes_nothing() {
+    let dir = tempfile::tempdir().unwrap();
+    let p = params_disk();
+    let (mut e, sink) = store_with(dir.path(), Ablation::default(), p.clone());
+    let ids: Vec<_> = (0..8)
+        .map(|i| e.put(&format!("m{i}"), "{}", &unit(i)).unwrap())
+        .collect();
+    while e.staged_len() > 0 {
+        e.flush().unwrap();
+    }
+    let _ = sink.drain();
+    let before = snapshot(dir.path());
+    for (i, id) in ids.iter().enumerate() {
+        assert_eq!(e.search(&unit(i)).unwrap()[0].memory.id, *id, "m{i}");
+    }
+    let after = snapshot(dir.path());
+    let events = sink.drain();
+    assert!(
+        changed_files(&before, &after).is_empty(),
+        "an M/disk search wrote to the store"
+    );
+    assert!(
+        events
+            .iter()
+            .all(|ev| matches!(ev, LeakEvent::RegionSlotRead { .. })),
+        "an M/disk search may only read slots by position: {events:?}"
+    );
+    assert!(!events.is_empty(), "M/disk reads its candidates from disk");
+    assert!(
+        e.stats().resident_bytes < (e.geometry().slots() * e.geometry().header_pt) as u64,
+        "M/disk must not hold headers resident"
+    );
+
+    e.close().unwrap();
+    let ks = SoftwareKeystore::open_at(&dir.path().join("k"), true).unwrap();
+    let mut e = EngineM::open(dir.path(), p, Box::new(ks), Ablation::default()).unwrap();
+    e.unlock().unwrap();
+    for (i, id) in ids.iter().enumerate() {
+        assert_eq!(
+            e.search(&unit(i)).unwrap()[0].memory.id,
+            *id,
+            "m{i} after reopen"
+        );
+    }
+}
+
+#[test]
+fn m_disk_flushes_write_the_same_pattern_as_m() {
+    let dir = tempfile::tempdir().unwrap();
+    let (mut e, sink) = store_with(dir.path(), Ablation::default(), params_disk());
+    for i in 0..5 {
+        e.put(&format!("m{i}"), "{}", &unit(i)).unwrap();
+    }
+    let before = snapshot(dir.path());
+    e.flush().unwrap();
+    let after = snapshot(dir.path());
+    let events: Vec<LeakEvent> = sink
+        .drain()
+        .into_iter()
+        .filter(|ev| !matches!(ev, LeakEvent::RegionSlotRead { .. }))
+        .collect();
+    assert_eq!(announced_slots(&e, &events).len(), K as usize);
+    assert_explained_sweep(&e, &before, &after, &events);
+}

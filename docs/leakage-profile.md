@@ -319,3 +319,25 @@ unlocked, so an observer learns when the store was open, though not whether anyt
 An `unlock` reads the entire store, which reveals that an unlock happened. Deletion is bounded by
 `R·Δ` in wall-clock time, and no storage-layer measure reaches copies a synchronisation provider
 has already retained.
+
+### 7.1 The sweep flush (`m.flush_mode = "sweep"`, the shipped configuration from 2026-09-28)
+
+The region flush above rewrites `w + 1` whole regions every Δ, which at the shipped geometry is
+about 5.4 MB per flush. The sweep replaces it with the write pattern of a deterministic write-only
+ORAM (Roche et al., CCS 2017): each flush rewrites the next `sweep_slots` slots after a cursor, and
+a fixed-size sealed journal holds staged records until the cursor reaches a free slot.
+
+| Operation | Events emitted | Adversary observes | Cannot infer |
+|---|---|---|---|
+| `flush` (clocked, every Δ) | `RegionWrite` naming exactly the `sweep_slots` slots after the cursor (one event per region the range touches), `ManifestWrite × 1`, **`JournalWrite × 1`**, `EpochFlush × 1` | the cursor range, which is a function of the flush count and a start drawn at unlock | whether any record was placed, staged, re-encrypted or refreshed: every written slot is a fresh sealing of fixed length |
+| **`JournalWrite`** | the journal (`journal.enc`, fixed size) was rewritten | that a flush happened | how many staged records it holds (none to `journal_slots`) |
+| `lock` / `close` | exactly one flush; further flushes only while more than `journal_slots` records are staged | that the store was locked | whether anything was written in the session. **Residual:** extra flushes at lock reveal that the backlog exceeded `journal_slots`, which requires the agent to have written faster than `sweep_slots * (1 - load)` records per Δ |
+| `flush` with non-resident content (`payload_residency = "disk"`) | additionally `RegionSlotRead` for each slot of the cursor range | the cursor range was read before it was written | anything: the read set equals the write set |
+
+### 7.2 Mnemos-M/disk (`m.header_residency = "disk"`)
+
+Headers and payloads stay on disk; the locked arena holds only each slot's logical partition and
+the position map. Writes are the sweep's, unchanged. A search emits `RegionSlotRead` for the header
+of every live record in its probed partitions and for each result's payload. **W** observes
+nothing of a search. **RW** observes which slots were read, which groups records by logical
+partition over repeated searches: the read channel of any on-disk index, stated rather than hidden.

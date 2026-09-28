@@ -79,6 +79,26 @@ pub struct MParams {
     pub search: String,
     /// Partitions probed per search under `search = "ivf"`.
     pub probe_width: u32,
+    /// What a clocked flush writes.
+    ///
+    /// `"regions"`: `epoch_writes + 1` whole regions, each uniformly distributed (the design the
+    /// first submission measured). `"sweep"`: the next `sweep_slots` slots after a cursor, a
+    /// deterministic function of the flush count, in the manner of a write-only ORAM; a staged
+    /// record is placed in the first free slot the cursor reaches and is held until then in a
+    /// fixed-size sealed journal rewritten every flush. The sweep writes `C` times fewer bytes per
+    /// flush and makes the write pattern independent of everything but the clock.
+    pub flush_mode: String,
+    /// Slots rewritten per flush under `flush_mode = "sweep"`.
+    pub sweep_slots: u32,
+    /// Staged records the sealed journal can hold under `flush_mode = "sweep"`.
+    pub journal_slots: u32,
+    /// `"memory"`: every header is decrypted at unlock and searched in the locked arena.
+    /// `"disk"`: only a position map and each slot's logical partition are resident, and a search
+    /// reads the headers of its probed partitions' records by position. The write pattern is
+    /// unchanged, so this is invisible to the W class and visible to RW; it is the variant for
+    /// stores larger than memory. Requires `search = "ivf"`, `payload_residency = "disk"` and
+    /// `flush_mode = "sweep"`.
+    pub header_residency: String,
 }
 
 impl Default for MParams {
@@ -91,6 +111,10 @@ impl Default for MParams {
             durable: true,
             search: "exact".into(),
             probe_width: 8,
+            flush_mode: "regions".into(),
+            sweep_slots: 8,
+            journal_slots: 4,
+            header_residency: "memory".into(),
         }
     }
 }
