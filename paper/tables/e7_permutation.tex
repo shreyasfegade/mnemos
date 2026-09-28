@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\centering
+\caption{Recovering the keyed partition permutation from search traffic alone, with no induced
+writes, by matching the observed region co-occurrence graph against the one the public table
+predicts ($B=64$, $k_{\mathrm{probe}}=4$, 800 queries,
+null $1/B = 0.016$), over 20 independent stores.
+\emph{FAQ} is the fast approximate QAP solver alone; \emph{refined} adds pairwise-swap local
+search from each of its restarts and is the adversary reported, since a leakage measurement is only
+as strong as its attacker. Applies to the RW class only.}
+\label{tab:e7}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\toprule
+Probe mechanism & Exact, FAQ & Exact, refined & Neighbourhood \\
+\midrule
+Genuine probes only ($s=1$) & 0.887\,[0.823, 0.934] & 0.963\,[0.897, 1.000] & 0.965 \\
+Randomised superset ($s=2$, shipped) & 0.393\,[0.328, 0.460] & 0.564\,[0.469, 0.664] & 1.000 \\
+Grouped probes (group size 8) & 0.025\,[0.016, 0.034] & 0.025\,[0.016, 0.034] & 0.172 \\
+\bottomrule
+\end{tabular}
+\end{table*}

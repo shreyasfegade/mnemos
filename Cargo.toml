@@ -1,0 +1,112 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/mnemos-core",
+    "crates/mnemos-crypto",
+    "crates/mnemos-keystore",
+    "crates/mnemos-store",
+    "crates/mnemos-index",
+    "crates/mnemos-engine",
+    "crates/mnemos-v2",
+    "crates/mnemos-mem",
+    "crates/mnemos-baselines",
+    "crates/mnemos-ffi",
+    "crates/mnemos-cli",
+    "crates/mnemos-bench",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/shreyasfegade/mnemos"
+authors = ["Shreyas Fegade"]
+
+# Lint policy, applied workspace-wide via `[lints] workspace = true` in each crate.
+#
+# `clippy::pedantic` is on because in a security codebase the pedantic lints catch real things.
+# The numeric-cast family is allowed with a specific justification rather than fixed
+# individually in ~30 places:
+#
+#   - `rust-toolchain.toml` targets x86_64 only, so `usize` is 64 bits everywhere we build.
+#   - The casts in question are slot and bucket indices, all bounded by `n_max` (2^16 by
+#     default, validated at load) or by `buckets`/`bucket_capacity`. None can truncate.
+#   - Where a cast *could* lose information — quantisation, scale decoding — the code uses
+#     `try_from` or an explicit clamp, and those paths are tested.
+#
+# If a 32-bit target is ever added, remove these and fix the ~30 sites properly. They would
+# then be genuine bugs rather than noise.
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+cast_possible_truncation = "allow"
+cast_precision_loss = "allow"
+cast_sign_loss = "allow"
+cast_possible_wrap = "allow"
+module_name_repetitions = "allow"
+
+[workspace.dependencies]
+# --- internal ---
+mnemos-core      = { path = "crates/mnemos-core" }
+mnemos-crypto    = { path = "crates/mnemos-crypto" }
+mnemos-keystore  = { path = "crates/mnemos-keystore" }
+mnemos-store     = { path = "crates/mnemos-store" }
+mnemos-index     = { path = "crates/mnemos-index" }
+mnemos-engine    = { path = "crates/mnemos-engine" }
+mnemos-v2        = { path = "crates/mnemos-v2" }
+mnemos-mem       = { path = "crates/mnemos-mem" }
+mnemos-baselines = { path = "crates/mnemos-baselines" }
+
+# --- crypto (RustCrypto; audited, constant-time where it matters) ---
+chacha20poly1305 = "0.10"
+aes-gcm          = "0.10"
+aes              = "0.8"
+hkdf             = "0.12"
+hmac             = "0.12"
+sha2             = "0.10"
+subtle           = "2.6"      # constant-time comparison — ALL tag comparisons go through this
+zeroize          = { version = "1.8", features = ["zeroize_derive"] }
+rand             = "0.8"
+rand_chacha      = "0.3"      # seeded, reproducible PRNG for experiments
+
+# --- infrastructure ---
+thiserror        = "2.0"
+serde            = { version = "1.0", features = ["derive"] }
+serde_json       = "1.0"
+toml             = "0.8"
+tracing          = "0.1"
+tracing-subscriber = "0.3"
+memmap2          = "0.9"
+parking_lot      = "0.12"
+
+# --- testing ---
+proptest         = "1.5"
+criterion        = { version = "0.5", features = ["html_reports"] }
+
+[profile.release]
+opt-level     = 3
+lto           = "fat"
+codegen-units = 1
+panic         = "abort"
+
+# The Python extension MUST unwind. `panic = "abort"` in a cdylib loaded by CPython turns any
+# Rust panic into a hard abort of the interpreter -- the user loses their whole session with no
+# traceback. PyO3 catches unwinding panics and re-raises them as `PanicException`, which is a
+# recoverable error in Python and the behaviour a caller can actually handle.
+#
+# `panic` is a profile-level setting, so the extension gets its own profile rather than the
+# workspace giving up abort semantics for the binaries, where abort is the right choice.
+#
+#     cargo build --profile release-ffi -p mnemos-ffi
+[profile.release-ffi]
+inherits = "release"
+panic = "unwind"
+
+# Benchmarks and attack reproduction must run at release speed with symbols intact.
+[profile.bench]
+inherits = "release"
+debug    = true
+
+# Property tests (history independence) are too slow in a pure debug profile.
+[profile.test]
+opt-level = 1

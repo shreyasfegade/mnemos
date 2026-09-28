@@ -1,0 +1,126 @@
+\section{Proof of Theorem~\ref{thm:main}}
+\label{supp:proof}
+
+Let $\Pi$ satisfy S1 to S4, let $F$ be the pseudorandom function used to derive record tags and
+the per-flush random choices, and let $\mathsf{AE}$ be the authenticated encryption scheme. Let
+$\mathcal{A}$ be a probabilistic polynomial-time adversary in $\mathbf{G}^{\mathrm{H}}$ that
+submits admissible histories and issues polynomially many post-$\tau$ operations. The proof
+proceeds through three games and then exhibits the simulator of \cref{def:dualepoch}.
+
+\paragraph{On adaptivity} $\mathcal{A}$ chooses each post-$\tau$ operation after seeing the leakage
+of every earlier one. This does not disturb the argument. Each hybrid step below replaces a
+primitive with an idealized version, uniformly over the whole game, rather than fixing the
+operation sequence in advance; the reduction answers $\mathcal{A}$'s queries as they arrive and its
+advantage is unchanged. The final step shows the view is a function of the leakage and public
+randomness alone, which holds pointwise for every sequence $\mathcal{A}$ might produce and
+therefore holds for an adaptively chosen one.
+
+\paragraph{Game $\mathrm{G}_0$} The real game $\mathbf{G}^{\mathrm{H}}_{\Pi,\mathcal{A}}$.
+
+\paragraph{Game $\mathrm{G}_1$} As $\mathrm{G}_0$, except that every evaluation of $F$ under a
+store key is replaced by a lazily sampled random function. This affects the record tags, the
+keyed logical-to-physical partition permutation, the free-slot choice within a rewritten region,
+the choice of uniformly random padding regions in a flush, and the per-call probe randomization.
+A distinguisher between $\mathrm{G}_0$ and $\mathrm{G}_1$ yields a distinguisher against $F$, so
+$|\Pr[\mathrm{G}_0 \Rightarrow 1] - \Pr[\mathrm{G}_1 \Rightarrow 1]| \le
+\mathsf{Adv}^{\mathrm{prf}}_{F}(\lambda)$ up to a factor for the number of derived keys.
+
+\paragraph{Game $\mathrm{G}_2$} As $\mathrm{G}_1$, except that every ciphertext written to disk is
+replaced by a uniformly random string of the same length. This includes each slot's header and
+payload ciphertexts, the manifest, and the partition table, and every re-encryption performed when
+a region is rewritten during a flush. The challenger keeps the plaintexts of live records in its
+own state, so no stored ciphertext is decrypted. Each ciphertext is produced under a fresh
+uniformly random nonce and the number of encryptions is polynomial, so a reduction answering every
+encryption with an IND\$-CPA challenge oracle gives
+$|\Pr[\mathrm{G}_1 \Rightarrow 1] - \Pr[\mathrm{G}_2 \Rightarrow 1]| \le
+\mathsf{Adv}^{\mathrm{ind\$}}_{\mathsf{AE}}(\lambda)$.
+
+\paragraph{Independence of the view in $\mathrm{G}_2$ from $b$} The view consists of the snapshot
+at $\tau$ and the leakage of each post-$\tau$ operation. Each component is considered in turn.
+
+\begin{enumerate}
+\item \emph{File lengths.} By S1 every file has a length determined by the public parameters, so
+the snapshot's shape is independent of $b$.
+\item \emph{Snapshot bytes.} By S2 and the change made in $\mathrm{G}_2$, every slot of the
+partition file, whether it holds a live record or is free, is a uniformly random string of the
+slot length, and the manifest and table are uniformly random strings of fixed length. The snapshot
+is therefore a tuple of independent uniform strings whose count and lengths are public parameters,
+identically distributed under $b=0$ and $b=1$.
+\item \emph{Flush leakage.} By S3 a flush writes exactly $w+1$ whole regions. The regions written
+are: one per staged record, being that record's physical region; uniformly random regions to reach
+$w$; and one region fixed by a counter that depends only on the flush index. A staged record's
+physical region is the relabeling of the nearest-centroid partition of its embedding, a function of
+the embedding, the partition table and the relabeling, all independent of $b$ by S4 and
+$\mathrm{G}_1$. The uniform and counter choices are independent of $b$. The written bytes are
+uniform by item 2. So a flush reveals only a multiset of region indices with a distribution
+independent of $b$.
+\item \emph{Deletion and update leakage.} By S3 a deletion writes nothing at the time of the call
+and records a tombstone in the manifest, which is rewritten wholesale every flush regardless of
+content; an update is a deletion followed by a fresh write. The physical removal of a tombstoned
+record occurs only when the counter-selected region of a later flush is rewritten, which is already
+covered by item 3 and whose region choice is content-independent. Hence deleting or updating a
+cohort-H record adds nothing to the view that depends on which region held it.
+\item \emph{Search leakage.} A search reads the regions its probe set names. The probe set is a
+function of the query, the partition table, the relabeling and fresh per-call randomness, none of
+which depends on $b$. Ranking and payload decryption occur in memory over the region images already
+read, so no further disk access is issued.
+\item \emph{Refusals.} Under S4 every submitted history is admissible, so no partition reaches
+capacity under either history and no write is refused under either. The refusal rule is therefore
+never exercised, and cannot distinguish. It is worth being precise about why the weaker argument
+fails: in a store with a \emph{global} load factor, one could argue that the refusal decision
+depends only on the total number of live records, which the equal-length condition makes identical
+under both histories. That argument does not survive here, because refusal depends on
+\emph{per-partition} load, and per-partition load is exactly what the two histories differ in. Only
+admissibility rules the case out. Admissibility must also count tombstoned records whose slots have
+not yet been freed, since those slots are occupied and a partition holding them can refuse.
+Independently of the theorem, S3 requires a refused write to perform the rewrites an accepted one
+would have, so that a deployment leaving the admissible regime degrades gracefully rather than
+disclosing the load directly; \cref{prop:capacity} states what is at stake and
+\cref{sec:eval-refusal} measures it.
+\end{enumerate}
+
+Every component is thus a function of the public parameters, the leakage of the operations issued,
+and randomness independent of $b$. A simulator given only $\mathcal{L}$ reproduces the view: it
+samples the relabeling $\pi$ itself, emits fixed-length uniform strings for the snapshot, and for
+each operation emits the region indices $\mathcal{L}^{\mathrm{op}}$ names under $\pi$, drawing the
+uniform padding and per-call probe randomness itself. Hence the real and simulated views are
+indistinguishable and $\Pr[b'=b] = \tfrac{1}{2}$ in $\mathrm{G}_2$, giving
+\[
+\AdvH_{\Pi,\mathcal{A}}(\lambda) \le \mathsf{Adv}^{\mathrm{prf}}_{F}(\lambda) +
+\mathsf{Adv}^{\mathrm{ind\$}}_{\mathsf{AE}}(\lambda) \le \negl(\lambda).
+\]
+\hfill$\blacksquare$
+
+\paragraph{Predicate hiding (\cref{cor:predicate})} Let $\mathcal{D}$ be a distribution over
+cohort-H histories, let $\phi$ be a predicate on cohort-H contents, and let $\mathcal{P}$ be the
+best predictor of $\phi$ that does not see the adversary's view. Suppose an adversary $\mathcal{B}$
+predicts $\phi$ from its view with advantage $\delta$ over $\mathcal{P}$, where the advantage is
+taken in expectation over $\mathcal{D}$.
+
+Construct a distinguisher $\mathcal{A}$ for $\mathbf{G}^{\mathrm{H}}$ as follows. $\mathcal{A}$
+samples $\sigma_0 \leftarrow \mathcal{D} \mid \phi = 0$ and $\sigma_1 \leftarrow \mathcal{D} \mid
+\phi = 1$, submits them, runs $\mathcal{B}$ on the resulting view, and outputs $\mathcal{B}$'s
+prediction of $\phi$ as its guess for $b$. Conditioned on the sampled pair, $\mathcal{A}$ is correct
+exactly when $\mathcal{B}$ predicts $\phi$ correctly, so
+$\Pr[b' = b] = \tfrac{1}{2} + \tfrac{1}{2}\,\delta_{\sigma_0,\sigma_1}$ where
+$\delta_{\sigma_0,\sigma_1}$ is $\mathcal{B}$'s advantage on that pair. Averaging over the draw of
+the pair gives $\AdvH_{\Pi,\mathcal{A}} \ge \delta/2$, hence
+$\delta \le 2\,\AdvH_{\Pi,\mathcal{A}}(\lambda)$. The averaging is necessary because $\mathcal{B}$'s
+advantage may be concentrated on a small set of histories; the bound holds for the average, not
+pointwise. This is the standard equivalence between semantic security and indistinguishability,
+instantiated for the cohort-H game.
+
+The direction of the corollary is worth restating, because it is easy to invert by accident. It
+converts a \emph{proof} of dual-epoch security into a bound on predicate recovery. It does not
+convert a \emph{measurement} into such a bound: an experiment exhibits one attacker, and the
+advantage it achieves is a lower bound on the leakage present, never an upper bound on the leakage
+available.
+
+\paragraph{Necessity of the conditions} Condition S2 requires pseudorandom rather than merely
+CPA-secure ciphertexts because free slots are uniform strings that must be indistinguishable from
+live ones. Condition S3's whole-region rewrite is used in item 3: a per-slot write would reveal
+which slot changed and, accumulated, the occupancy that item 2 hides. The flush at $\tau$ required
+by the game closes the staged-remainder channel, and S4's admissibility closes the overflow channel
+of item 6. \Cref{prop:seal,prop:fp} show that dropping S1, S2 or S3 admits a distinguisher, which
+\cref{sec:eval-game} realizes as ablations, together with the observation that the keyed
+relabeling is \emph{not} among the conditions and that removing it leaves the game at chance.

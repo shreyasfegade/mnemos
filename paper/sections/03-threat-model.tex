@@ -1,0 +1,166 @@
+\section{System and Threat Model}
+\label{sec:threat}
+
+\subsection{Self-Writing Agent Memory}
+
+The system under study is an agent that stores memory records locally. Each record consists of
+text, optional metadata, and an embedding vector produced by a public embedding model. Retrieval
+returns the records whose embeddings are most similar to a query embedding. Four properties
+distinguish this workload from the usual setting of searchable encryption, in which a user
+outsources a document collection to a remote server.
+
+Records are \emph{self-authored}, produced as a by-product of the agent's work and never reviewed,
+and \emph{continuous}, written throughout the life of the store rather than in an initial bulk load.
+They are \emph{inducible}: a party who can supply tasks to the agent, through a web page, a ticket
+or an email, causes records to be written without any access to the store, and those records are
+genuine agent output that content filtering cannot separate from organic ones. And the store is
+\emph{local}, so the client/server distinction on which the security analysis of schemes such as
+Sophos \cite{bost2016sophos} relies does not apply: both reside on the same disk.
+
+The last property is load-bearing in a way the searchable-encryption framing obscures. There is no
+remote server that must hold the index, so the disk can be removed from the query path altogether.
+\Cref{sec:mnemos-m} takes that option and \cref{sec:eval-perf} measures what it costs.
+
+\subsection{Partitioned Encrypted Vector Indexes}
+
+An inverted-file (IVF) index divides the embedding space into $B$ partitions using a table of
+centroids, called the \emph{partition table}. A record is assigned to the partition with the
+nearest centroid. A search computes the $k_{\mathrm{probe}}$ partitions nearest to the query,
+scores the records they contain, and returns the $\mathit{top\_k}$ best matches. Because
+partitions are defined by embedding similarity, records on similar topics share partitions.
+
+An encrypted variant seals each record, so that record contents require a key. Writes are
+typically buffered and flushed in batches of $w$ records, called \emph{epochs}. The
+analysis distinguishes two storage layouts. In an \emph{unpadded} layout, each partition occupies
+a file region whose size is proportional to the number of records it holds. In a \emph{padded}
+layout, each partition occupies exactly $C$ slots regardless of occupancy. A forward-private scheme
+additionally maintains per-partition state such as update counters. The notation
+used throughout the paper is summarized in \cref{tab:notation}.
+
+\begin{table}[t]
+\centering
+\caption{Notation}
+\label{tab:notation}
+\small
+\begin{tabular}{@{}lp{0.68\columnwidth}@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$B$, $C$ & partitions (or regions); slots per partition \\
+$w$ & records written per flush (\emph{epoch\_writes}) \\
+$\Delta$ & clocked flush interval (\cref{sec:mnemos-m}) \\
+$k_{\mathrm{probe}}$, $\mathit{top\_k}$ & partitions probed per search; records returned \\
+$s$, $p$ & probe spread and probe retention (\cref{sec:mnemos-read}) \\
+$\tau$ & time of compromise \\
+H, P & records written before $\tau$; at or after $\tau$ \\
+$\beta$ & injection budget: induced writes per topic \\
+$g$ & version-capture granularity, in flushes (\cref{sec:eval-multisnapshot}) \\
+\advhist, \advpost & topic-recovery advantage on cohorts H and P \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The \texorpdfstring{$\tau$}{tau}-Arrival Adversary}
+\label{sec:tau-adversary}
+
+The adversary gains access to the stored state at an arbitrary time $\tau$ and retains it. Before
+$\tau$ it observes nothing directly. At $\tau$ it obtains a copy of the on-disk state. After
+$\tau$ it observes storage-level activity and may induce writes up to a budget $\beta$. It cannot
+read the memory of the agent process while the store is unlocked and cannot extract keys from the
+hardware key store.
+
+What it observes after $\tau$ depends on how it obtained access, so the paper distinguishes two
+classes.
+
+\begin{itemize}
+\item \textbf{W, the write observer.} A compromised synchronization or backup account, or repeated disk
+imaging. It sees a sequence of file \emph{versions}, so it learns which byte ranges changed
+between captures and when. It does not see reads at all: no search a local process performs
+produces a new file version. This is the class the anchoring instantiations belong to.
+\item \textbf{RW, the read-write observer.} A storage component with file-system visibility but no code
+execution as the user, such as a network-share server or a malicious storage driver. It sees the
+same writes and additionally every read offset. Search-side leakage matters only for this class.
+\end{itemize}
+
+\Cref{tab:tau} summarizes the two views; results about probe patterns, query equality and
+permutation recovery apply to RW only, and \cref{sec:eval} labels every result with its class.
+
+\begin{table}[t]
+\centering
+\caption{What the two adversary classes observe. W is the class the sync, backup and imaging
+instantiations belong to; RW additionally sees reads. $g$ is the capture granularity.}
+\label{tab:tau}
+\footnotesize
+\begin{tabular}{@{}p{0.24\columnwidth}p{0.34\columnwidth}p{0.30\columnwidth}@{}}
+\toprule
+Observable & Cohort H ($t<\tau$) & Cohort P ($t\ge\tau$) \\
+\midrule
+On-disk state & at $\tau$, plus retained versions & every version, at $g$ \\
+Write offsets & via retained versions & complete, at $g$ \\
+Read offsets & none & RW only \\
+Write timing & via retained artifacts & to the flush schedule \\
+Induced writes & none & up to budget $\beta$ \\
+Keys, process memory & none & none \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Hardware key custody (\cref{sec:mnemos-keys}) is meaningful precisely for these adversaries,
+because it protects a disk image or a synchronized copy read offline. It does not, and is not
+claimed to, protect against malware running as the user, which can ask the key store to unwrap the
+master key or read decrypted records from process memory directly. That adversary is out of scope
+for every storage-layer design.
+
+\subsection{Capture Granularity}
+\label{sec:granularity}
+
+A synchronization client coalesces changes rather than uploading one version per flush, at an
+interval set by the client and network rather than the store. The attacks of
+\cref{sec:eval-multisnapshot} are therefore parameterized by the capture granularity $g$, the
+number of flushes between versions the adversary obtains, rather than assuming $g=1$; coarser
+capture weakens every write-channel attack against W.
+
+\subsection{Pre-\texorpdfstring{$\tau$}{tau} State a Real System Retains}
+\label{sec:artifacts}
+
+The assumption that the adversary observes nothing before $\tau$ deserves scrutiny on a real
+operating system, because ordinary artifacts record past activity: the NTFS change journal, on by
+default, records that and when the store's files were written, and volume shadow copies,
+file-history snapshots and an SSD's flash translation layer, which retains superseded pages after
+an in-place rewrite \cite{wei2011reliably}, preserve earlier contents. \Cref{sec:eval-artifacts}
+audits the evaluation machine rather than asserting the point.
+
+The $\tau$-arrival model should therefore be read as granting the adversary the state at $\tau$
+\emph{and} whatever earlier state these artifacts preserve. That this costs nothing does not follow
+from history independence: in the sense of Naor and Teague \cite{naor2001anti} it relates a
+\emph{single} representation to the operation sequence that produced it, and says nothing about a
+\emph{sequence} of representations, which differ exactly in the regions rewritten in between. A
+synchronization account that retains version history thus moves the effective compromise boundary
+back to the start of its retention window. \Cref{sec:attack-multisnapshot} develops this as an
+attack, and \cref{sec:mnemos-write} gives the countermeasure.
+
+\paragraph{Hibernation}
+A hibernation image captures physical memory, including a locked arena and an unwrapped master
+key, since locking pages prevents paging but not hibernation; an imaging adversary that takes the
+disk after the machine hibernated with the store unlocked defeats key custody entirely. The
+countermeasure is a deployment requirement: lock the store and zeroize its arena on suspend and
+hibernate notifications.
+
+\subsection{Assets, Goals, and Assumptions}
+
+The assets, in decreasing order of sensitivity, are the content of stored records, their topics, the
+temporal pattern of the agent's activity, and the existence of specific records; a record's topic,
+meaning the subject matter the agent worked on, is often as sensitive as its text and is easier to
+recover. The security goals are content confidentiality (G1), topic confidentiality for cohort P
+(G2), query privacy under observation of storage access (G3), resistance to correlation of induced
+writes (G4), and topic confidentiality for cohort H (G5), which is the focus of this paper.
+
+The analysis assumes secure cryptographic primitives (A1); a host uncompromised before $\tau$ (A2),
+without which cohort H does not exist and the problem reduces to that of a fully observed store;
+that the adversary neither defeats hardware key custody nor reads the memory of the unlocked agent
+process (A3), which is what makes a memory-resident design possible at all and which
+\cref{sec:mnemos-m} takes at face value rather than paying for on-disk search the threat model does
+not require; a public embedding model, with no security derived from its secrecy (A4); and a finite
+injection budget (A5), as a function of which results are reported. Availability, the integrity of
+agent behavior, microarchitectural side channels, and deployments spanning multiple hosts are out of
+scope.

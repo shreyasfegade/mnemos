@@ -1,0 +1,13 @@
+{
+ "store": "faiss",
+ "dim": 768,
+ "n_hist": 2000,
+ "n_topics": 8,
+ "budget_per_topic": 40,
+ "block_size": 4096,
+ "distinct_changed_blocks": 1807,
+ "blocks_confidently_labelled": 80,
+ "induced_localisation_accuracy": 0.6320754716981132,
+ "mean_blocks_per_write": 1686.328125,
+ "seconds": 42.408002853393555
+}

@@ -1,0 +1,82 @@
+\section{Background and Related Work}
+\label{sec:background}
+
+\subsection{Searchable Encryption and Leakage}
+
+Searchable symmetric encryption allows a client to query an encrypted index. Its security is
+stated relative to a leakage function that describes what the scheme is permitted to reveal,
+typically the access pattern (which encrypted records a query touches) and the search pattern
+(whether two queries are equal) \cite{curtmola2006searchable,kamara2018structured}. A large body
+of work shows that such leakage can be exploited. Islam, Kuzu, and Kantarcioglu recovered queries
+from access-pattern co-occurrence \cite{islam2012access}; Cash et al. introduced the count attack
+\cite{cash2015leakage}; and Blackstone, Kamara, and Moataz reduced the auxiliary knowledge these
+attacks require \cite{blackstone2020revisiting}. Volume leakage alone suffices for database
+reconstruction \cite{kellaris2016generic,grubbs2018pump}, and query recovery can survive
+access-pattern obfuscation \cite{oya2022ihop}. Kornaropoulos, Papamanthou, and Tamassia recover
+data from the leakage profile of $k$-nearest-neighbor queries \cite{kornaropoulos2019knn}, the
+query type an encrypted vector store serves. Volume-hiding constructions pad response sizes to
+remove this channel \cite{kamara2019volume,patel2019mitigating}. Xu et al. showed that
+leakage-abuse attacks remain effective against schemes that are both forward and backward private
+\cite{xu2023leakage}.
+
+\subsection{Forward Privacy, Backward Privacy, and Injection}
+
+Forward privacy requires that an update cannot be linked to previously issued search tokens
+\cite{stefanov2014practical,bost2016sophos}. It was motivated by file-injection attacks, in which
+an adversary who can insert chosen documents recovers queries from the documents they return
+\cite{zhang2016all}. Sophos achieves forward privacy with a trapdoor permutation and a per-keyword
+counter \cite{bost2016sophos}; Diana replaces the public-key operation with a constrained
+pseudorandom function built from a GGM tree \cite{bost2017forward}. Backward privacy limits what
+searches reveal about deleted entries and is classified into Types I to III
+\cite{bost2017forward}; Ghareh Chamani et al. give constructions across this range
+\cite{chamani2018new}. Amjad, Kamara, and Moataz generalize forward privacy to injection security
+\cite{amjad2023injection}. These notions are defined over the transcript of operations observed
+by a persistent adversary. In prior injection attacks the adversary supplies documents verbatim,
+whereas in the setting of this paper the adversary controls only the task that causes the agent
+to write.
+
+\subsection{Snapshot Adversaries and History Independence}
+
+A snapshot adversary observes the stored state at one or more points rather than the full
+transcript. Amjad, Kamara, and Moataz define breach-resistant structured encryption, which
+requires that a snapshot adversary learn less than a persistent one \cite{amjad2019breach}. Du,
+Genkin, and Grubbs construct snapshot-oblivious RAMs \cite{du2022snapshot}, and Persiano and Yeo
+establish lower bounds for such constructions \cite{persiano2023limits}. Grubbs, Ristenpart, and
+Shmatikov observe that real database snapshots also contain logs, caches, and other artifacts that
+leak past operations \cite{grubbs2017why}, and below the file system an SSD's flash translation
+layer retains superseded pages after an in-place rewrite \cite{wei2011reliably}. History
+independence, anticipated by Micciancio
+\cite{micciancio1997oblivious} and defined by Naor and Teague \cite{naor2001anti}, requires that a
+data structure's representation reveal nothing about the sequence of operations beyond its current
+contents; Buchbinder and Petrank establish its inherent costs \cite{buchbinder2006history}. It has
+been applied to file systems \cite{bajaj2013hifs} and combined with oblivious
+storage and secure deletion \cite{roche2016oblivious}. Oblivious RAM
+\cite{goldreich1996software,stefanov2013path} hides access patterns completely at a
+polylogarithmic cost per access. The present work differs from breach resistance in that it
+compares two cohorts of data under a single adversary, rather than two classes of adversary, and
+it identifies the history-independence property that a dynamic encrypted vector index must
+satisfy against that adversary.
+
+\subsection{Private Vector Search}
+
+Compass performs encrypted semantic search by running ORAM over an HNSW graph with client-side
+traversal \cite{zhu2025compass}. Opal protects personal AI memory by confining data-dependent
+reasoning to a trusted execution environment while an untrusted disk sees only fixed, oblivious
+accesses; it handles continuous ingestion by piggybacking reindexing and capacity management on
+each ORAM access \cite{kaviani2026opal}, so an oblivious store is not limited to static corpora.
+What closes the derived-write channel there is oblivious access under a fixed budget, not the
+enclave as such (\cref{prop:derived}). ONYX reduces the cost of
+disk-oblivious nearest-neighbor search \cite{rathee2026onyx}. Pacmann \cite{zhou2025pacmann} and
+Panther \cite{li2025panther} address private approximate nearest-neighbor search in client-server
+settings. These systems protect against a compromised server or storage provider and, in Opal's
+case, assume that the enclave is not compromised, an assumption that transient-execution attacks
+have violated in practice \cite{vanbulck2018foreshadow}. None of them distinguishes records by the
+time at which they were written relative to a compromise.
+
+\subsection{Security of Agent Memory}
+
+Most self-writing memories store records in plaintext, and the attacks of \cref{sec:intro}
+either target integrity or, like MEXTRA \cite{mextra2025} and membership inference against
+chat-agent memory \cite{mrmmia2026}, query the running agent, which access control addresses. A
+recent survey confirms that the storage-layer confidentiality of a self-writing memory has not been
+treated \cite{survey2026ltmsecurity}; this paper considers that adversary.

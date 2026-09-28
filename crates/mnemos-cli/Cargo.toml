@@ -1,0 +1,35 @@
+[package]
+name = "mnemos-cli"
+description = "Command-line interface for Mnemos: store, search, attack, benchmark, demo."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "mnemos"
+path = "src/main.rs"
+
+[features]
+default = []
+# Propagates the keystore's CI-only fallback. Off by default, so a `cargo install` of this
+# binary CANNOT reach the software keystore however the environment is set. Turning it on is a
+# compile-time decision and still requires MNEMOS_I_ACCEPT_INSECURE=1 at runtime — ADR-0005's
+# double gate, preserved through the CLI rather than quietly widened by it.
+insecure-software-keystore = ["mnemos-keystore/insecure-software-keystore"]
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-engine = { workspace = true }
+mnemos-baselines = { workspace = true }
+mnemos-bench = { path = "../mnemos-bench" }
+mnemos-index = { workspace = true }
+mnemos-keystore = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

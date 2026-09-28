@@ -1,0 +1,99 @@
+\section{Introduction}
+\label{sec:intro}
+
+\IEEEPARstart{L}{arge} language model agents increasingly keep a persistent memory. While
+triaging tickets, reading documents, or debugging code, an agent records what it has learned and
+later retrieves relevant records by nearest-neighbor search over text embeddings
+\cite{packer2023memgpt}. The records are written continuously and without human review, and the
+memory is often stored on the user's own device. Over time it becomes a detailed account of the
+work the agent has performed.
+
+Security research on agent memory has so far concentrated on integrity. Poisoning attacks such
+as MINJA \cite{dong2025minja}, AgentPoison \cite{chen2024agentpoison}, and MemoryGraft
+\cite{srivastava2025memorygraft} insert records that alter the agent's later behavior, and the
+OWASP LLM Top 10 lists vector and embedding weaknesses as a distinct risk
+\cite{owasp2025llm08}. Confidentiality has received less attention. MEXTRA \cite{mextra2025}
+extracts memory records through the agent's own prompting interface, and membership inference
+against chat-agent memory likewise queries the running agent \cite{mrmmia2026}, but no existing
+work models an adversary that obtains the storage layer. Encrypting the memory is the natural first
+measure, because embeddings can be inverted to recover much of the original text
+\cite{morris2023text}.
+
+This paper studies an adversary that obtains the storage layer partway through the life of such a
+store, for example through a compromised synchronization or backup account, or by imaging the
+device more than once. From the moment of compromise, $\tau$, it observes storage activity and can
+influence the agent's inputs; for entries written before $\tau$ it holds only stored state. Those
+entries might be expected to be better protected. For a common class of index layouts they are not,
+and the reason also says when they are.
+
+\paragraph{The attack, and its precondition}
+The attack rests on two properties of the setting. An agent's writes can be induced: an adversary
+that supplies a document, a ticket, or an email causes the agent to write a record about it, and
+that record is ordinary agent output. And encrypted vector indexes partition their records by
+content, so repeated induced writes on a chosen topic reveal which partitions receive records on
+that topic. Because partitions are assigned by content rather than by time, the resulting
+partition-to-topic map describes the earlier records too. A transfer lemma makes this exact, and
+shows the two cohorts are exposed equally.
+
+The lemma has a third hypothesis, and it carries most of the weight: the adversary must learn
+\emph{which partition holds a given earlier record}. A layout whose regions grow with occupancy
+discloses that in the snapshot; one of fixed-size sealed regions does not. The paper is largely an
+account of how an adversary obtains that membership anyway.
+
+\paragraph{What actually protects, and what does not}
+Two beliefs about this setting do not survive measurement. The first is that subject drift protects
+early records: it lowers the attack's advantage only against an adversary that induces with current
+content, and one that induces with archival material recovers it entirely. The second is that a
+history-independent representation makes several snapshots no worse than one. History independence
+relates a single representation to the operations that produced it and says nothing about a
+sequence of representations; two retained versions diff to exactly the regions written between
+them, which is the write channel applied before $\tau$.
+
+Two further channels reach the earlier cohort without touching the layout. A store that bounds
+per-partition capacity and refuses an overflowing write discloses, at near-perfect accuracy, that a
+topic's load has reached capacity, and therefore what the earlier cohort contributed to it. And an
+agent that acts on what it recalls leaks through its own operations; the weakest form of this, the
+occurrence of a write, is enough, because a memory pipeline that skips a fact it already holds turns
+deduplication into a membership oracle for facts written before the compromise.
+
+\paragraph{A design space, not a construction}
+The threat model already assumes the adversary cannot read the unlocked process's memory, and in
+the local setting there is no remote server that must hold the index. Encrypted on-disk search is
+therefore a choice rather than a requirement, and taking the assumption at face value yields a
+design whose disk layout carries no content at all: placement is uniform over free slots, search
+runs entirely in locked memory, and flushes happen on a clock rather than on writes. That design
+closes all three channels above. Its limit is resident memory, and a partition index kept in
+locked memory rather than expressed in the disk layout gives it sublinear search at no cost in
+leakage. The partitioned design remains the right tool above the memory limit, with its residual
+channels reported, including one that is easy to misattribute: its keyed partition permutation is
+largely recovered from ordinary search traffic by an adversary that observes reads.
+
+The contributions are as follows.
+\begin{enumerate}
+\item A threat model for the confidentiality of self-writing agent memory: the $\tau$-arrival
+adversary, split into a write-observing and a read-write-observing class, anchored on
+synchronization, backup and imaging instantiations, parameterized by version-capture granularity,
+and audited against the artifacts a real operating system retains
+(\cref{sec:threat,sec:eval-artifacts}).
+\item The structure-transfer attack and a transfer lemma that states the condition under which it
+reaches the earlier cohort, evaluated with realistic estimators, against deployed stores under
+file-level encryption with time-placed negative controls, and against records a language-model
+agent actually wrote (\cref{sec:transfer,sec:eval}).
+\item Three channels that supply that condition: multi-version reconstruction, the refusal channel
+with a capacity--confidentiality proposition, and derived writes, together with a deduplication
+membership-inference attack that instantiates the last of them
+(\cref{sec:attack-refusal,sec:attack-derived,sec:attack-multisnapshot}).
+\item An adaptive, leakage-parameterized definition of dual-epoch security with leakage stated over
+plaintext operations, sufficient conditions, a predicate-hiding corollary, and separations realized
+as measured ablations (\cref{sec:dualepoch,sec:eval-game}).
+\item Three implemented designs spanning the space, with a byte-level leakage auditor that checks
+every operation against the bytes it writes and that found a cross-operation defect no functional
+test could (\cref{sec:mnemos,sec:eval-audit}). Two results from building them generalize: whole-region
+rewrites are necessary only when placement within a region is deterministic
+(\cref{lem:slot}), and a partition index costs nothing in leakage once it is logical rather than
+physical (\cref{sec:mnemos-m}).
+\item A leakage ledger that states every measured channel, for every design and adversary class, as
+a lower bound on the information it carries in bits, and every null as the smallest effect the
+experiment could have detected, so the design space can be read on one axis
+(\cref{sec:eval-ledger}).
+\end{enumerate}

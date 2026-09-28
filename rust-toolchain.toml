@@ -1,0 +1,7 @@
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]
+# The primary key-custody path is Windows TPM 2.0 via CNG (docs/adr/0005), so that target is
+# listed first; Linux is CI and the artifact image.
+targets = ["x86_64-pc-windows-msvc", "x86_64-unknown-linux-gnu"]
+profile = "default"

@@ -1,0 +1,119 @@
+# Test geometry. Same schema and the same invariants as the shipped `params.toml`, at a size
+# that runs in seconds instead of minutes.
+#
+# Why this file exists: the shipped parameters preallocate n_max * block_size = 256 MiB per
+# store and train 256 centroids over 768 dimensions. A test suite that creates a dozen stores
+# spends four minutes on allocation and k-means, which is long enough that people stop running
+# it -- and a suite nobody runs is a suite that catches nothing.
+#
+# Every security-relevant *invariant* is preserved: page locking stays on, the collision policy
+# stays uniquely representing, wal_records still equals epoch_writes, and probe_width plus
+# decoy_buckets still fits inside the bucket count. Only the sizes shrink.
+
+schema_version = 2
+
+[crypto]
+content_aead        = "xchacha20poly1305"
+content_key_bits    = 256
+content_nonce_bits  = 192
+metadata_aead       = "aes256gcm"
+kdf                 = "hkdf-sha256"
+prf                 = "hmac-sha256"
+prf_tag_bits        = 128
+pprf                = "ggm-aes128"
+pprf_depth          = 32
+block_size_bytes    = 512
+max_entry_bytes     = 512
+
+[memory]
+# Small, but STILL LOCKED. Turning off page locking in tests would mean the mechanism that
+# enforces TA-4 is never exercised anywhere.
+arena_bytes         = 65536
+lock_pages          = true
+zeroise_deadline_ms = 1
+
+[keystore]
+providers           = ["windows-cng-pcp", "linux-tpm2", "macos-enclave", "software"]
+# Still true. Tests reach the software keystore through the explicit `allow_insecure_keystore`
+# parameter, which keeps the opt-in visible at every call site rather than buried in a config
+# file where it could quietly leak into a real deployment.
+require_hardware    = true
+
+[embedding]
+model               = "BAAI/bge-base-en-v1.5"
+# 768, matching what bge-base-en-v1.5 actually emits. An earlier value of 64 worked only while
+# the hashing fallback was in use -- the fallback honours any requested width, a real model
+# cannot. Once the real weights were installed every test that opened a store failed, which is
+# the correct outcome: a store whose declared dimension disagrees with its embedder would
+# silently mis-assign every partition.
+dim                 = 768
+metric              = "cosine"
+quantisation        = "int8-scalar"
+speed_model         = "sentence-transformers/all-MiniLM-L6-v2"
+speed_dim           = 384
+
+[index]
+buckets             = 16
+bucket_capacity     = 32
+probe_width         = 4
+decoy_buckets       = 0
+
+# Pinned to the PRE-MITIGATION configuration, on purpose and not by inheritance.
+#
+# E5 exists to measure the query-equality channel that the mitigation was built to close, so it
+# has to run with the mitigation off; measuring the shipped default here would report 0.000 and
+# quietly delete the motivation for the mitigation from the paper. E10 measures the mitigation.
+#
+# Stating it explicitly matters because `params.toml` now ships `s = 2`: without these lines
+# this file would inherit whatever the default happens to be on the day, and E5's number would
+# move with it while its docstring kept claiming the old meaning.
+probe_spread        = 1
+probe_retention     = 1.0
+overflow_depth      = 2
+top_k               = 10
+n_max               = 1024
+partitioner         = "spherical-kmeans"
+collision_policy    = "robin-hood"
+
+[epoch]
+epoch_ms            = 500
+epoch_writes        = 16
+compaction_slots    = 8
+slot_write_budget   = 64
+max_load_factor     = 0.60
+wal_records         = 16
+
+[targets.performance]
+search_p50_ms       = 25
+search_p95_ms       = 60
+search_p50_decoy_ms = 45
+write_p50_ms        = 8
+epoch_flush_ms      = 30
+overhead_vs_plain_x = 20
+storage_overhead_x  = 2.5
+
+[targets.utility]
+recall_at_10_probe4 = 0.90
+recall_at_10_probe8 = 0.95
+ndcg_degradation    = 0.03
+agent_success_delta_pp = 2.0
+
+[targets.security]
+adv_hist_mnemos_max  = 0.05
+adv_hist_baseline_min = 0.50
+trials               = 30
+confidence           = 0.95
+aux_knowledge        = [0.10, 0.25, 0.50]
+
+[sweeps]
+buckets             = [16]
+probe_width         = [4]
+decoy_buckets       = [0]
+epoch_writes        = [16]
+epoch_ms            = [500]
+corpus_sizes        = [1000]
+
+[datasets]
+d1_hermes           = "data/d1-hermes"
+d2_public           = "data/d2-msmarco-nq"
+d3_procedural       = "data/d3-swebench"

@@ -1,0 +1,31 @@
+\begin{table*}[t]
+\centering
+\caption{Every channel in one unit. \emph{Bits} is a Fano lower bound on the mutual information between the secret and what the adversary observes, per observation of the unit the channel is about (a record's topic, a region's partition, one game instance), taken at the lower end of the experiment's 95\% interval so that it holds at the experiment's confidence; $^\ast$ marks a result with no interval, for which only the point bound exists. A test bounds leakage from below, so for a \emph{closed} channel the informative number is the last column: the smallest effect, in the experiment's own unit, it had 80\% power to detect. The supplement gives every row.}
+\label{tab:ledger}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llllrl}
+\toprule
+Channel & Design & Class & Status & Bits $\geq$ & Detectable $\geq$ \\
+\midrule
+structure transfer, historically aware adversary & growing layout & W & \textbf{open} & 0.815 & -- \\
+snapshot + post-$\tau$ writes (the game) & Mnemos-P & W & closed & 0.000 & 0.052 (AUC) \\
+snapshot + post-$\tau$ writes (the game) & Mnemos-M & W & closed & 0.000 & 0.051 (AUC) \\
+refusal, silent & Mnemos-P ablation & W & \textbf{open} & 0.682 & -- \\
+refusal, silent & Mnemos-P & W & \textbf{open} & 0.763 & -- \\
+refusal, padded & Mnemos-P & W & closed & 0.000 & 0.051 (AUC) \\
+refusal, padded & Mnemos-P & W & closed & 0.000 & undetermined \\
+multi-version diff, g=1 & Mnemos-P & W & \textbf{open} & 0.524 & -- \\
+multi-version diff, across a session, rewrite\_at\_lock on & Mnemos-P & W & closed & 0.000 & undetermined \\
+permutation recovery (spread\_s1) & Mnemos-P & RW & \textbf{open} & 4.905 & -- \\
+permutation recovery (spread\_s2) & Mnemos-P & RW & \textbf{open} & 1.827 & -- \\
+permutation recovery (grouped) & Mnemos-P & RW & \textbf{open} & 0.000 & -- \\
+query equality (spread\_s2), overlap threshold & Mnemos-P & RW & \textbf{open} & 0.890 & -- \\
+query equality (grouped), overlap threshold & Mnemos-P & RW & \textbf{open} & 0.566 & -- \\
+dedup membership (threshold) & Mnemos-P & W & \textbf{open} & 0.189 & -- \\
+dedup membership (threshold) & Mnemos-M & W & closed & 0.000 & undetermined \\
+dedup membership (llm) & Mnemos-P & W & \textbf{open} & 0.003 & -- \\
+dedup membership (llm) & Mnemos-M & W & closed & 0.000 & undetermined \\
+\bottomrule
+\end{tabular}
+\end{table*}

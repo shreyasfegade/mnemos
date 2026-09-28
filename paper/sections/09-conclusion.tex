@@ -1,0 +1,36 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+For encrypted partitioned indexes whose partitions are placed by content, induced writes label
+partitions with topics, and where the layout also discloses which partition holds each stored
+record, those labels apply to records written before the compromise. The transfer lemma makes that
+condition precise: when it holds the two cohorts are exposed equally, and having been written early
+helps only when the agent's subject matter drifts and the adversary does not induce with archival
+content.
+
+Once the layout stops disclosing membership, fixed-size sealed regions with data-independent
+updates close the snapshot channel, and dual-epoch security states what that buys; but three
+channels reach the earlier cohort anyway. File versions reconstruct pre-compromise writes, which
+re-encryption at a session boundary defeats only at coarse capture. Bounded per-partition capacity
+discloses the earlier load through refusals, which an indistinguishable refusal closes. And an
+agent leaks through its own operations, down to the occurrence of a write, which makes
+deduplication a membership oracle.
+
+That last channel needs to be stated precisely. It is not that no storage design can close it. It
+is that no storage design whose operations depend on the content or the occurrence of what the
+agent does can close it, which leaves content-oblivious placement, in-memory search and a clocked
+flush schedule as a design that does. Because the threat model already grants that the adversary
+cannot read the unlocked process, that design is available in the local setting at a cost measured
+here in memory rather than in latency. Its exhaustive search loses to the partitioned design above
+about $10^4$ records, but a partition index kept in locked memory rather than on disk restores the
+lead at every size measured without reopening the write channel, because partitions that are
+logical rather than physical cost nothing an adversary can observe. The partitioned design remains
+the right tool above the memory bound, with its residual channels stated.
+
+The open problems are the ones the residuals name. Oblivious access remains the only closure for
+the write and query-equality channels of a store too large to keep resident, and its cost against a
+constant-factor design remains to be measured. Version retention at the provider is outside the
+reach of anything the storage layer does, so secure deletion has no answer there. And the broader
+lesson is the one the measurements kept repeating: for memory an agent writes about its own work,
+the time a record was written is not a protection, and a leakage claim is only as good as the
+granularity at which it was tested against the bytes an adversary actually sees.

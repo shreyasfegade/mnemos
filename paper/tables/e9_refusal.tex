@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\centering
+\caption{The refusal channel ($B=64$, $C=32$, $w=4$;
+padding alone rewrites a given region on 0.076 of flushes). The adversary
+induces writes destined for a region and watches whether that region is rewritten.}
+\label{tab:e9}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrr}
+\toprule
+Refusal behaviour & AUC [95\% CI] & Rate, full & Rate, open & Gap \\
+\midrule
+Silent (writes nothing) & 1.000\,[1.000, 1.000] & 0.070 & 1.000 & +0.930 \\
+Padded (rewrites the region anyway) & 0.500\,[0.500, 0.500] & 1.000 & 1.000 & +0.000 \\
+\bottomrule
+\end{tabular}
+\end{table*}

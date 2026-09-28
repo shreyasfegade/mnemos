@@ -1,0 +1,28 @@
+\begin{table*}[t]
+\centering
+\caption{The dual-epoch game against the compiled engines, 1000 instances per
+bit, evaluated on a held-out half. \emph{Learned} is a gradient-boosted classifier over snapshot
+and trace features; \emph{hand} is one named statistic per arm, oriented on the training half.
+A test bounds leakage from below, so the upper end of the interval is the ceiling for these
+attackers and not a certificate.}
+\label{tab:e5}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrl}
+\toprule
+Configuration & Admissible & Refusals & Learned AUC [95\% CI] & Hand AUC [95\% CI] & Verdict \\
+\midrule
+P shipped & yes & 0 & 0.50\,[0.47, 0.54] & 0.52\,[0.48, 0.56] & at chance \\
+P no S1 (growing regions) & yes & 0 & 1.00\,[1.00, 1.00] & 1.00\,[1.00, 1.00] & distinguishable \\
+P no S2 (unsealed slots) & yes & 0 & 1.00\,[1.00, 1.00] & 1.00\,[0.99, 1.00] & distinguishable \\
+P no S3 (per-slot writes) & yes & 0 & 0.49\,[0.45, 0.53] & 0.50\,[0.46, 0.53] & at chance \\
+P identity permutation & yes & 0 & 0.52\,[0.49, 0.56] & 0.51\,[0.47, 0.54] & at chance \\
+P inadmissible, padded refusal & \textbf{no} & 7659 & 0.47\,[0.44, 0.51] & 0.53\,[0.49, 0.56] & at chance \\
+P inadmissible, silent refusal & \textbf{no} & 7659 & 1.00\,[1.00, 1.00] & 0.99\,[0.99, 0.99] & distinguishable \\
+M shipped & yes & 0 & 0.50\,[0.47, 0.54] & 0.51\,[0.47, 0.55] & at chance \\
+M content placement & yes & 0 & 0.49\,[0.45, 0.52] & 0.49\,[0.45, 0.52] & at chance \\
+P first-free slot (S3 kept) & yes & 0 & 0.51\,[0.48, 0.55] & 0.50\,[0.50, 0.50] & at chance \\
+P no S3, first-free slot & yes & 0 & 1.00\,[1.00, 1.00] & 1.00\,[1.00, 1.00] & distinguishable \\
+\bottomrule
+\end{tabular}
+\end{table*}

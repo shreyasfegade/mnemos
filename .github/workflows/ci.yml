@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  # CI runners have no TPM, so the software keystore is the only option here. Both gates are
+  # set explicitly and loudly: the compile feature below, and this env var. Any result
+  # produced in this configuration is NOT a security result — see docs/adr/0005.
+  MNEMOS_I_ACCEPT_INSECURE: "1"
+
+jobs:
+  rust:
+    name: Rust (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows first: it is the primary key-custody path (ADR-0005) and the development
+        # machine, so a Windows-only break must not hide behind a green Linux run.
+        os: [windows-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Format
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --features mnemos-keystore/insecure-software-keystore -- -D warnings
+
+      - name: Test
+        run: cargo test --workspace --features mnemos-keystore/insecure-software-keystore
+
+      # The leakage-profile test asserts that the emitted LeakEvent set matches
+      # docs/leakage-profile.md row by row. A failure here means the implementation leaks
+      # something the paper does not admit to — which is a correctness failure of the paper,
+      # not just of the code. It runs as its own step so it is unmissable in the log.
+      - name: Leakage profile matches the documented table
+        run: cargo test -p mnemos-engine --test leakage_profile
+
+      # The machine-checked form of Definition 1(iii): for any two insertion orders of the
+      # same set, the final slab bytes must agree modulo nonces and dummy fill.
+      - name: History independence (property test)
+        run: cargo test -p mnemos-store --release -- --ignored layout_is_independent
+
+  python:
+    name: Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - run: ruff check python
+      - run: ruff format --check python
+      - run: mypy python/mnemos
+      - run: pytest python/tests -v
+
+  params-consistency:
+    name: params.toml is the single source of truth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e "."
+      # Both loaders must accept the shipped file and agree on the derived quantities.
+      # If Rust and Python disagree about slots_read_per_search(), every A5 result is
+      # measuring one implementation against another implementation's assumptions.
+      - name: Python loader accepts params.toml
+        run: python -c "from mnemos import params; params.load(); print(params.slots_read_per_search())"
+
+  attack-fairness:
+    name: Attacks cannot import the engine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The constraint that makes every attack result meaningful: attacks see the LeakEvent
+      # transcript and nothing else. An attack with engine internals still produces a
+      # plausible number while measuring nothing, and nothing else in CI would catch it.
+      - name: No attack module imports mnemos.engine or mnemos_native
+        run: |
+          if grep -rnE "^\s*(from|import)\s+(mnemos\.engine|mnemos_native)" python/eval/attacks/; then
+            echo "::error::An attack module imports engine internals. Attacks may only use"
+            echo "::error::mnemos.trace — see python/eval/attacks/__init__.py."
+            exit 1
+          fi
+      - name: No attack module imports the evaluation-only trace loader
+        run: |
+          if grep -rn "load_evaluation_trace" python/eval/attacks/; then
+            echo "::error::load_evaluation_trace exposes adversary-invisible fields (e.g. the"
+            echo "::error::decoy flag) and must never be used from an attack."
+            exit 1
+          fi
+
+  audit:
+    name: Advisories and licences
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

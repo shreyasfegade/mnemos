@@ -1,0 +1,263 @@
+% Supplementary material, submitted as a separate PDF.
+%
+% TDSC counts pages beyond 12 as overlength and caps the paper at 18; supplementary files have no
+% page limit. The full hybrid proof lives here so the main text can carry the proof sketch and the
+% measurements.
+%
+% Build main.tex FIRST: the xr package reads main.aux so that references to Theorem 1, the
+% definitions and the evaluation sections resolve to the numbers the main paper gives them.
+%
+%   latexmk -pdf main.tex && latexmk -pdf supplement.tex
+
+\documentclass[10pt,journal,compsoc]{IEEEtran}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\let\proof\relax
+\let\endproof\relax
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink]{cleveref}
+
+% Resolve \ref and \cref against the main paper's numbering.
+\usepackage{xr}
+\externaldocument{main}
+
+\newcommand{\advhist}{\ensuremath{\mathrm{Adv}_{\mathrm{hist}}}}
+\newcommand{\advpost}{\ensuremath{\mathrm{Adv}_{\mathrm{post}}}}
+\newcommand{\AdvH}{\ensuremath{\mathsf{Adv}^{\mathrm{H}}}}
+\newcommand{\negl}{\ensuremath{\mathsf{negl}}}
+% Every number the prose quotes, generated from the results (python -m eval.exp2.numbers).
+\input{tables/numbers}
+% Run-in paragraph heads unnumbered, as in the main paper.
+\setcounter{secnumdepth}{1}
+
+\crefname{section}{Section}{Sections}
+
+\begin{document}
+
+\title{Supplementary Material for\\
+``Structure Transfer Attacks and Dual-Epoch Security for Encrypted Agent Memory''}
+
+\author{Shreyas~Fegade%
+\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem S. Fegade is an independent researcher.\protect\\
+E-mail: shreyasf@icloud.com}}
+
+\markboth{Supplementary Material}{Fegade: Structure Transfer Attacks and Dual-Epoch Security}
+
+\maketitle
+
+\noindent
+This document contains the full proof of Theorem~\ref{thm:main}, whose statement, conditions and
+proof sketch appear in the main paper. Numbering of theorems, definitions, propositions and
+sections follows the main paper throughout.
+
+\input{sections/10-appendix-proof}
+
+\section{The Counting Study in Full}
+\label{supp:counting}
+
+\Cref{prop:fp} separates forward and backward privacy from dual-epoch security by exhibiting state
+a forward-private scheme persists locally: a per-keyword update counter, which distinguishes two
+histories with different count \emph{profiles}. The main paper reports the headline, that on a
+realistic corpus the channel is weak. This section gives the method behind that number.
+
+\paragraph{Setup} The corpus is D3, whose keyword tags follow a heavy-tailed distribution with many
+ties, which is the property the attack turns on. Each record carries three tags drawn from a
+503-term vocabulary. A Sophos-style index is built over it, and the snapshot exposes, for each
+keyword, a pseudorandom handle and the number of updates recorded under it. The adversary never
+sees the keyword itself.
+
+\paragraph{The adversary} It holds auxiliary knowledge of keyword frequencies: a fraction $\alpha$
+of the corpus in the clear, from which it estimates an expected count for every keyword. It then
+matches observed counters to expected ones, greedily and in descending order of expected count,
+which is the strongest simple matching available to it. The sweep runs
+$\alpha \in \{0.10, 0.25, 0.50\}$ against a range of tag skews.
+
+\paragraph{Why it is weak here} Three effects compound. Most keywords are rare, so most counters are
+small integers. Small integers collide: the number of keywords sharing a given count grows sharply
+as the count falls, and keywords with equal counts are information-theoretically indistinguishable
+from counts alone. And the record-level question the paper actually cares about, the topic of a
+stored record, requires recovering several of a record's tags rather than one, so per-keyword errors
+compound rather than average out.
+
+The \emph{tie ceiling}, the fraction of keywords whose count is unique, bounds the recovery rate of
+any matching based on counts alone. Averaged over the sweep, keyword recovery is 0.05 and
+record-level topic accuracy never exceeds the most-frequent-class baseline. The worst case remains
+real, which is what makes the proposition a separation rather than an observation, but a deployment
+whose client state is sealed and padded to a fixed size removes the channel outright.
+
+\section{Query Equality in Full}
+\label{supp:query}
+
+\Cref{sec:eval-rw} reports that neither probe mechanism hides query equality from an adversary that
+thresholds read-set overlap. This section gives the measurement in full (\cref{tab:supp-e15}), the
+reason cover does not help, and the anonymity-set analysis, which is the property that separates
+the two mechanisms.
+
+\input{tables/supp_e15}
+
+\paragraph{The adversary} It observes, for each search, the set of regions read, and must decide
+whether two searches carried the same query. It never sees a query or a result. The weak test is
+exact equality of the two read sets; the strong one compares the size of their intersection,
+$|R_1 \cap R_2|$, against a threshold $\tau$; the third clusters the graph that joins searches
+whose overlap reaches $\tau$. Each threshold is fixed on half of a store's queries and scored on
+the other half, over \REfifteenRepeats{} independent stores, so no adversary is credited with a
+threshold fitted to the answers.
+
+\paragraph{The randomized superset} A search reads $s\,k$ regions ($k = k_{\mathrm{probe}}$), of
+which $k$ are the genuine nearest partitions of the query and the remaining $(s-1)k$ are drawn with
+fresh randomness on every call. Two searches on the same query therefore almost never produce
+identical read sets, and the exact-equality test scores $J = \REfifteenExactStwo$ at $s = 2$,
+which is what makes it look as though this mechanism closes the channel.
+
+It does not, because the genuine probes survive every repeat. Treating cover as uniform, two
+searches for the same query share the $k$ genuine regions plus about $(s-1)^2k^2/B$ cover
+collisions, and two unrelated queries share about $s^2k^2/B$, so the expected gap is
+\[
+  k\Bigl(1 - \frac{(2s-1)\,k}{B}\Bigr).
+\]
+More cover narrows the gap linearly in $s$ while the variance of both overlaps grows, and the gap
+closes only when $s\,k$ approaches $B/2$, where every search reads about half the store. At the
+shipped parameters the threshold test separates the populations with $J = \REfifteenThreshStwo$;
+doubling the cover to $s = 4$ lowers it to $J = \REfifteenThreshSfour$. We had registered the
+expectation that more cover would barely matter, with a lower bound of 0.60 on this interval, and
+it does matter: cover is a real knob. It is a costly one, though, since read volume grows in step
+with $s$ and the channel stays open until a search reads half the store, at which point reading
+all of it, obliviously, costs little more.
+
+\paragraph{The grouped mechanism} The partitions are divided into fixed disjoint groups at setup,
+and a search reads exactly one whole group. Two searches therefore read either the same regions or
+disjoint ones, so repeated-query recognition succeeds at the granularity of a group and
+$J = \REfifteenThreshGrouped$: every repeat is recognised, and two distinct queries are confused
+exactly when they fall in one group.
+What it buys in exchange is a guarantee the randomized superset cannot state: within a group every
+query is indistinguishable from every other, giving a deterministic anonymity set equal to the
+group size, independent of the adversary's effort. The randomized superset's protection is
+statistical and degrades with the number of observed repeats; the grouped mechanism's is structural
+and does not. Together with the permutation recovery of \cref{sec:eval-permutation}, which the
+grouped mechanism defeats outright, this is why it is the one preferred against a read observer
+despite recognizing repeats more often.
+
+\section{Full Results}
+\label{supp:full}
+
+The main paper tabulates the rows its arguments rest on. The tables here give every row, and are
+generated from the same result files by the same code, so the two cannot disagree.
+
+\input{tables/supp_ledger_full}
+\input{tables/e1_longitudinal}
+\input{tables/supp_e2_full}
+\input{tables/supp_e10_full}
+
+\section{Further Tables and Figures}
+\label{supp:further}
+
+These results are argued from in the main paper, which carries their headline in prose or in the
+leakage ledger (\cref{tab:ledger}); the full tables are here.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.78\textwidth]{figures/fig2_threat_model.pdf}
+\caption{The $\tau$-arrival adversary. Records written before $\tau$ (cohort H) are available only
+as stored state; activity after $\tau$ (cohort P) is observed and partly induced. Where assignment
+depends on content, partitions hold records from both cohorts, so labels learned after $\tau$
+describe cohort H as well --- but they reach a given cohort-H record only if the layout discloses
+which partition holds it, which a growing layout does and a sealed fixed-size one does not
+(\cref{lem:transfer}).}
+\label{fig:threat}
+\end{figure*}
+
+\input{tables/e4_drift}
+\input{tables/e6_stores}
+\input{tables/e3_dedup}
+\input{tables/e7_permutation}
+\input{tables/e8_multisnapshot}
+\input{tables/e9_refusal}
+\input{tables/e9_capacity}
+\input{tables/e11_retrieval}
+\input{tables/e12_oblivious}
+
+\paragraph{The operating-system artifact audit} \Cref{sec:eval-artifacts} summarises it. On the
+evaluation machine the audit recovers change-journal (USN) records naming the store's own files,
+confirming that the file system retains pre-$\tau$ write history with timestamps; it enumerates
+volume shadow copies and reports where elevation was required to do so; it identifies which
+synchronization clients are installed and whether the store lies inside a synchronized tree; and it
+reports the hibernation file and pagefile, which matter because a hibernation image captures locked
+pages and therefore the unwrapped master key. It also verifies the mechanism a power-event handler
+would invoke: after locking, both sealed engines report themselves locked and refuse to search.
+
+\section{Agent-Memory Frameworks, Read from Source}
+\label{supp:census}
+
+\Cref{sec:attack-derived} states that four of nine widely used open-source agent-memory
+frameworks make whether a write reaches storage depend on whether the content is already stored,
+which is the precondition of \cref{prop:derived}. \Cref{tab:supp-census} gives the evidence. The
+method is deliberately narrow: each framework's wheel was downloaded from PyPI without its
+dependencies and its shipped Python source read directly, and a mechanism is recorded only if it
+was located at the cited file and line. Documentation was not used, because documentation
+describes intent and the attack depends on behaviour.
+
+The census also corrects a description of mem0 that is widely repeated. mem0 is commonly described as running an update stage that returns
+\textsc{noop} for a fact it already holds. The current release has no such stage: it passes the
+most similar existing memories to a single extraction call, and then drops any extracted fact
+whose hash is already present. The observable consequence is the same --- a known fact never
+reaches the vector store --- but it now arises from two mechanisms rather than one, and only the
+vector store's files are written conditionally: mem0's message log is written either way. An
+adversary that watches the whole store directory sees the difference as \emph{which} files
+changed.
+
+\input{tables/supp_census}
+
+\section{The Dual-Epoch Game: Per-Ablation Details}
+\label{supp:ablations}
+
+\Cref{sec:eval-game} reports the outcome of the game of \cref{def:dualepoch} against the compiled
+engines. This section gives the construction of the arms, and why four choices in the experiment are
+load-bearing rather than incidental. Each is a way the experiment can appear to measure the
+theorem's setting while measuring something else.
+
+\paragraph{Admissibility is verified, not assumed} A history is admissible only if no partition
+exceeds its capacity at any point. An experiment that merely \emph{intends} admissibility and wraps
+each write in a bare exception handler will silently submit inadmissible histories and measure the
+refusal channel, while reporting a number that reads as placement leakage. Every admissible arm here
+therefore asserts that the engine's own refusal counter is exactly zero at the end of the arm.
+
+Two distinct defects were caught only by that assertion. The first was an admissibility check that
+recomputed each record's partition in floating point by nearest centroid, which disagrees with the
+engine's quantised assignment at the margin; the check now calls the engine's own assignment
+directly, so the experiment and the implementation cannot differ about where a record went. The
+second was subtler: bounding the pre-$\tau$ cohort at the partition capacity left no room for the
+adversary's own targeted post-$\tau$ writes, which then overflowed the very partitions the history
+had been constructed to keep admissible. The cohort bound is now set below capacity by the
+adversary's entire induced budget.
+
+The second defect is the reason the assertion is worth its cost: at 50 instances per bit every
+admissible arm reported zero refusals and the experiment looked correct, and only at 1{,}000
+instances per bit did an admissible arm report seven. A leakage measurement that is sound at low
+power and unsound at high power is indistinguishable from a sound one until the moment it matters.
+
+\paragraph{Evaluation is held out} The distinguisher is fitted on one half of the instances and
+scored on the other. Without the split, a classifier with enough features recovers the bit on the
+data it was fitted to, and the resulting AUC measures capacity rather than leakage. With it, an AUC
+below one half is read as the small-sample anti-learning it is, and is not reported as evidence of a
+distinguisher running backwards.
+
+\paragraph{Every arm carries a hand-built statistic} Alongside the gradient-boosted classifier each
+arm names one statistic, oriented on the training half, that a reader can check by hand: the spread
+of post-$\tau$ writes over regions for the shipped arms, and for the $\lnot$S3 arm the slot-level
+features a per-slot write exposes --- the number of distinct slots touched and the mean, maximum and
+standard deviation of their indices. A learned AUC with no interpretable companion cannot
+distinguish a real channel from a harness artifact; the pair can.
+
+\paragraph{The inadmissible case is its own arm} Rather than being excluded, inadmissibility is run
+deliberately, in both refusal modes. This is what keeps the refusal channel from contaminating arms
+that claim to measure placement: the channel is given somewhere to appear, and \cref{prop:capacity}
+predicts exactly where. The padded refusal mode is the same arm with the fix applied, so the two
+together measure the countermeasure rather than merely asserting it.
+
+\end{document}

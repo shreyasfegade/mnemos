@@ -1,0 +1,136 @@
+\section{Attacks on Self-Writing Memory}
+\label{sec:transfer}
+
+This section describes the attacks. The first exploits a partition layout whose regions grow with
+occupancy, and is the one that motivates the security definition; the others exploit channels that
+survive a layout built to close it. Experimental results for all of them are reported in
+\cref{sec:eval}.
+
+\subsection{Leakage of a Growing Partition Layout}
+
+An IVF index is naturally stored with the records of each partition in a contiguous region,
+because a search reads whole partitions and contiguous storage makes those reads efficient. When
+regions grow as records are added, the snapshot at $\tau$ reveals the size of every partition and
+the region that holds each sealed record. After $\tau$, the offsets of writes reveal which
+partitions receive new records. Neither observation requires a key: encryption hides the
+content of a record but not its location.
+
+\subsection{Structure Transfer}
+
+The attack consists of three steps.
+
+\paragraph{Induction}
+The adversary selects a topic $t$ from a known set and causes the agent to receive a task on $t$,
+such as a document to summarize or a report to triage. The agent writes a record in its own words.
+The adversary knows the topic and the approximate time of the induced record, but neither its
+content nor its partition; unlike classical file injection \cite{zhang2016all}, it does not
+choose the stored text. That supplied content causes a persistent memory write is documented
+against deployed assistants \cite{rehberger2024spaiware,unit42memory} and across memory backends
+\cite{das2026trojan}, and \cref{sec:eval-induction} measures it for a mem0-style pipeline
+\cite{chhikara2025mem0} driven by local models.
+
+\paragraph{Localization}
+A flush of $w$ records reveals the set of partitions that received a record. The adversary repeats
+the induction and combines the observed sets with one of two estimators.
+
+\emph{Intersection.} If several induced records are known to fall into the same partition,
+intersecting the partition sets of their flushes isolates that partition. If the other $w-1$
+records of each flush fall into partitions uniformly at random, an unrelated partition appears in
+a flush with probability $q = 1 - (1 - 1/B)^{w-1}$ and survives $r$ intersections with probability
+$q^{r}$. The expected number of unrelated survivors, $(B-1)q^{r}$, falls below one once
+$r > \ln(B-1) / \ln(1/q)$. The required number of repetitions grows with $w$, so batching raises
+the cost of the attack without preventing it. An adversary generally cannot tell which induced
+records share a partition, so this estimator is retained only as an upper bound.
+
+\emph{Frequency analysis.} Without attribution, the adversary computes, for each topic $t$ and
+partition $b$, the fraction of flushes carrying an induced record on $t$ in which $b$ receives a
+write. A partition holding records on $t$ receives writes in the flushes of $t$ more often than in
+the flushes of other topics. Each partition is labeled with the topic for which this rate is
+highest, provided the rate exceeds the mean over all topics by twice the estimated sampling noise.
+Padding writes to uniformly random partitions raise every rate by the same expected amount; they
+add noise the adversary must overcome with a larger budget, but they do not remove the difference
+between topics.
+
+\paragraph{Transfer, and what it requires}
+The adversary assigns each cohort-H record the label of the partition that holds it. By
+\cref{lem:transfer} the expected accuracy of this assignment is the same on cohort H as on cohort
+P, so the attack exposes the two cohorts equally, except to the extent that the agent's subject
+matter has drifted between them or the adversary's taxonomy differs from the user's.
+
+The step that makes this work is the lemma's third hypothesis, knowing which partition holds a
+given cohort-H record, which a growing layout supplies in its snapshot and a sealed fixed-size
+layout does not. The rest of this section is an inventory of channels that supply it anyway.
+
+\subsection{Deployed Stores, and Time-Placed Controls}
+\label{sec:transfer-general}
+
+The growing-region layout is not particular to a research prototype: widely deployed vector stores
+place records by content and persist that placement in files whose changed byte ranges a
+size-preserving encryption layer such as \texttt{gocryptfs} or Cryptomator does not hide. FAISS
+writes each inverted list contiguously, Chroma updates HNSW node and neighbor-list files
+incrementally, and LanceDB stores IVF-PQ lists in a columnar dataset.
+
+Placing by content is necessary for the attack but not sufficient, and the difference is what
+\cref{sec:eval-real} measures. Transfer additionally needs the layout to disclose \emph{which}
+partition holds a given stored record, at the granularity the adversary observes: a store that
+rewrites its whole index on every save discloses nothing at block granularity, and the blocks a
+graph-index insert touches depend on graph structure and insertion order as much as on content.
+Stores that place by arrival time, such as an unindexed LanceDB table or a sqlite-vec table without
+a partition key, are the cleanest test of the premise, and serve as negative controls.
+
+\subsection{The Refusal Channel}
+\label{sec:attack-refusal}
+
+A store that bounds per-partition capacity must do something when a partition fills. If it refuses
+the write and writes nothing, the refusal is observable, and by \cref{prop:capacity} what it
+discloses is the partition's live load, which is dominated by cohort H once the adversary accounts
+for its own induced contribution. The attack is direct: induce writes on a topic and watch whether
+the region that topic's records occupy is rewritten. \Cref{sec:eval-refusal} measures it, and
+measures the padded refusal that closes it.
+
+\subsection{Derived Writes and Deduplication Membership Inference}
+\label{sec:attack-derived}
+
+\Cref{prop:derived} says a store whose operations depend on the content \emph{or the occurrence} of
+what the agent does leaks cohort H to a feedback agent. The occurrence half admits a concrete and,
+to our knowledge, new attack.
+
+Agent memory pipelines avoid storing a fact twice, and they do so by consulting what is already
+stored. An adversary that supplies a document and can see whether a write happened therefore
+learns whether a matching fact was already in memory. Because the adversary chooses the document
+it chooses the fact, and a fact present before $\tau$ is a cohort-H membership disclosure.
+Nothing is decrypted; the signal is the occurrence of a write. Against a store that flushes when
+records are staged, the occurrence of a flush is the answer. Against one that flushes on a clock,
+a flush happens either way and the channel is closed. \Cref{sec:eval-dedup} measures both sides.
+
+The precondition is not an artefact of a prototype. Reading the shipped source of nine
+open-source agent-memory frameworks, four make whether a write reaches storage depend on whether
+the content is already stored: mem0 passes the most similar existing memories to its extraction
+call and then drops any extracted fact whose hash is already present, so a known fact never
+reaches the vector store; CrewAI asks a model for a consolidation plan whose \emph{insert} flag
+decides whether a record is written; LangMem's memory manager patches existing memories and
+creates only novel ones; and Graphiti deduplicates extracted entities against the graph before
+writing them. The supplementary material lists each framework, its version and default store, and
+the file and line at which the mechanism was found; a framework is recorded as vulnerable only
+where the mechanism was located in its source.
+
+\subsection{Multiple Versions}
+\label{sec:attack-multisnapshot}
+
+An adversary that retains several versions of the store file diffs consecutive versions and reads
+off the regions rewritten in between. This is the write channel applied \emph{before} $\tau$, and
+it is what supplies the cohort-H membership that \cref{sec:transfer} otherwise lacks: regions
+labeled after $\tau$ then give those earlier writes their topics. The attack is parameterized by
+the capture granularity $g$ of \cref{sec:granularity}, and \cref{sec:eval-multisnapshot} reports it
+as a function of $g$, together with the session-boundary re-encryption that defeats it when the
+adversary cannot capture more finely than a session.
+
+\subsection{Counting Persisted Per-Keyword State}
+\label{sec:attack-counting}
+
+Forward-private schemes persist per-keyword state, such as Sophos's update counters
+\cite{bost2016sophos} and Diana's counter-indexed GGM keys \cite{bost2017forward}, and in the local
+setting that state is in the snapshot, so an adversary with auxiliary keyword frequencies can match
+counters to keywords. Ties among the many rare keywords bound it: on D3, keyword recovery averages
+0.05 and topic accuracy never exceeds the most-frequent-class baseline, so the channel that makes
+\cref{prop:fp} a separation is weak in practice. The supplementary material gives the sweep.

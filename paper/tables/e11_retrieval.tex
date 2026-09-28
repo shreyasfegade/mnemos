@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\centering
+\caption{nDCG@10 against BEIR relevance judgments on the \emph{full} corpora. The columns
+separate the two sources of loss: the gap from exhaustive to IVF at the same
+$k_{\mathrm{probe}}=4$ is the cost of fixed probing, and the gap from exhaustive to
+Mnemos-M, which searches exactly, is the cost of int8 quantisation. \emph{M (IVF)} is Mnemos-M
+with its in-memory partition index probing 8 partitions, the number of regions Mnemos-P reads at
+$s{=}2$. Refusals during indexing are counted, not swallowed.}
+\label{tab:e11}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+ & & \multicolumn{2}{c}{Plaintext float} & \multicolumn{4}{c}{int8 engines} & \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-8}
+Domain & $|D|$ & exhaustive & IVF@$k$ & M (exact) & M (IVF) & P ($s{=}2$) & P grouped
+ & Refused \\
+\midrule
+scifact & 5,183 & 0.738 & 0.657 & 0.737 & 0.703 & 0.658 & 0.435 & 0 \\
+nfcorpus & 3,633 & 0.370 & 0.313 & 0.369 & 0.342 & 0.319 & 0.256 & 0 \\
+fiqa & 57,638 & 0.384 & 0.327 & 0.384 & 0.358 & 0.329 & 0.224 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table*}

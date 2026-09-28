@@ -1,0 +1,105 @@
+% Manuscript prepared for IEEE Transactions on Dependable and Secure Computing.
+% Single-column Computer Society journal layout for review.
+%
+%   latexmk -pdf main.tex
+
+\documentclass[10pt,journal,compsoc]{IEEEtran}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\let\proof\relax
+\let\endproof\relax
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{cite}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink]{cleveref}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+% Run-in paragraph headings are left unnumbered.
+\setcounter{secnumdepth}{3}
+
+\crefname{section}{Section}{Sections}
+\crefname{appendix}{Appendix}{Appendices}
+
+\newcommand{\advhist}{\ensuremath{\mathrm{Adv}_{\mathrm{hist}}}}
+\newcommand{\advpost}{\ensuremath{\mathrm{Adv}_{\mathrm{post}}}}
+\newcommand{\AdvH}{\ensuremath{\mathsf{Adv}^{\mathrm{H}}}}
+\newcommand{\negl}{\ensuremath{\mathsf{negl}}}
+% Every number the prose quotes, generated from the results (python -m eval.exp2.numbers).
+\input{tables/numbers}
+
+\begin{document}
+\bstctlcite{IEEEexample:BSTcontrol}
+
+\title{Structure Transfer Attacks and Dual-Epoch Security for Encrypted Agent Memory}
+
+\author{Shreyas~Fegade%
+\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem S. Fegade is an independent researcher.\protect\\
+E-mail: shreyasf@icloud.com}}
+
+\markboth{IEEE Transactions on Dependable and Secure Computing}%
+{Fegade: Structure Transfer Attacks and Dual-Epoch Security for Encrypted Agent Memory}
+
+\IEEEtitleabstractindextext{%
+\begin{abstract}
+\input{sections/00-abstract}
+\end{abstract}
+
+\begin{IEEEkeywords}
+Searchable encryption, encrypted vector search, leakage-abuse attacks, history independence,
+snapshot adversaries, AI agent memory.
+\end{IEEEkeywords}}
+
+\maketitle
+\IEEEdisplaynontitleabstractindextext
+\IEEEpeerreviewmaketitle
+
+\input{sections/01-introduction}
+\input{sections/02-background}
+\input{sections/03-threat-model}
+\input{sections/04-structure-transfer}
+\input{sections/05-dual-epoch}
+\input{sections/06-mnemos}
+\input{sections/07-evaluation}
+\input{sections/08-discussion}
+\input{sections/09-conclusion}
+
+\section*{Availability}
+The implementation of all three designs, the attack and evaluation harness, the byte-level leakage
+auditor, and the corpora and scripts that regenerate every table in this paper from its stored
+results are available at \url{https://github.com/ANONYMIZED/mnemos} and will be archived with a
+persistent identifier on publication. The full proof of \cref{thm:main} appears in the supplementary material
+accompanying this submission.
+% Note before submission: replace the placeholder above with the real repository URL, or an
+% anonymized mirror if TDSC is reviewing double-blind. "Available to reviewers" with no link is the
+% single most common desk-check failure for an artifact claim.
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+% The full hybrid proof is in the supplementary material (supplement.tex), which TDSC accepts as a
+% separate file with no page limit. Build main.tex first; supplement.tex reads main.aux.
+
+% Note: IEEE Computer Society journals require a biography and a photograph for each author,
+% and an ORCID in the author block. Both are placeholders until the submission is de-anonymized.
+\begin{IEEEbiographynophoto}{Shreyas Fegade}
+is an independent researcher. Note: replace with a biography of roughly 100 words, add
+\texttt{\textbackslash includegraphics} for the required photograph, and record the ORCID in the
+author block above.
+\end{IEEEbiographynophoto}
+
+\vfill
+
+\end{document}

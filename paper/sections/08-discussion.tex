@@ -1,0 +1,100 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Positioning}
+
+\begin{table*}[t]
+\centering
+\caption{Where each scheme leaks, against the adversary classes of \cref{sec:tau-adversary}.
+\emph{Open} means the channel carries information about the pre-compromise cohort;
+\emph{n/a} means the mechanism that would carry it is absent. Rows above the rule are constructions
+this paper attacks or compares against; rows below are the designs it evaluates.}
+\label{tab:crossscheme}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lllllllll}
+\toprule
+Scheme & Snapshot & Write & Search & Query eq. & Delete & Refusal & Multi-version & Derived \\
+\midrule
+Growing encrypted IVF & open & open & open & open & open & n/a & open & open \\
+Deployed stores, \texttt{gocryptfs} & open & open & open & open & open & n/a & open & open \\
+Forward-private SSE, sealed and padded & open (counters) & closed & open & open & graded & n/a & open & open \\
+ORAM over the slots & closed & closed & closed & closed & closed & n/a & closed & closed \\
+\midrule
+Mnemos-RS & open & open & open & open & open & open & open & open \\
+Mnemos-P & closed & open & closed & open & closed & closed$^\dagger$ & closed$^\ddagger$ & open \\
+Mnemos-M & closed & closed & n/a & n/a & closed & n/a & closed & closed$^\S$ \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.4em}
+\begin{minipage}{0.96\textwidth}
+\footnotesize
+$^\dagger$ by performing the rewrites an accepted write would have (\cref{prop:capacity}).
+$^\ddagger$ across session boundaries only; at finer capture granularity the channel is open
+(\cref{sec:eval-multisnapshot}).
+$^\S$ given the clocked flush schedule; the clock itself remains visible.
+\end{minipage}
+\end{table*}
+
+\Cref{tab:crossscheme} places the designs among the alternatives. Oblivious RAM closes every
+column, which is why the write and query-equality channels of a partitioned store are costs rather
+than open problems: a closure exists and is priced. The memory-resident design reaches ORAM's
+column pattern for every channel except the clock, without obliviousness, by removing the disk from
+the query path instead of hiding accesses to it, an option open only because the threat model is
+local.
+
+\subsection{Residual Leakage}
+
+Mnemos-P keeps an open write channel, since a real record is always written to its content region
+and padding raises the cost without removing it; query equality survives both probe mechanisms; the
+keyed permutation does not survive a read observer; version diffs are closed only across session
+boundaries; and derived writes are open. Mnemos-M is bounded by resident memory, a hard bound: the
+index and by default every payload live in the locked arena. Its clock is visible, so an observer
+learns when the store was open though not whether anything was written, and an unlock reads the
+whole store. And it inherits A3: if the adversary can read process memory, a memory-resident index
+is the worst place to have put the plaintext, which is why hibernation is treated as a first-class
+threat. For both, no storage-layer measure reaches copies a synchronization provider has already
+retained, so secure deletion is bounded by what the provider keeps.
+
+\subsection{Limitations}
+
+\paragraph{Assumptions}
+The analysis depends on A2, a clean host before $\tau$, and A3, that the adversary cannot read
+process memory. Decrypted results and the embedding computation reside in process memory; the locked
+region holds plaintext during an operation, and for the memory-resident design for the whole
+session, but the Python embedder sits outside it, so plaintext embeddings may reach swap on the
+embedding path.
+
+\paragraph{Agent experiments}
+The agent results use local models of moderate size through a mem0-style pipeline rather than the
+mem0 library itself, and the induced corpus is issue text from one public tracker. The deduplication
+oracle is measured both with a model making the add-or-skip decision and with a similarity
+threshold, because production pipelines use both, but neither is a deployment.
+
+\paragraph{Scope of the measurements}
+Performance is measured on one machine. The deployed-store experiment uses local instances holding
+public data under one encryption layer, and its per-store conclusions depend on library versions
+that change. The version-granularity parameter is swept rather than measured against a provider's
+retention policy, which would require authenticated access to that provider.
+
+\paragraph{Construction}
+Both sealed designs remove a tombstoned record only when the maintenance cursor reaches its region.
+Records larger than one payload block are rejected rather than chunked. The partition table is fixed
+at creation, so a store whose subject matter drifts far enough eventually partitions poorly.
+
+\subsection{Ethical Considerations}
+
+The attacks were run against implementations built for this study and against public or synthetic
+corpora and public issue trackers; no third-party production system was attacked, and the deployed
+stores of \cref{sec:eval-real} were local instances holding public data. The vulnerable layout
+arises from a natural implementation choice, and the countermeasures are layout changes that
+designers of partitioned encrypted indexes can adopt, which is why the attacks and the
+countermeasures are disclosed together.
+
+\subsection{Disclosure of AI Assistance}
+
+The implementation and manuscript were prepared with the assistance of an AI coding tool used under
+the author's direction and review. All experiments, measurements and claims were executed and
+verified by the author, and the code and data are available so that every reported number can be
+reproduced independently.

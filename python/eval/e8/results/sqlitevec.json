@@ -1,0 +1,13 @@
+{
+ "store": "sqlitevec",
+ "dim": 768,
+ "n_hist": 2000,
+ "n_topics": 8,
+ "budget_per_topic": 40,
+ "block_size": 4096,
+ "distinct_changed_blocks": 829,
+ "blocks_confidently_labelled": 821,
+ "induced_localisation_accuracy": 0.9875,
+ "mean_blocks_per_write": 13.225,
+ "seconds": 30.52557611465454
+}

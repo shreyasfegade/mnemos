@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\caption{Deduplication membership inference: whether an adversary learns that a fact was already
+in cohort H, from the occurrence of a write alone (80 probes per class,
+bootstrap intervals). The write rates are the agent's decisions and are the same for both designs;
+Mnemos-M's clocked flush makes what the adversary observes identical either way.}
+\label{tab:e3}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrrr}
+\toprule
+Decided by & Design & AUC [95\% CI] & Writes, member & non-member \\
+\midrule
+similarity & Mnemos-P & 1.00\,[1.00, 1.00] & 0.00 & 1.00 \\
+similarity & Mnemos-M & 0.50\,[0.50, 0.50] & 0.00 & 1.00 \\
+model: qwen2.5 & Mnemos-P & 0.62\,[0.57, 0.67] & 0.74 & 0.97 \\
+model: qwen2.5 & Mnemos-M & 0.50\,[0.50, 0.50] & 0.74 & 0.97 \\
+\bottomrule
+\end{tabular}
+\end{table*}

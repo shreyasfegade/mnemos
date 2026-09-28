@@ -1,0 +1,34 @@
+[package]
+name = "mnemos-bench"
+description = "Criterion benchmarks for Mnemos — the source of every performance number in the paper."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish = false
+
+[[bench]]
+name = "search"
+harness = false
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-engine = { workspace = true }
+mnemos-baselines = { workspace = true }
+mnemos-keystore = { workspace = true }
+mnemos-crypto = { workspace = true }
+mnemos-index = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+mnemos-keystore = { workspace = true, features = ["insecure-software-keystore"] }
+tempfile = "3"

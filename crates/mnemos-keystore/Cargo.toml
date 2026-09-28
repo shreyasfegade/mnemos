@@ -1,0 +1,35 @@
+[package]
+name = "mnemos-keystore"
+description = "Hardware key custody (TPM 2.0 / Secure Enclave) for Mnemos. See docs/adr/0005."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[features]
+# The Windows TPM provider needs NCrypt FFI. On by default so the primary custody path is built
+# and tested; turning it off yields a crate the compiler proves contains no unsafe code at all.
+default = ["ncrypt-unsafe"]
+ncrypt-unsafe = []
+# CI only. Also requires MNEMOS_I_ACCEPT_INSECURE=1 at runtime. See docs/adr/0005.
+insecure-software-keystore = []
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-crypto = { workspace = true }
+zeroize = { workspace = true }
+rand = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+    "Win32_Security_Cryptography",
+    "Win32_Foundation",
+] }
+
+[dev-dependencies]
+tempfile = "3"

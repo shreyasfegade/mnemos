@@ -1,0 +1,30 @@
+# Distribution metadata for the compiled extension, kept separate from the workspace root's.
+#
+# Without this file maturin walks up and finds the root `pyproject.toml`, which declares
+# `name = "mnemos"` -- the *Python* package under `python/mnemos/`. Both then install under the
+# same distribution name and the second one silently replaces the first, so
+# `maturin develop` after `pip install -e .` leaves you with a working `mnemos_native` and no
+# `mnemos` at all. The failure is a bare ModuleNotFoundError with nothing pointing at packaging.
+#
+# Two artifacts, two names. `mnemos-native` ships the compiled module `mnemos_native`; `mnemos`
+# ships the pure-Python layer that imports it.
+
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "mnemos-native"
+description = "Compiled core for Mnemos: the engine, centroid training, and parameter accessors."
+requires-python = ">=3.11"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "Shreyas Fegade" }]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+dynamic = ["version"]
+
+[tool.maturin]
+module-name = "mnemos_native"
+features = ["pyo3/extension-module"]

@@ -1,0 +1,44 @@
+[package]
+name = "mnemos-crypto"
+description = "Composed cryptographic primitives and the locked plaintext arena for Mnemos."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[features]
+default = ["arena-unsafe"]
+# The arena needs VirtualLock/mlock, which are FFI. Everything else in the crate is
+# #![forbid(unsafe_code)]; this feature scopes the exception rather than removing it globally.
+arena-unsafe = []
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+chacha20poly1305 = { workspace = true }
+aes-gcm = { workspace = true }
+aes = { workspace = true }
+hkdf = { workspace = true }
+hmac = { workspace = true }
+sha2 = { workspace = true }
+subtle = { workspace = true }
+zeroize = { workspace = true }
+rand = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+    "Win32_System_Memory",
+    "Win32_Foundation",
+    "Win32_System_Threading",
+] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+proptest = { workspace = true }
+hex = "0.4"

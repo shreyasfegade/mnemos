@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\centering
+\caption{Query equality against three adversaries ($B=64$, $k_{\mathrm{probe}}=4$), over 20 independent stores with 16 queries each, every query searched 10 times in random order. The overlap threshold $\tau$ and the clustering threshold are fixed on pairs among half of each store's queries and scored on the other half, so no adversary is fitted to the pairs it is scored on. $J$ is Youden's (TPR $-$ FPR); ARI is the adjusted Rand index of the recovered query groups. Applies to the RW class only.}
+\label{tab:supp-e15}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Probe mechanism & Regions/search & Exact-equality $J$ & Threshold $J$ & $\tau$ (mode) & Clustering ARI \\
+\midrule
+Genuine probes only ($s=1$) & 4 & 0.99\,[0.99, 1.00] & 0.98\,[0.97, 1.00] & 4 & 0.94\,[0.89, 0.99] \\
+Randomised superset ($s=2$, shipped) & 8 & 0.00\,[0.00, 0.00] & 0.98\,[0.97, 0.99] & 4 & 0.66\,[0.59, 0.71] \\
+Randomised superset ($s=4$) & 16 & 0.00\,[0.00, 0.00] & 0.59\,[0.57, 0.60] & 6 & 0.13\,[0.11, 0.15] \\
+Grouped probes (group size 8) & 8 & 0.85\,[0.82, 0.88] & 0.85\,[0.82, 0.88] & 1 & 0.59\,[0.53, 0.65] \\
+\bottomrule
+\end{tabular}
+\end{table*}

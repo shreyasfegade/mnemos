@@ -1,0 +1,23 @@
+\begin{table*}[t]
+\centering
+\caption{What a sequence of file versions reveals about writes made \emph{before} the
+compromise ($B=64$, $w=4$, null precision $1/B=0.0156$).
+\emph{Exposure} is how often the record's true region is inside the diff; \emph{precision} is
+the chance of naming it by guessing within the diff.}
+\label{tab:e8}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\toprule
+Capture & Exposure & Precision [95\% CI] & Candidate regions \\
+\midrule
+every 1 flushes & 1.000 & 0.208\,[0.207, 0.208] & 4.9 \\
+every 2 flushes & 1.000 & 0.108\,[0.108, 0.108] & 9.3 \\
+every 4 flushes & 1.000 & 0.058\,[0.058, 0.058] & 17.4 \\
+every 16 flushes & 1.000 & 0.022\,[0.022, 0.022] & 46.2 \\
+every 64 flushes & 1.000 & 0.016\,[0.016, 0.016] & 63.8 \\
+across a session, without re-encryption & 1.000 & 0.0492\,[0.0476, 0.0508] & 20.4 \\
+across a session, with re-encryption & 1.000 & 0.0156\,[0.0156, 0.0156] & 64.0 \\
+\bottomrule
+\end{tabular}
+\end{table*}

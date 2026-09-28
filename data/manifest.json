@@ -1,0 +1,51 @@
+{
+  "generator": "data/generate_data.py",
+  "version": "3.0.0",
+  "seed": 20260812,
+  "params_hash": "f6922b9eec16d0112f766c911ab30954e48720a190cfa2938e2f22be77e553f1",
+  "params_file": "params.toml",
+  "files": [
+    {
+      "path": "d3-swebench/notes.jsonl",
+      "count": 5000,
+      "schema": [
+        "note_id",
+        "topic",
+        "category",
+        "difficulty",
+        "language",
+        "component",
+        "source_task",
+        "tags",
+        "written_at_ms",
+        "seq",
+        "text",
+        "meta"
+      ]
+    },
+    {
+      "path": "d3-swebench/tasks.jsonl",
+      "count": 1200,
+      "schema": [
+        "task_id",
+        "topic",
+        "difficulty",
+        "attack",
+        "trigger",
+        "tags",
+        "task"
+      ]
+    },
+    {
+      "path": "retrieval-clusters.jsonl",
+      "count": 1500,
+      "schema": [
+        "doc_id",
+        "cluster",
+        "title",
+        "text",
+        "words"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+[package]
+name = "mnemos-engine"
+description = "Mnemos orchestration: public API, epoch state machine, leakage event bus."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-crypto = { workspace = true }
+mnemos-keystore = { workspace = true }
+mnemos-store = { workspace = true }
+mnemos-index = { workspace = true }
+tracing = { workspace = true }
+rand = { workspace = true }
+parking_lot = { workspace = true }
+
+[dev-dependencies]
+mnemos-baselines = { workspace = true }
+mnemos-keystore = { workspace = true, features = ["insecure-software-keystore"] }
+serde_json = { workspace = true }
+tempfile = "3"
+proptest = { workspace = true }

@@ -1,0 +1,13 @@
+{
+ "store": "lancedb",
+ "dim": 768,
+ "n_hist": 2000,
+ "n_topics": 8,
+ "budget_per_topic": 40,
+ "block_size": 4096,
+ "distinct_changed_blocks": 1873,
+ "blocks_confidently_labelled": 1872,
+ "induced_localisation_accuracy": 1.0,
+ "mean_blocks_per_write": 6.85,
+ "seconds": 37.22703671455383
+}

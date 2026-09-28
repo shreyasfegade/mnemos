@@ -1,0 +1,26 @@
+\begin{table*}[t]
+\centering
+\caption{Fetching the $top\_k$ payloads, for the RW class. Path ORAM is a cost model with its
+parameters stated ($Z=4$), not a measurement.}
+\label{tab:e12}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrlrrl}
+\toprule
+Method & $n$ & Source & $p50$ (ms) & kB read/search & Leaks positions \\
+\midrule
+resident & 1000 & measured & 0.159 & 0.0 & no \\
+position & 1000 & measured & 0.226 & 18.9 & yes \\
+read all & 1000 & measured & 3.071 & 5691.1 & no \\
+path oram & 1000 & computed & --- & 1665.0 & no \\
+resident & 10000 & measured & 1.751 & 0.0 & no \\
+position & 10000 & measured & 1.787 & 18.9 & yes \\
+read all & 10000 & measured & 30.477 & 56911.4 & no \\
+path oram & 10000 & computed & --- & 2119.0 & no \\
+resident & 50000 & measured & 12.532 & 0.0 & no \\
+position & 50000 & measured & 12.214 & 18.9 & yes \\
+read all & 50000 & measured & 154.072 & 283830.3 & no \\
+path oram & 50000 & computed & --- & 2573.1 & no \\
+\bottomrule
+\end{tabular}
+\end{table*}

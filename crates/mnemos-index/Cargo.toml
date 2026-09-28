@@ -1,0 +1,25 @@
+[package]
+name = "mnemos-index"
+description = "Forward-private, history-independent encrypted IVF index for Mnemos."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-crypto = { workspace = true }
+mnemos-store = { workspace = true }
+zeroize = { workspace = true }
+rand = { workspace = true }
+subtle = { workspace = true }
+rand_chacha = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+tempfile = "3"

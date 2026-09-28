@@ -1,0 +1,24 @@
+[package]
+name = "mnemos-baselines"
+description = "Plaintext, naive, Sophos and Diana baselines — the things Mnemos is attacked against."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-crypto = { workspace = true }
+mnemos-index = { workspace = true }
+aes = { workspace = true }
+sha2 = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
+rand_chacha = { workspace = true }
+tempfile = "3"

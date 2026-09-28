@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\centering
+\caption{Whether a write reaches storage depends on whether the content is already stored, read from each framework's shipped source (\texttt{pip download --no-deps}, 2026-09-27). \emph{Yes} is recorded only where the mechanism was located at the cited file; anything not located is \emph{none found} or \emph{not verified}, never inferred from documentation. Where it is yes, the precondition of \cref{prop:derived} holds and the deduplication oracle of \cref{sec:attack-derived} applies to the framework as shipped.}
+\label{tab:supp-census}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llp{3.6cm}lp{4.9cm}}
+\toprule
+Framework & Version & Default store & Write depends on existing content & Evidence \\
+\midrule
+mem0 & 2.2.1 & Qdrant, local mode at /tmp/qdrant & \textbf{yes} & \nolinkurl{mem0/memory/main.py:925-955} \\
+CrewAI & 1.15.22 & LanceDB & \textbf{yes} & \nolinkurl{crewai/memory/unified_memory.py:93} \\
+LangMem & 0.0.30 & LangGraph BaseStore (backend chosen by the caller) & \textbf{yes} & \nolinkurl{langmem/knowledge/extraction.py:195-211} \\
+Graphiti (Zep) & 0.30.2 & graph database (caller-configured) & \textbf{yes} & \nolinkurl{graphiti_core/utils/maintenance/combined_extraction.py:171-174} \\
+LlamaIndex core & 0.14.25 & caller-chosen vector store & none found & \nolinkurl{llama_index/core/memory/memory_blocks/vector.py:29} \\
+Cognee & 1.6.1 & LanceDB (vectors), Kuzu (graph) & not verified & \nolinkurl{cognee/api/v1/config/config.py:215} \\
+Agno & 3.0.11 & caller-chosen database & none found & \nolinkurl{agno/db/base.py:580-636} \\
+Memobase & 0.0.27 & server-side (client package) & none found & -- \\
+Letta & 0.33.2 & server-side & not verified & -- \\
+\bottomrule
+\end{tabular}
+\end{table*}

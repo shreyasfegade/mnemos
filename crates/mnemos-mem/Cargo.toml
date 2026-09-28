@@ -1,0 +1,28 @@
+[package]
+name = "mnemos-mem"
+description = "Mnemos-M: memory-resident index, content-oblivious disk placement, clocked flushes."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-crypto = { workspace = true }
+# The sealing primitives, the sealed fixed-size manifest, and the slot geometry constants are
+# shared with Mnemos-P rather than reimplemented. Two copies of an AEAD framing is two things to
+# get wrong, and the designs are meant to differ in placement and residency, not in crypto.
+mnemos-v2 = { workspace = true }
+zeroize = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+parking_lot = { workspace = true }
+
+[dev-dependencies]
+mnemos-keystore = { workspace = true, features = ["insecure-software-keystore"] }
+tempfile = "3"

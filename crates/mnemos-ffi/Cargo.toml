@@ -1,0 +1,28 @@
+[package]
+name = "mnemos-ffi"
+description = "PyO3 bindings for Mnemos — the only surface Python may touch."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lib]
+name = "mnemos_native"
+crate-type = ["cdylib", "rlib"]
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-engine = { workspace = true }
+mnemos-v2 = { workspace = true }
+mnemos-mem = { workspace = true }
+mnemos-baselines = { workspace = true }
+mnemos-keystore = { workspace = true }
+mnemos-index = { workspace = true }
+serde_json = { workspace = true }
+parking_lot = { workspace = true }
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py311"] }

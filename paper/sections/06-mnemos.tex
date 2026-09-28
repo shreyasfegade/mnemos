@@ -1,0 +1,177 @@
+\section{A Design Space}
+\label{sec:mnemos}
+
+\Cref{thm:main} gives conditions a storage layout can satisfy, and \cref{prop:capacity,prop:derived}
+give two it cannot satisfy by layout alone. This section describes three designs that sit at
+different points in that space. All three are implemented in Rust with a Python binding used only
+by the evaluation harness and the embedding model; \cref{sec:eval} measures them, and
+\cref{sec:discussion} states what each does not achieve.
+
+\begin{itemize}
+\item \textbf{Mnemos-RS:} a record store plus a separate index: the natural padded design, and the one a
+reader would write first.
+\item \textbf{Mnemos-P:} one sealed partition file of $B$ equal regions, placed by content. Intended for
+stores larger than memory.
+\item \textbf{Mnemos-M:} the same sealed file, placed at random, searched entirely in memory, and flushed
+on a clock. Intended for stores that fit in memory, which for agent memory is the common case.
+\end{itemize}
+
+\Cref{tab:crossscheme} in \cref{sec:discussion} summarizes which channel each closes, beside the
+alternatives; the rest of this section says how.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_architecture.pdf}
+\caption{Where each design puts a record and where it searches. Both write whole sealed regions of
+one fixed-size file, so neither reveals a region's occupancy. They differ in two places, and both
+differences are the security argument: Mnemos-P sends a record to the region its \emph{content}
+selects and reads $s\,k_{\mathrm{probe}}$ regions back from disk to answer a query, while Mnemos-M
+draws the region uniformly and answers queries entirely from the locked arena, touching no disk at
+all.}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{The Shared Layout}
+\label{sec:mnemos-layout}
+
+Mnemos-P and Mnemos-M share a file of $B$ equal regions of $C$ slots. A slot holds two
+authenticated ciphertexts: a fixed-size header carrying the record identifier and its quantized
+embedding, and a fixed-size payload of one or more blocks carrying the text and metadata. Every
+ciphertext uses XChaCha20-Poly1305 under a fresh 192-bit random nonce, whose length makes a
+counter unnecessary and so keeps no nonce state on disk; a free slot is uniformly random bytes of
+the slot length. A single authenticated cipher is used throughout. This satisfies S1 and S2: the
+file lengths are functions of $B$, $C$, the embedding dimension and the block size, and no slot's
+bytes distinguish a live record from free space without the key.
+
+Both designs write by rewriting \emph{whole regions}, so a write reveals which region changed and
+never which slot within it, and hence never a region's occupancy. Both flush exactly $w+1$ regions.
+What differs is how a region is chosen, and that difference is the whole of the security
+difference between them.
+
+\subsection{Mnemos-P: Placement by Content}
+\label{sec:mnemos-p}
+\label{sec:mnemos-write}
+
+A record's region is the keyed permutation of its nearest centroid's partition. The permutation
+exists so that an adversary holding a public partition table, one trained on public text, cannot
+map a topic to a region directly. A secret \emph{rotation} of the centroids would not achieve
+this, because a rotation preserves inner products and therefore preserves the nearest-centroid
+assignment; permuting physical positions is what hides the correspondence.
+
+The permutation is weaker than it appears against the RW class. Genuine probes are the
+$k_{\mathrm{probe}}$ nearest partitions to a query, so the regions read together are geometric
+neighbours, and the co-occurrence graph of observed reads can be matched against the graph the
+public table predicts. \Cref{sec:eval-permutation} recovers most of the permutation from search
+traffic alone when probes are not randomized, and part of it at the shipped spread. Against the W
+class, which sees no reads, the permutation holds. This is stated here rather than in the
+limitations because it changes what the mechanism is for: it protects against a write observer
+with a public table, not against a read observer.
+
+A record whose partition is full is refused rather than spilled, so that no history can make a
+write land in a partition it would not otherwise reach. By \cref{prop:capacity} a refusal that
+wrote nothing would itself be the leak, so a refused write performs the same region rewrite an
+accepted one would have: the store owes the intended region its rewrite whether or not the record
+was admitted. \Cref{sec:eval-refusal} measures both arms.
+
+Two further measures address the multi-snapshot channel of \cref{sec:artifacts}. The whole file is
+re-encrypted when the store is locked, so any version diff spanning a session boundary covers every
+region and carries nothing; and the maintenance cursor's starting position is drawn afresh at each
+unlock, so its resting position no longer counts the flushes performed before $\tau$.
+
+\subsection{Mnemos-M: Placement at Random, Search in Memory}
+\label{sec:mnemos-m}
+
+Assumption A3 already grants that the adversary cannot read the unlocked process's memory, and in
+the local setting there is no remote server that must hold the index. Mnemos-M takes both facts at
+face value.
+
+\paragraph{Placement} A record's slot is drawn uniformly from the store's free slots, at the moment
+it is accepted, before its content has influenced anything on disk. Its region is that slot's
+region. The $w$ record-carrying rewrites of a flush and the padding rewrites are therefore draws
+from the \emph{same} distribution, which is what Mnemos-P cannot say: there, a real record's region
+is a function of its content and only the padding is uniform. A version diff, at any granularity,
+reveals which regions changed and nothing about what they hold.
+
+\paragraph{Search} At unlock the store is read once, sequentially, and every header, and by default
+every payload, is decrypted into the locked arena. A search ranks the resident headers there and
+returns results from resident payloads, so it performs \emph{no disk access at all}. The search,
+result and query-equality channels are not mitigated but absent. The cost is memory, which
+\cref{sec:eval-perf} reports against $n$.
+
+\paragraph{Logical partitions} Exhaustive ranking is linear in $n$, and \cref{sec:eval-perf}
+finds the partitioned design overtaking it on search between \REtenCrossLo{} and \REtenCrossHi{}
+records.
+The remedy is to notice what the partition table actually costs. It cost Mnemos-P its write
+channel because Mnemos-P's partitions are \emph{physical}: a record's region on disk is its
+partition. Nothing requires that. Mnemos-M keeps each resident record's nearest-centroid
+partition in the locked arena beside its header and, when configured to, ranks only the records
+of the query's $k$ nearest partitions. The disk layout is unchanged, uniformly random, and the
+probing happens in memory, so the index changes nothing either adversary class observes; the
+auditor confirms that such a search still writes no byte and emits no event. What it trades is
+recall, which \cref{sec:eval-recall} measures, and time at unlock, when every resident record's
+partition is recomputed, which \cref{sec:eval-perf} measures. Separating the logical index from the
+physical layout is what lets one store search sublinearly without placing records by content.
+
+\paragraph{Flushes} A flush occurs every $\Delta$ while the store is unlocked, whether or not
+anything was written. This is what closes the derived-write channel of \cref{prop:derived}: the
+occurrence of a flush no longer implies that the agent wrote, so an adversary that supplies a
+document and watches for a write learns nothing, and the deduplication attack of
+\cref{sec:eval-dedup} fails against it. It also bounds deletion in wall-clock time rather than in
+flushes, and hides write timing up to $\Delta$.
+
+\paragraph{Capacity} There is no per-partition capacity, so \cref{prop:capacity} does not apply.
+The only bound is global, and global occupancy is a function of the record count, which the game
+already equalizes. The practical consequence is large: \cref{sec:eval-refusal} shows Mnemos-P
+refusing its first write at roughly a quarter of nominal capacity under a skewed corpus, while
+Mnemos-M admits every slot.
+
+\subsection{Search and Probe Mechanisms}
+\label{sec:mnemos-read}
+
+Mnemos-M's search reads nothing, so this section concerns Mnemos-P. A search reads whole regions
+and nothing else: it reads the regions of its probe set, decrypts the headers they contain, ranks
+the candidates in memory, and decrypts the $\mathit{top\_k}$ payloads from the region images it has
+already read. No further, result-dependent access reaches the disk, which removes the channel by
+which a returned cohort-H record could be linked to a query topic (\cref{sec:eval-search}).
+
+Every query reads the same number of regions, chosen by one of two mechanisms: the default reads
+the $k_{\mathrm{probe}}$ genuine nearest partitions plus $(s-1)k_{\mathrm{probe}}$ fresh random
+ones; the alternative reads one of a set of fixed disjoint groups, so repeated queries are
+recognised only at group granularity, with a deterministic anonymity set. Neither hides query
+equality from an overlap-threshold adversary (\cref{sec:eval-query}); only the grouped mechanism
+resists permutation recovery (\cref{sec:eval-permutation}).
+
+\subsection{Deletion and Update}
+\label{sec:mnemos-delete}
+
+In both designs a deletion records a tombstone in the sealed manifest and writes nothing else at
+the time of the call, so the operation does not name the deleted record's region. The
+counter-selected region of each flush is scanned for tombstoned slots, which are freed as that
+region is rewritten, so a tombstoned record is physically removed within $B$ flushes at the latest.
+An update is a deletion followed by a fresh write and therefore also writes nothing at the time of
+the call. This is what lets the post-$\tau$ program delete and update cohort-H records without
+leaking their partitions.
+
+For Mnemos-P the bound is in flushes, which for an agent that writes rarely can mean days;
+Mnemos-M's clock makes it $B\Delta$. Neither reaches copies a synchronization provider already
+retains.
+
+\subsection{Key Custody}
+\label{sec:mnemos-keys}
+
+The master key is wrapped by a hardware key store, the Windows TPM through the CNG Platform Crypto
+Provider in the current implementation, and is unwrapped into a locked, promptly zeroized memory
+region only while the store is unlocked. All working keys are derived from it by HKDF. Decrypted
+records and query vectors live only in the locked region, which for Mnemos-M is also where the
+resident index lives.
+
+Since page locking does not prevent hibernation, custody is paired with locking the store on
+suspend and hibernate notifications (\cref{sec:artifacts,sec:eval-artifacts}).
+
+\subsection{Instrumentation}
+\label{sec:mnemos-events}
+
+Every disk-visible operation emits one typed event naming the file regions it touched, and that
+stream is the transcript the attack harness consumes, so an attack cannot structurally observe more
+than the storage adversary does. \Cref{sec:eval-audit} describes the separate byte-level audit that
+checks the stream against the disk, and what it covers for each design.

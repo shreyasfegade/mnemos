@@ -1,0 +1,305 @@
+\section{Dual-Epoch Security}
+\label{sec:dualepoch}
+
+The attack of \cref{sec:transfer} exposes cohort H almost as much as cohort P. This section
+explains why, states the security notion that separates the two cohorts, and gives the conditions
+under which the separation can be made to hold. Three results delimit what any storage design can
+achieve: a transfer lemma showing that a content-placed layout exposes the two cohorts equally, a
+capacity result showing that bounded per-partition capacity leaks the earlier cohort's load, and a
+separation showing that a self-writing agent leaks cohort H through its own retrievals against any
+store whose operations depend on content.
+
+\subsection{A Transfer Lemma}
+\label{sec:transfer-lemma}
+
+The empirical finding that cohort H is exposed nearly as much as cohort P is not an artifact of a
+particular attack; it follows from the placement rule.
+
+\begin{lemma}[Transfer]
+\label{lem:transfer}
+Let records be assigned to partitions by a function of content alone, let cohorts H and P be
+drawn from the same distribution over content, and let the adversary observe the partition of
+each stored record. For any partition-labeling $\ell$ that the adversary computes without
+reference to cohort membership, the expected topic-recovery accuracy of $\ell$ on cohort H equals
+its expected accuracy on cohort P.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+Placement depends only on content, so a record's partition is independent of its cohort given its
+content. The labeling $\ell$ maps partitions to topics without reading cohort membership, so the
+predicted label of a record depends only on its content. The true topic is a function of content.
+Hence the event that $\ell$ is correct on a record depends only on its content, whose distribution
+is identical across cohorts; the expectations are therefore equal.
+\end{proof}
+
+The third hypothesis is easily overlooked. Applying a partition label to a cohort-H record
+requires knowing which partition holds it: a growing layout discloses that in the snapshot, and
+against a layout of fixed-size sealed regions the lemma says nothing at all. The write channel of
+\cref{sec:eval-write} is therefore a statement about cohort P unless another channel supplies
+cohort-H membership, and \cref{sec:eval-multisnapshot} exhibits one. The other hypotheses name the
+ways the cohorts' exposure can differ: subject drift breaks identical distributions, which
+\cref{sec:eval-drift} measures together with how much an adversary inducing with archival content
+recovers. Dual-epoch security is thus valuable not because historical data is inherently safer,
+but because a store can be built whose adversary-visible representation carries no partition
+labels at all.
+
+\subsection{The Security Game}
+
+Dual-epoch security is defined with respect to a leakage function
+$\mathcal{L} = (\mathcal{L}^{\mathrm{snap}}, \mathcal{L}^{\mathrm{op}})$, where
+$\mathcal{L}^{\mathrm{snap}}$ describes the state exposed at $\tau$ and $\mathcal{L}^{\mathrm{op}}$
+describes each post-$\tau$ operation. Making the leakage explicit lets the definition cover the
+operations a real agent performs, searches and deletions included.
+
+The leakage is stated over \emph{plaintext operations}, in the style usual for structured
+encryption, rather than over the transcript the store happens to produce. Writing it the other way,
+as "the physical regions the operation reads or writes", makes the definition circular: the
+transcript is then permitted to reveal itself, and the theorem says little. Let $\pi$ be a secret
+relabeling of partitions, sampled once and used consistently. Then
+\begin{itemize}
+\item $\mathsf{put}(x)$ reveals $\pi(\mathrm{part}(x))$;
+\item $\mathsf{search}(q)$ reveals $\pi$ applied to the probe set of $q$, together with the fresh
+random extras drawn on that call;
+\item $\mathsf{delete}$ and $\mathsf{update}$ reveal nothing at the time of the call, and an
+update additionally reveals the new record's relabeled partition at its next flush;
+\item every operation reveals the time at which it occurred.
+\end{itemize}
+The simulator samples $\pi$ itself, which is what makes explicit that the keyed permutation buys
+consistency of the relabeling and nothing more. \Cref{sec:eval-permutation} measures how much even
+that is worth against an adversary that observes reads.
+
+Let $\Pi$ be a dynamic encrypted memory. The game $\mathbf{G}^{\mathrm{H}}_{\Pi,\mathcal{A}}$ is
+played between a challenger and an adversary $\mathcal{A}$.
+\begin{enumerate}
+\item $\mathcal{A}$ outputs two \emph{admissible} histories $\sigma_0, \sigma_1$ of equal length,
+each a sequence of $\mathsf{put}$ operations. Admissibility is defined in \cref{sec:conditions}.
+\item The challenger samples $b \leftarrow \{0,1\}$, initializes $\Pi$, executes $\sigma_b$, and
+performs a flush, so that no record of $\sigma_b$ remains staged. This point is $\tau$. The
+challenger gives $\mathcal{A}$ the snapshot leakage $\mathcal{L}^{\mathrm{snap}}$.
+\item $\mathcal{A}$ then issues operations \emph{adaptively}: having seen the leakage of every
+earlier operation, it chooses the next one, from $\mathsf{put}$, $\mathsf{delete}$,
+$\mathsf{update}$, and $\mathsf{search}$, and may reference records written in $\sigma_b$. After
+each operation the challenger returns $\mathcal{L}^{\mathrm{op}}$.
+\item $\mathcal{A}$ outputs $b' \in \{0,1\}$.
+\end{enumerate}
+The advantage is
+$\AdvH_{\Pi,\mathcal{A}}(\lambda) = \bigl|\Pr[b'=b] - \tfrac{1}{2}\bigr|$.
+
+Adaptivity matters because the $\tau$-arrival adversary is inherently adaptive: it induces writes
+in response to what it has already observed. The hybrid argument in the supplementary material is
+unchanged by it, because each hybrid step replaces a primitive rather than fixing the operation
+sequence.
+
+\begin{definition}[$\mathcal{L}$-dual-epoch security]
+\label{def:dualepoch}
+$\Pi$ is $\mathcal{L}$-dual-epoch secure if for every probabilistic polynomial-time $\mathcal{A}$
+there is a simulator $\mathcal{S}$ such that the view $\mathcal{A}$ receives in
+$\mathbf{G}^{\mathrm{H}}_{\Pi,\mathcal{A}}$ is computationally indistinguishable from the output of
+$\mathcal{S}$ given only $\mathcal{L}$ evaluated on the operations $\mathcal{A}$ issued, and
+consequently $\AdvH_{\Pi,\mathcal{A}}(\lambda) \le \negl(\lambda)$.
+\end{definition}
+
+Because the simulator sees the post-$\tau$ leakage but nothing about $\sigma_b$, the definition
+states that the entire view is independent of which history produced cohort H. The flush at $\tau$
+matters: a record staged but unflushed at $\tau$ would be written in full view of the adversary.
+Equal lengths matter too: the maintenance cursor's resting position counts pre-$\tau$ flushes, and
+global occupancy bounds how many further records the store accepts, so unequal lengths would make
+the definition unsatisfiable for reasons unrelated to placement (\cref{sec:mnemos-write} gives the
+deployment measure for the cursor).
+
+\Cref{def:dualepoch} concerns indistinguishability of histories, not topic recovery. The two are
+connected by a standard reduction.
+
+\begin{corollary}[Predicate hiding]
+\label{cor:predicate}
+If $\Pi$ is $\mathcal{L}$-dual-epoch secure, then for any predicate $\phi$ on cohort-H contents,
+in particular the topic of any record, no adversary predicts $\phi$ from its view with advantage
+over the best cohort-oblivious predictor exceeding $2\,\AdvH_{\Pi,\mathcal{A}}(\lambda)$, where the
+advantage is averaged over the distribution from which the histories are drawn.
+\end{corollary}
+
+The argument is the usual equivalence between semantic security and indistinguishability, with
+the averaging over histories that lets a $\phi$-predictor fix a distinguishing pair; the
+supplementary material spells it out. The corollary must not be read backwards: a measured
+advantage is a \emph{lower} bound on what one classifier extracts, so \cref{sec:eval-game} reports
+the upper end of each interval as the ceiling for the attacker it ran, and claims nothing beyond
+it.
+
+\subsection{Sufficient Conditions}
+\label{sec:conditions}
+
+A history is \emph{admissible} if, under either $\sigma_0$ or $\sigma_1$, no partition receives
+more than its capacity of live records at any point during the game. Tombstoned records that have
+not yet been purged still occupy their slots, so admissibility counts them. Admissibility is a
+restriction on the histories the adversary may submit, not on the scheme, and it is necessary: a
+scheme cannot hide whether a record overflowed a partition if the adversary is free to choose
+histories that differ precisely in whether an overflow occurs. \Cref{prop:capacity} and
+\cref{sec:eval-refusal} address what happens when a deployment leaves the admissible regime, which
+under realistic skew it does early.
+
+\begin{theorem}
+\label{thm:main}
+Let $\Pi$ store records in $B$ partitions of fixed capacity $C$, in a single file of $B$ equal
+regions, and let it satisfy the following conditions.
+\begin{itemize}
+\item \textbf{S1 (fixed size).} Every file the store maintains has a length determined by the public
+parameters alone.
+\item \textbf{S2 (sealed slots).} Every slot is encrypted with an IND\$-CPA authenticated cipher under a
+fresh nonce; a free slot is uniformly random bytes; and any cleartext index within a slot is the
+output of a pseudorandom function of a uniformly random identifier.
+\item \textbf{S3 (data-independent updates).} Each flush rewrites exactly $w+1$ whole regions: one per
+staged record, uniformly random regions for the remainder up to $w$, and one region chosen by a
+counter that depends only on the flush index. A deletion writes nothing until the next flush. A
+refused write performs the same rewrites an accepted one would. The manifest is rewritten every
+flush regardless of content.
+\item \textbf{S4 (independent placement).} The partition table is independent of cohort H, and every
+submitted history is admissible.
+\end{itemize}
+Then $\Pi$ is $\mathcal{L}$-dual-epoch secure for the $\mathcal{L}$ above, with
+$\mathcal{L}^{\mathrm{snap}}$ empty beyond the public parameters.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+The proof is a sequence of hybrids over the game, given in full in the supplementary material.
+$\mathbf{G}_0$ is the real game. $\mathbf{G}_1$ replaces every pseudorandom function with a random function; a
+distinguisher breaks the PRF. $\mathbf{G}_2$ replaces every ciphertext, live or free, with a
+uniformly random string of the same length; a distinguisher breaks IND\$-CPA, and S1 guarantees
+the lengths match. In $\mathbf{G}_2$ the snapshot is a collection of fixed-length uniform strings
+whose sizes are public parameters, so by S1 and S2 it is independent of $b$. Each post-$\tau$
+operation writes a set of whole regions determined by S3, whose identities are the staged records'
+relabeled partitions, uniform choices, and a content-independent counter, none of which depends on
+which history produced the records already present. Under S4 the partition table is independent of
+$b$, and admissibility ensures no write is refused under either history, so the refusal rule of S3
+is never exercised and cannot distinguish. Hence the whole view is a function of $\mathcal{L}$ and
+public randomness, which the simulator reproduces.
+\end{proof}
+
+Padding a flush with rewrites of uniformly random regions rather than with dummy records keeps the
+write pattern data-independent without consuming capacity, so admissibility can be stated in terms
+of real load alone.
+
+Rewriting whole regions (S3) makes a write reveal which region changed and never which slot, and
+it is natural to assume that a per-slot write would reveal how full the region was. It need not.
+Whether the index of a written slot carries occupancy depends on how the slot was chosen, and a
+uniformly random choice among the free slots makes whole-region rewrites unnecessary for placement.
+
+\begin{lemma}[Slot-index independence]
+\label{lem:slot}
+Let each accepted record occupy a slot drawn uniformly from the free slots of its region, and let
+nothing else in the store depend on slot labels within a region. For any admissible pair
+$\sigma_0, \sigma_1$ and any region $r$, the sequence of slot indices at which post-$\tau$ records
+are placed in $r$ has the same distribution under $b = 0$ and $b = 1$.
+\end{lemma}
+
+\begin{proof}
+The placement rule is invariant under any permutation of the slot labels of $r$, and by hypothesis
+nothing else distinguishes them, so the labels are exchangeable. Hence the set $O_b(r)$ of slots
+cohort H occupies at $\tau$ is a uniformly random subset of size $L_b(r)$, whatever the history.
+Post-$\tau$ records draw uniformly without replacement from its complement, so $k$ of them occupy a
+uniformly random ordered $k$-subset of the complement of a uniformly random $L_b(r)$-subset, which is
+a uniformly random ordered $k$-subset of all $C$ labels whenever $k \le C - L_b(r)$. Admissibility
+guarantees that bound under both histories, so the distribution does not depend on $b$. By S2 the
+snapshot does not reveal $O_b(r)$, so the adversary cannot condition on it.
+\end{proof}
+
+The lemma is exactly as strong as its hypothesis, which fails for the maintenance step: freeing
+tombstoned cohort-H records slot by slot writes as many slots as were deleted there, which depends
+on the history, so the purge must remain a whole-region rewrite. Record placement need not;
+\cref{sec:eval-game} measures all four combinations of placement rule and write granularity, and
+only the lowest free slot, written alone, distinguishes the histories.
+
+A second boundary is set by what the game reveals. Every post-$\tau$ put is in
+$\mathcal{L}^{\mathrm{op}}$, so the lemma says nothing about hiding \emph{whether} a write
+happened, which Mnemos-M's clocked flush promises. There padding must look like placement, and slot
+by slot it does not: a slot written twice with no deletion between was padding the first time, so
+over enough flushes the adversary counts the puts. Per-slot placement is therefore available to the
+partitioned design and not to the memory-resident one, where it would have saved writing $C$ slots
+per record.
+
+\subsection{Separations}
+
+The conditions are not implied by the standard notions.
+
+\begin{proposition}[Forward and backward privacy are insufficient]
+\label{prop:fp}
+There is a scheme that is forward and Type-II backward private but not dual-epoch secure.
+\end{proposition}
+A forward- and backward-private scheme may keep per-partition state, such as an update counter,
+in its local snapshot. Counters sit behind pseudorandom handles, so the adversary sees a
+\emph{multiset} of values rather than a vector indexed by partition; two histories with the same
+per-partition counts in different partitions are therefore \emph{not} distinguished. Two histories
+with different count \emph{profiles} are: writing $m$ records to one partition yields the multiset
+$\{m\}$, while writing $m/2$ to each of two yields $\{m/2, m/2\}$, and no relabeling identifies
+them. So $\AdvH$ is non-negligible while forward and backward privacy, properties of the operation
+transcript, are unaffected. \Cref{sec:attack-counting} reports how much this state leaks on a
+realistic corpus, where it is weak.
+
+\begin{proposition}[Sealing and padding are each necessary]
+\label{prop:seal}
+Slot-level history independence with regions that grow with occupancy is not dual-epoch secure,
+and padding regions to a fixed size without sealing free slots is not dual-epoch secure.
+\end{proposition}
+The first store leaks per-partition occupancy through region sizes even though within a region no
+order is revealed; the second leaks occupancy through the boundary between written and unwritten
+slots. \Cref{sec:eval-game} realizes both as ablations and measures the resulting advantage.
+
+\subsection{Capacity and Confidentiality}
+\label{sec:capacity-prop}
+
+Admissibility is a real restriction, and a deployment cannot simply assume it.
+
+\begin{proposition}[Capacity--confidentiality trade-off]
+\label{prop:capacity}
+Let $\Pi$ place records by content into partitions of capacity $C$, and let a write whose partition
+is full be refused without performing the writes an accepted record would have performed. Then an
+adversary that can induce writes on a topic and observe the operation leakage learns whether that
+topic's live load has reached $C$. Since the adversary knows its own contribution to that load, it
+learns the load contributed by cohort H. Dual-epoch security therefore requires either that $C$
+exceed the worst-case per-topic load, or that a refusal be indistinguishable from an acceptance.
+\end{proposition}
+
+The proof is immediate: an accepted put reveals $\pi(\mathrm{part}(x))$ and a silently refused
+one reveals nothing, and the distinguishing event is exactly "this topic's load is at capacity".
+The second disjunct is the cheap one and is part of S3: the store owes the intended region its
+rewrite whether or not the record was admitted. The first is expensive, since capacity must then be
+provisioned for the most frequent topic; \cref{sec:eval-refusal} measures both. A design with only
+a global capacity bound, such as \cref{sec:mnemos-m}, escapes the proposition, because global
+occupancy is a function of the record count, which the game already equalizes.
+
+\subsection{The Derived-Write Channel}
+\label{sec:derived-write}
+
+\Cref{def:dualepoch} treats the post-$\tau$ operations as chosen by the adversary. A self-writing
+agent introduces a second source: it retrieves a cohort-H record and then, in the same turn, writes
+a new record or issues a follow-up query about the same subject, so the operations performed after
+$\tau$ depend on the contents of cohort H.
+
+\begin{proposition}[Derived-write separation]
+\label{prop:derived}
+Let $\Pi$ be a store whose post-$\tau$ operation leakage $\mathcal{L}^{\mathrm{op}}$ reveals a
+non-constant function of the content of the operations performed, or of whether an operation was
+performed at all. Then there is a feedback agent, whose post-$\tau$ operations depend on retrieved
+cohort-H records, against which $\Pi$ is not dual-epoch secure.
+\end{proposition}
+
+\begin{proof}
+Consider an agent that, after $\tau$, searches for a fixed query $q$ and writes a record whose text
+is its top result. Choose $\sigma_0$ and $\sigma_1$ so that the top result for $q$ lies in
+different partitions under the two histories, which is possible because the histories are the
+adversary's to choose. The post-$\tau$ write then touches a region that differs between $b=0$ and
+$b=1$, and by hypothesis $\mathcal{L}^{\mathrm{op}}$ reveals a non-constant function of it. The
+adversary outputs the corresponding bit and wins with non-negligible advantage. The same argument
+runs on the occurrence of a write rather than its content: if the agent deduplicates, so that it
+writes only when the retrieved fact is absent, then whether any write occurred is itself the
+distinguishing bit.
+\end{proof}
+
+The proposition does not say that no storage design closes this channel; its hypothesis excludes
+stores whose operation leakage is content-independent. Oblivious RAM is one. So is a store with
+content-oblivious placement, in-memory search, and a clocked flush: the regions written are uniform
+whatever the agent retrieved, and a flush occurs every $\Delta$ whether or not the agent wrote.
+\Cref{sec:mnemos-m} is such a store. This is what separates self-writing memory from classical
+searchable encryption, whose queries are external to the stored data: closing the channel needs
+content-oblivious access \emph{and} a content-independent operation schedule, and
+\cref{sec:eval-dedup} measures the resulting attack, deduplication membership inference, on both
+sides of that line.

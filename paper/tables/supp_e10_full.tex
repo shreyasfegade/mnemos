@@ -1,0 +1,38 @@
+\begin{table*}[t]
+\centering
+\caption{Cost at every size measured. Against the in-tree Rust plaintext IVF, which shares the quantisation and the partitioner, so a ratio is a statement about the security machinery. \emph{Put} is the sparse regime: one record, one flush, which is what an agent writing seconds apart pays. \emph{kB written/record} is what a whole-region rewrite costs per record; a dash marks a design that does not count its bytes or keeps nothing on disk.}
+\label{tab:supp-e10}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Design & $n$ & Search $p50$ (ms) & Put $p50$ (ms) & kB written/record & RAM (MB) & Disk (MB) & Unlock (s) \\
+\midrule
+Plaintext IVF (Rust) & 1,000 & 0.091 & 0.04 & -- & 0.0 & 0.0 & 0.00 \\
+Mnemos-M, exact & 1,000 & 0.137 & 4.33 & 198 & 5.5 & 5.8 & 0.21 \\
+Mnemos-M, in-memory IVF & 1,000 & 0.068 & 3.81 & 198 & 5.5 & 5.8 & 0.20 \\
+Mnemos-P & 1,000 & 1.237 & 15.00 & 198 & 0.0 & 5.8 & 0.25 \\
+Mnemos-RS & 1,000 & 0.662 & 3.70 & -- & 0.0 & 5.8 & 0.30 \\
+Plaintext IVF (Rust) & 3,000 & 0.069 & 0.02 & -- & 0.0 & 0.0 & 0.00 \\
+Mnemos-M, exact & 3,000 & 0.454 & 6.04 & 290 & 16.4 & 17.2 & 0.21 \\
+Mnemos-M, in-memory IVF & 3,000 & 0.104 & 5.84 & 290 & 16.4 & 17.2 & 0.23 \\
+Mnemos-P & 3,000 & 1.718 & 17.24 & 290 & 0.0 & 17.2 & 0.23 \\
+Mnemos-RS & 3,000 & 0.823 & 3.92 & -- & 0.0 & 17.2 & 0.32 \\
+Plaintext IVF (Rust) & 10,000 & 0.106 & 0.02 & -- & 0.0 & 0.0 & 0.00 \\
+Mnemos-M, exact & 10,000 & 1.467 & 8.96 & 478 & 54.5 & 57.1 & 0.26 \\
+Mnemos-M, in-memory IVF & 10,000 & 0.238 & 8.12 & 478 & 54.6 & 57.1 & 0.38 \\
+Mnemos-P & 10,000 & 2.557 & 22.15 & 478 & 0.0 & 57.1 & 0.28 \\
+Mnemos-RS & 10,000 & 1.522 & 5.65 & -- & 0.0 & 57.2 & 0.36 \\
+Plaintext IVF (Rust) & 30,000 & 0.288 & 0.05 & -- & 0.0 & 0.0 & 0.00 \\
+Mnemos-M, exact & 30,000 & 6.404 & 13.13 & 713 & 163.3 & 170.8 & 0.35 \\
+Mnemos-M, in-memory IVF & 30,000 & 0.602 & 14.04 & 713 & 163.5 & 170.8 & 1.21 \\
+Mnemos-P & 30,000 & 3.813 & 28.19 & 713 & 0.0 & 170.8 & 0.39 \\
+Mnemos-RS & 30,000 & 2.383 & 8.38 & -- & 0.0 & 171.1 & 0.43 \\
+Plaintext IVF (Rust) & 100,000 & 0.422 & 0.06 & -- & 0.0 & 0.0 & 0.00 \\
+Mnemos-M, exact & 100,000 & 23.194 & 32.18 & 1,185 & 543.7 & 568.2 & 0.79 \\
+Mnemos-M, in-memory IVF & 100,000 & 1.778 & 33.85 & 1,185 & 544.3 & 568.2 & 6.67 \\
+Mnemos-P & 100,000 & 6.667 & 46.26 & 1,185 & 0.0 & 568.2 & 0.69 \\
+Mnemos-RS & 100,000 & 3.442 & 13.09 & -- & 0.0 & 569.4 & 0.71 \\
+\bottomrule
+\end{tabular}
+\end{table*}

@@ -1,0 +1,13 @@
+{
+ "store": "chroma",
+ "dim": 768,
+ "n_hist": 2000,
+ "n_topics": 8,
+ "budget_per_topic": 40,
+ "block_size": 4096,
+ "distinct_changed_blocks": 357,
+ "blocks_confidently_labelled": 341,
+ "induced_localisation_accuracy": 0.8375,
+ "mean_blocks_per_write": 14.99375,
+ "seconds": 42.058098554611206
+}

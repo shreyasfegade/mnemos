@@ -1,0 +1,33 @@
+[package]
+name = "mnemos-v2"
+description = "Mnemos v2: one sealed partition file, whole-region reads and rewrites, tombstoned deletion."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+mnemos-core = { workspace = true }
+mnemos-crypto = { workspace = true }
+chacha20poly1305 = { workspace = true }
+zeroize = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+parking_lot = { workspace = true }
+
+[dev-dependencies]
+mnemos-keystore = { workspace = true, features = ["insecure-software-keystore"] }
+tempfile = "3"
+serde_json = { workspace = true }
+
+[[bench]]
+name = "v2_bench"
+harness = false
+
+[dev-dependencies.criterion]
+workspace = true

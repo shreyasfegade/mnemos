@@ -1,0 +1,88 @@
+[project]
+name = "mnemos"
+version = "0.1.0"
+description = "Searchable encrypted memory for self-writing agents — Python layer and evaluation harness."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "Shreyas Fegade" }]
+
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.14",          # linear_sum_assignment — the A1/A3 assignment step
+    "sentence-transformers>=3.0",
+    "torch>=2.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "maturin>=1.7",         # builds crates/mnemos-ffi
+]
+eval = [
+    "matplotlib>=3.9",
+    "pandas>=2.2",
+    "datasets>=3.0",        # MS MARCO / NQ for corpus D2
+    "tqdm>=4.66",
+]
+mcp = [
+    "mcp>=1.0",             # the Stage 4 agent integration
+]
+
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "python" }
+
+[tool.setuptools.packages.find]
+where = ["python"]
+
+# ---------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["python"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# Attack and experiment modules are stubs until their stage; unused imports in a stub are
+# a signature the implementation must honour, not dead code.
+#
+# The evaluation code uses the paper's symbols as names -- H and P for the cohorts, B and C for
+# buckets and capacity, W for epoch writes, X for the estimators module, K for the topic count --
+# so an experiment can be read against the definition it measures. N806/N803/N812 would rename
+# them to lower case and break that correspondence. E741 (l, I, O) is NOT ignored: those really
+# are confusable with 1 and 0.
+"python/eval/**" = ["ARG001", "N806", "N803", "N812"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+# Attacks and experiments are gradually typed while stubbed out.
+[[tool.mypy.overrides]]
+module = "eval.*"
+disallow_untyped_defs = false
+
+# The compiled PyO3 extension ships no stubs or py.typed marker; its interface is checked by
+# the Python tests that drive it, not by mypy.
+[[tool.mypy.overrides]]
+module = "mnemos_native"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+pythonpath = ["python"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: takes more than 30 seconds",
+    "needs_tpm: requires hardware key custody; skipped in CI",
+]
