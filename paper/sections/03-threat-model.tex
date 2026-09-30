@@ -78,12 +78,34 @@ imaging. It sees a sequence of file \emph{versions}, so it learns which byte ran
 between captures and when. It does not see reads at all: no search a local process performs
 produces a new file version. This is the class the anchoring instantiations belong to.
 \item \textbf{RW, the read-write observer.} A storage component with file-system visibility but no code
-execution as the user, such as a network-share server or a malicious storage driver. It sees the
-same writes and additionally every read offset. Search-side leakage matters only for this class.
+execution as the user, principally a network-share or remote-filesystem server that mediates the
+store's reads and writes. It sees the same writes and additionally every read offset. Search-side
+leakage matters only for this class. We deliberately do \emph{not} instantiate RW as a malicious
+local storage driver: a kernel-mode driver can read the unlocked process's memory, which violates A3
+and collapses the distinction the model is built on, so it is out of scope rather than a weaker RW.
 \end{itemize}
 
 \Cref{tab:tau} summarizes the two views; results about probe patterns, query equality and
-permutation recovery apply to RW only, and \cref{sec:eval} labels every result with its class.
+permutation recovery apply to RW only, and \cref{sec:eval} labels every result with its class. The
+two classes and the version-retention, OS-artifact and hibernation capabilities below are
+\emph{distinct} adversary powers, not a single one under different names: a sync account retains
+versions but sees no reads; a network-share server sees reads but retains no history; an imaging
+adversary obtains OS artifacts and a hibernation image but observes nothing live. A design is
+credited with closing a channel only against the class that has the capability to observe it.
+
+\paragraph{Why induction rather than exfiltration}
+A reader asked why an adversary who can induce writes does not simply exfiltrate memory through
+indirect prompt injection \cite{greshake2023injection}, which needs the same ability to get content
+in front of the agent. The two abilities come apart in the deployments this attack targets. A memory
+pipeline such as mem0's runs an extraction and deduplication step with \emph{no tools and no egress}:
+it reads the supplied document, decides what to store, and writes, but has no channel to send data
+out, so injected instructions have nothing to act on. More generally the storage side channel is the
+residual threat exactly when injection is \emph{defended} --- an egress-gated agent, an
+injection-hardened summarizer, a sandbox that blocks tool use on untrusted content
+\cite{debenedetti2025defeating} --- because those defenses stop the agent from acting on injected
+instructions but do not stop it from \emph{remembering} the content, which is what the induced write
+records. Where injection is undefended it does dominate, and we say so; the contribution is the
+regime where it is not.
 
 \begin{table}[t]
 \centering
