@@ -70,7 +70,22 @@ def e20() -> dict[str, float]:
     return out
 
 
-EXTRACTORS = {"e21": e21, "e20": e20}
+def e17() -> dict[str, float]:
+    d = _load("e17_composed.json")
+    if not d:
+        return {}
+    out: dict[str, float] = {"E17 oracle adv_H": d["oracle"]["adv_H"]}
+    by = {r["granularity_flushes"]: r for r in d["composed"]}
+    for g in (1, 16):
+        if g in by:
+            out[f"E17 composed adv_H, g={g}"] = by[g]["adv_H"]
+            out[f"E17 composed adv_H lower, g={g}"] = by[g]["adv_H_lo"]
+    if 1 in by:
+        out["E17 oracle minus composed, g=1"] = d["oracle"]["adv_H"] - by[1]["adv_H"]
+    return out
+
+
+EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17}
 
 
 # ----------------------------------------------------------------------------- checks
@@ -172,5 +187,35 @@ CHECKS = [
         "P flushes on demand, so whether a flush happens depends on the agent's decision, and a "
         "written probe goes to its (permuted) content region.",
         "e20",
+    ),
+    # --- E17: the composed attack on Mnemos-P (registered 2026-09-30, before the run) -----------
+    _check(
+        "E17 composed adv_H lower, g=1",
+        "sec:eval-multisnapshot -- the composed attack (diff-derived membership) reaches cohort H",
+        0.005,
+        1.00,
+        "At g=1 the version diff names the region to within the w+1 = 5 regions a flush rewrote, "
+        "so a majority vote over the labelled candidates still beats chance; the interval lower "
+        "end must clear zero for the composition to be a real attack rather than the oracle.",
+        "e17",
+    ),
+    _check(
+        "E17 oracle minus composed, g=1",
+        "sec:eval-multisnapshot -- the composed attack is weaker than the oracle it replaces",
+        0.0,
+        1.00,
+        "The oracle knows the exact region; the composed attack chooses among ~5 diff candidates, "
+        "so its advantage can only be lower. A negative value would mean the composition beat the "
+        "oracle, which is impossible and would signal a bug.",
+        "e17",
+    ),
+    _check(
+        "E17 composed adv_H, g=16",
+        "sec:eval-multisnapshot -- coarse capture collapses the composed attack toward chance",
+        -0.05,
+        0.10,
+        "At g=16 the diff merges sixteen flushes, so the candidate set is most of the file and the "
+        "label vote is near-random; the advantage should sit near zero, as E8's precision does.",
+        "e17",
     ),
 ]
