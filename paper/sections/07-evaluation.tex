@@ -342,6 +342,40 @@ there is no ORAM in the tree and a poor reimplementation would be worse than an 
 memory-resident design reaches the same leakage as the oblivious options at zero read cost, bounded
 instead by memory, which is the substance of the design-space argument.
 
+\paragraph{What the clocked flush writes}
+The memory-resident design's flush is on a clock, so its cost is paid whether or not the agent
+wrote, and a reader rightly asked what that costs on disk and on the drive. The submitted design
+rewrote $w+1$ whole regions every $\Delta$, which at the shipped geometry is \REtwentyoneRegionMiB~MiB
+a flush: at a $500$~ms clock an idle store writes \REtwentyoneRegionGBDay~GB a day, which is a
+non-starter. We replaced it with a deterministic sweep, in the manner of write-only
+ORAM~\cite{roche2017detwooram,aviv2017oblivisync,blass2014hive}: each flush rewrites the next fixed run of
+slots after a cursor, plus a fixed-size sealed journal that holds staged records until the cursor
+reaches a free slot, so the write pattern is a function of the flush index alone. A flush now writes
+\REtwentyoneSweepKiB~KiB regardless of what was staged --- the byte count is identical for an empty
+flush and a full one, which is the occurrence-hiding property stated as a measurement --- and at a
+$\Delta=10$~s clock the store writes \REtwentyoneSweepGBDay~GB a day, roughly
+\REtwentyoneRatio${\times}$ less than the region flush and about \REtwentyoneDriveYears{} years of
+continuous operation against a $600$~TBW endurance rating. The byte-level auditor confirms that a
+sweep flush writes exactly the cursor's slot run and the journal, and that the two are identical
+whether or not a record was carried. Locking re-encrypts nothing extra for this design; for the
+partitioned design a lock rewrites the whole partition file, \REtwentyonePLockMiB~MiB at the shipped
+geometry, which a synchronization client uploads in full each session.
+
+\paragraph{Repositioning the partitioned design}
+The submission argued that the partitioned store is the right tool above the memory limit. Against
+the write-only (class W) adversary that anchors the threat model, that is not quite right, and
+write-only ORAM is why. The sweep already keeps a logical partition index in memory while placing
+uniformly on disk (\cref{sec:mnemos-m}); pushing the headers to disk as well
+(Mnemos-M/disk, \cref{sec:mnemos-m}) gives a store larger than memory whose \emph{writes} are still a
+clock-driven sweep and therefore still invisible to W, closing the write, refusal, multi-version and
+derived-write channels against W at scale. Only a \emph{read}-observing (RW) adversary sees its
+access pattern, and only full obliviousness closes that. So the honest split is by adversary class:
+for W, a write-only-oblivious store dominates the partitioned design; for RW, the open problem is
+oblivious \emph{search}, whose cost we price against Path ORAM and, in \cref{sec:background}, against the
+recent disk-oblivious ANN and private-memory systems~\cite{rathee2026onyx,kaviani2026opal,zhu2025compass}. The
+partitioned design remains the point of comparison and the construction the dual-epoch theorem is
+proved for, not the recommended deployment for W.
+
 \subsection{Retrieval Quality}
 \label{sec:eval-recall}
 

@@ -92,8 +92,13 @@ measures the padded refusal that closes it.
 \label{sec:attack-derived}
 
 \Cref{prop:derived} says a store whose operations depend on the content \emph{or the occurrence} of
-what the agent does leaks cohort H to a feedback agent. The occurrence half admits a concrete and,
-to our knowledge, new attack.
+what the agent does leaks cohort H to a feedback agent. The occurrence half admits a concrete
+attack. Deduplication as a membership side channel is not itself new: Harnik, Pinkas, and
+Shulman-Peleg showed that cross-user deduplication in cloud storage lets one user learn whether
+another has already stored a file \cite{harnik2010side}. What is new here is the instantiation in
+self-writing agent memory, where the adversary supplies the ``file'' as a document for the agent to
+remember, the deduplication decision is made by the agent's own extraction pipeline, and the
+disclosure is dated relative to a compromise.
 
 Agent memory pipelines avoid storing a fact twice, and they do so by consulting what is already
 stored. An adversary that supplies a document and can see whether a write happened therefore

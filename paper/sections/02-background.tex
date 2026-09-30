@@ -17,7 +17,12 @@ data from the leakage profile of $k$-nearest-neighbor queries \cite{kornaropoulo
 query type an encrypted vector store serves. Volume-hiding constructions pad response sizes to
 remove this channel \cite{kamara2019volume,patel2019mitigating}. Xu et al. showed that
 leakage-abuse attacks remain effective against schemes that are both forward and backward private
-\cite{xu2023leakage}.
+\cite{xu2023leakage}. A parallel line makes SSE efficient when the index itself lives on the
+client's disk: local and page-efficient SSE bound how scattered a query's reads are, and Minaud and
+Reichle give dynamic constructions with constant storage and near-optimal locality
+\cite{minaud2022dynamic}. That the index is local rather than outsourced is the setting of this
+paper too, but locality bounds where a query reads, not what a compromise of the local disk reveals
+about earlier writes.
 
 \subsection{Forward Privacy, Backward Privacy, and Injection}
 
@@ -43,14 +48,28 @@ requires that a snapshot adversary learn less than a persistent one \cite{amjad2
 Genkin, and Grubbs construct snapshot-oblivious RAMs \cite{du2022snapshot}, and Persiano and Yeo
 establish lower bounds for such constructions \cite{persiano2023limits}. Grubbs, Ristenpart, and
 Shmatikov observe that real database snapshots also contain logs, caches, and other artifacts that
-leak past operations \cite{grubbs2017why}, and below the file system an SSD's flash translation
+leak past operations \cite{grubbs2017why}, and, attacking applications built on encrypted data,
+show that a snapshot combined with the application's own behaviour recovers far more than either
+alone \cite{grubbs2016breaking} --- the composition this paper formalizes for the storage layer.
+Below the file system an SSD's flash translation
 layer retains superseded pages after an in-place rewrite \cite{wei2011reliably}. History
 independence, anticipated by Micciancio
 \cite{micciancio1997oblivious} and defined by Naor and Teague \cite{naor2001anti}, requires that a
 data structure's representation reveal nothing about the sequence of operations beyond its current
 contents; Buchbinder and Petrank establish its inherent costs \cite{buchbinder2006history}. It has
 been applied to file systems \cite{bajaj2013hifs} and combined with oblivious
-storage and secure deletion \cite{roche2016oblivious}. Oblivious RAM
+storage and secure deletion \cite{roche2016oblivious}, and Trabucco et al.\ give a practical
+history-independent index for queryable-encrypted databases that scales to millions of records
+\cite{trabucco2026history}. History independence is nonetheless a single-snapshot notion in the
+sense of Naor and Teague, and does not by itself hide the content-based placement that our transfer
+attack exploits across two cohorts: an HI content-placed index still sends a topic's records to that
+topic's region, so it can be dual-epoch \emph{insecure} while being history-independent
+(\cref{prop:hi}). A separate line hides \emph{writes} rather than reads --- write-only ORAM, in HIVE
+\cite{blass2014hive}, DetWoORAM \cite{roche2017detwooram}, and the file-synchronization system
+ObliviSync \cite{aviv2017oblivisync}, which uses fixed-rate syncs to hide write occurrence and
+timing. That is exactly the anchoring write-only setting of this paper, and the memory-resident
+design's sweep flush is a write-only-oblivious store specialized to agent memory; \cref{sec:relations}
+and \cref{sec:eval-perf} draw the comparison. Oblivious RAM
 \cite{goldreich1996software,stefanov2013path} hides access patterns completely at a
 polylogarithmic cost per access. The present work differs from breach resistance in that it
 compares two cohorts of data under a single adversary, rather than two classes of adversary, and
