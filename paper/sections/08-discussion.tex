@@ -58,6 +58,42 @@ comparison rather than dismissed. The one row that changed most from the submiss
 stores: we report them as \emph{not detected} at the block granularity tested, not \emph{open}, which
 is what \cref{sec:eval-real} actually measured and what the submission's table wrongly overclaimed.
 
+\begin{table*}[t]
+\centering
+\caption{The architectural frontier. Security is stated by the strongest adversary class each design
+closes the historical channels against; performance is orders of magnitude, not a benchmark. Figures
+marked $\ast$ are reported by the cited systems for their own settings and are not re-measured here;
+unmarked figures for the Mnemos designs are from \cref{sec:eval-perf}. The point is the boundary
+between designs, not a head-to-head: these systems assume different adversaries.}
+\label{tab:arch}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lccccccc}
+\toprule
+Design & Closes hist.\ vs & Insert & Search & Resident & Disk/op & $>$mem & Ingest \\
+\midrule
+Plaintext IVF & --- & $O(1)$ & sublinear & index & $O(1)$ & yes & yes \\
+Mnemos-P & W (not deriv.) & flush & sublin., disk & index & region & yes & yes \\
+Mnemos-M & W, derived & clock & $O(n)$, mem & idx+payload & sweep & no & yes \\
+Mnemos-M/disk & W, derived & clock & sublin., disk & posmap+part & sweep & yes & yes \\
+Write-only ORAM & W & $O(1)^\ast$ & writes only & posmap$^\ast$ & $O(1)^\ast$ & yes & yes \\
+Path ORAM slots & W, RW & $O(\log^2 n)^\ast$ & $O(\log^2 n)^\ast$ & stash$^\ast$ & $O(\log^2 n)^\ast$ & yes & yes \\
+Compass & W, RW & $O(\log)^\ast$ & oblivious$^\ast$ & client$^\ast$ & per-acc$^\ast$ & srv & yes$^\ast$ \\
+Onyx & W, RW & --- & oblivious$^\ast$ & sublin.$^\ast$ & per-acc$^\ast$ & yes$^\ast$ & --- \\
+Opal (TEE) & W, RW & $O(\log)^\ast$ & oblivious$^\ast$ & enclave$^\ast$ & per-acc$^\ast$ & yes$^\ast$ & yes$^\ast$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\Cref{tab:arch} draws the frontier the readers asked for. Read down the security column: the
+memory-resident designs close the historical channels, including the derived-write channel, against
+the write observer at a write cost of one clocked sweep run, without obliviousness; the ORAM-based
+systems close them against the read observer too, at a per-access cost, and are the right comparison
+for that stronger adversary rather than a baseline this work claims to beat. The gap the table makes
+visible is that between W and RW: everything to the memory-resident designs' right buys read-side
+obliviousness that a write observer does not need, and the contribution is to show how much is closed
+without paying for it.
+
 \subsection{Residual Leakage}
 
 Mnemos-P keeps an open write channel, since a real record is always written to its content region

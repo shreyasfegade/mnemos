@@ -407,6 +407,23 @@ which matters because a hibernation image captures locked pages and therefore th
 key; it also verifies that after a lock both sealed engines refuse to search. The supplementary
 material gives the full audit.
 
+An artifact's existence is not the same as an exploit, and a reader asked us to keep the two apart.
+We therefore grade each artifact on a five-rung ladder: (1)~it exists; (2)~it contains data relevant
+to the store; (3)~the adversary can obtain it; (4)~that data is exploitable for the historical
+attack; (5)~it is sufficient on its own. The change journal reaches rung~2 --- it records \emph{that}
+and \emph{when} the store's files changed, which is write-timing metadata, not content, so it feeds
+the multi-version channel's granularity but does not carry a region diff by itself. Shadow copies and
+file-history snapshots reach rung~4: they are full prior file versions, so an adversary who obtains
+them has exactly the multi-version channel of \cref{sec:eval-multisnapshot} at whatever granularity
+the snapshot schedule set. The FTL's retained pages reach rung~4 for Mnemos-P and rung~1 for
+Mnemos-M: a whole-region rewrite lands at fixed offsets, so superseded pages reconstruct the version
+history, while the sweep's uniform placement leaves nothing structural. The hibernation image is the
+one rung-5 artifact, and only against key custody rather than against the layout, so it is
+handled as a first-class deployment requirement rather than a residual. This audit is a
+\emph{Windows} deployment study: the mechanisms (USN journal, VSS, CNG) are Windows-specific, and the
+corresponding Linux surfaces --- the journal of a journaling filesystem, LVM or Btrfs snapshots, a
+swap partition --- occupy the same rungs but are not measured here.
+
 \subsection{Where the Information Goes}
 \label{sec:eval-ledger}
 
