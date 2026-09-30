@@ -47,9 +47,9 @@ def e21() -> dict[str, float]:
     out["E21 sweep bytes, staged minus empty flush"] = float(
         g["sweep"]["bytes_per_flush_one_staged"] - g["sweep"]["bytes_per_flush"]
     )
-    out["E21 sweep GB per day at Delta 10 s, 24 h unlocked"] = g["sweep"]["gb_per_day"]["10"]
+    out["E21 sweep GB per day at Delta 10 s, 24 h unlocked"] = g["sweep"]["gb_per_day"]["10.0"]
     out["E21 daily volume ratio, regions at 0.5 s over sweep at 10 s"] = (
-        g["regions"]["gb_per_day"]["0.5"] / g["sweep"]["gb_per_day"]["10"]
+        g["regions"]["gb_per_day"]["0.5"] / g["sweep"]["gb_per_day"]["10.0"]
     )
     lk = {(r["rate"], r["load"]): r for r in d["lock_residual"]}
     if (0.1, 0.9) in lk:

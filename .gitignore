@@ -102,3 +102,4 @@ python/eval/e8/data/
 python/eval/results/**/*.npz
 .venv-fw/
 tools/bin/
+uv.lock
