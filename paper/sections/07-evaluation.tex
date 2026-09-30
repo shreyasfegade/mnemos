@@ -46,7 +46,7 @@ On the timestamped \texttt{kubernetes} corpus, splitting chronologically rather 
 the advantage on the earlier cohort substantially, reproducing the effect drift is supposed to
 provide. \Cref{fig:drift} then asks what that split leaves open: the adversary chooses what to induce,
 and for a public tracker it can induce with archival content. The curve is the
-advantage against the \emph{time gap} between cohort H and the induced content. The honest reading
+advantage against the \emph{time gap} between cohort H and the induced content. The reading
 is the one the gap-zero row supports: drift protects early records against an adversary that
 induces with current material, and considerably less against one that does not. The coarse-taxonomy
 arm is scored against coarse labels, so its chance rate is one in four rather than one in twelve.
@@ -63,7 +63,7 @@ interleaved across topics: several of these stores append at a tail, so consecut
 blocks whatever their content, and issuing a topic's writes together makes write order masquerade
 as content placement.
 
-With both in place the result is negative, and it is worth stating plainly: the attack does not
+With both in place the result is negative: the attack does not
 reach the pre-compromise cohort in any of the six configurations at this budget. Held-out
 localisation sits at chance throughout, and no interval on \advhist{} reaches above
 $\REsixWorstHi$ over \REsixSeeds{} seeds. Two mechanisms produce that. In the time-placed stores,
@@ -369,7 +369,7 @@ uniformly on disk (\cref{sec:mnemos-m}); pushing the headers to disk as well
 (Mnemos-M/disk, \cref{sec:mnemos-m}) gives a store larger than memory whose \emph{writes} are still a
 clock-driven sweep and therefore still invisible to W, closing the write, refusal, multi-version and
 derived-write channels against W at scale. Only a \emph{read}-observing (RW) adversary sees its
-access pattern, and only full obliviousness closes that. So the honest split is by adversary class:
+access pattern, and only full obliviousness closes that. So the split is by adversary class:
 for W, a write-only-oblivious store dominates the partitioned design; for RW, the open problem is
 oblivious \emph{search}, whose cost we price against Path ORAM and, in \cref{sec:background}, against the
 recent disk-oblivious ANN and private-memory systems~\cite{rathee2026onyx,kaviani2026opal,zhu2025compass}. The

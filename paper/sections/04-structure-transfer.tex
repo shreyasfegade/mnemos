@@ -2,7 +2,7 @@
 \label{sec:transfer}
 
 This section describes the attacks. The first exploits a partition layout whose regions grow with
-occupancy, and is the one that motivates the security definition; the others exploit channels that
+occupancy, and it motivates the security definition; the others exploit channels that
 survive a layout built to close it. Experimental results for all of them are reported in
 \cref{sec:eval}.
 
@@ -108,7 +108,7 @@ Nothing is decrypted; the signal is the occurrence of a write. Against a store t
 records are staged, the occurrence of a flush is the answer. Against one that flushes on a clock,
 a flush happens either way and the channel is closed. \Cref{sec:eval-dedup} measures both sides.
 
-The precondition is not an artefact of a prototype. Reading the shipped source of nine
+The precondition holds beyond our prototype. Reading the shipped source of nine
 open-source agent-memory frameworks, four make whether a write reaches storage depend on whether
 the content is already stored: mem0 passes the most similar existing memories to its extraction
 call and then drops any extracted fact whose hash is already present, so a known fact never

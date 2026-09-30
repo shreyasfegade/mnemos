@@ -115,6 +115,26 @@ REVISION = [
 ]
 
 
+#: Stylistic tics a reader associated with LLM-drafted prose. Each
+#: distinctive phrase is flagged wherever it occurs, so the human-plainness pass is enforced rather
+#: than remembered. These are deliberately narrow: a phrase here is one a careful human editor would
+#: not reach for twice in a paper, not ordinary connective tissue.
+STYLE_TICS = [
+    (re.compile(r"\bthe honest reading\b", re.I), "tic: 'the honest reading'"),
+    (re.compile(r"\bworth stating plainly\b", re.I), "tic: 'worth stating plainly'"),
+    (re.compile(r"\beasy to misattribute\b", re.I), "tic: 'easy to misattribute'"),
+    (re.compile(r"\bthe honest (?:number|answer|split|reading)\b", re.I), "tic: 'the honest X'"),
+    (re.compile(r"\bis the one that\b", re.I), "tic: 'is the one that'"),
+    (re.compile(r"\bnot an art[ei]fact of\b", re.I), "tic: 'not an artifact of'"),
+]
+
+#: Phrases that are fine once or twice but read as a verbal habit past a budget per file.
+STYLE_BUDGETS = [
+    (re.compile(r"\bwhich is why\b", re.I), "which is why", 3),
+    (re.compile(r"\bnot\b[^.,;]{1,40}\bbut\b", re.I), "not X but Y", 6),
+]
+
+
 def check(path: Path, root: Path) -> list[str]:
     problems: list[str] = []
     text = path.read_text(encoding="utf-8")
@@ -148,6 +168,19 @@ def check(path: Path, root: Path) -> list[str]:
         for m in pattern.finditer(text):
             n = text[: m.start()].count("\n") + 1
             problems.append(f"{name}:{n}: {why}: {m.group(0)[:60]!r}")
+
+    for pattern, why in STYLE_TICS:
+        for m in pattern.finditer(text):
+            n = text[: m.start()].count("\n") + 1
+            problems.append(f"{name}:{n}: {why}: {m.group(0)[:60]!r}")
+
+    for pattern, label, budget in STYLE_BUDGETS:
+        hits = list(pattern.finditer(text))
+        if len(hits) > budget:
+            lines = ", ".join(str(text[: m.start()].count("\n") + 1) for m in hits[:12])
+            problems.append(
+                f"{name}: '{label}' used {len(hits)} times (budget {budget}); lines {lines}"
+            )
 
     # Draft markers. These are supposed to be grepped for before submission rather than
     # remembered, which only works if something greps.
