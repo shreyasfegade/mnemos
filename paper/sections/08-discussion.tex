@@ -5,25 +5,32 @@
 
 \begin{table*}[t]
 \centering
-\caption{Where each scheme leaks, against the adversary classes of \cref{sec:tau-adversary}.
-\emph{Open} means the channel carries information about the pre-compromise cohort;
-\emph{n/a} means the mechanism that would carry it is absent. Rows above the rule are constructions
-this paper attacks or compares against; rows below are the designs it evaluates.}
+\caption{Where each scheme leaks about the pre-compromise cohort, grouped by adversary class.
+\emph{Open}: the channel carries pre-compromise information. \emph{closed}: it does not.
+\emph{n/a}: the mechanism that would carry it is absent. \emph{not det.}: no transfer was detected
+at the granularity tested, which is weaker than closed (\cref{sec:eval-real}). The W block holds the
+write-observing channels; the RW block adds the read-side ones, which apply only to a read observer.
+Rows above the rule are constructions this paper attacks or compares against; rows below are the
+designs it evaluates.}
 \label{tab:crossscheme}
 \footnotesize
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{lllllllll}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc@{\hskip 10pt}cc}
 \toprule
-Scheme & Snapshot & Write & Search & Query eq. & Delete & Refusal & Multi-version & Derived \\
+& \multicolumn{6}{c}{Class W (write observer)} & \multicolumn{2}{c}{Class RW (adds reads)} \\
+\cmidrule(lr){2-7}\cmidrule(l){8-9}
+Scheme & Snapshot & Write & Refusal & Multi-ver. & Derived & Delete & Search & Query eq. \\
 \midrule
-Growing encrypted IVF & open & open & open & open & open & n/a & open & open \\
-Deployed stores, \texttt{gocryptfs} & open & open & open & open & open & n/a & open & open \\
-Forward-private SSE, sealed and padded & open (counters) & closed & open & open & graded & n/a & open & open \\
-ORAM over the slots & closed & closed & closed & closed & closed & n/a & closed & closed \\
+Growing encrypted IVF & open & open & n/a & open & open & open & open & open \\
+Deployed stores, \texttt{gocryptfs} & not det. & not det. & n/a & not det. & not det. & not det. & not det. & not det. \\
+Forward-private SSE, sealed+padded & open (ctrs) & closed & n/a & open & open & graded & open & open \\
+Write-only ORAM index & closed & closed & n/a & closed & closed & closed & open & open \\
+ORAM over the slots & closed & closed & n/a & closed & closed & closed & closed & closed \\
 \midrule
 Mnemos-RS & open & open & open & open & open & open & open & open \\
-Mnemos-P & closed & open & closed & open & closed & closed$^\dagger$ & closed$^\ddagger$ & open \\
-Mnemos-M & closed & closed & n/a & n/a & closed & n/a & closed & closed$^\S$ \\
+Mnemos-P & closed & open & closed$^\dagger$ & closed$^\ddagger$ & open & closed & closed & open \\
+Mnemos-M/disk & closed & closed & n/a & closed & closed$^\S$ & closed & open & open \\
+Mnemos-M & closed & closed & n/a & closed & closed$^\S$ & closed & n/a & n/a \\
 \bottomrule
 \end{tabular}
 
@@ -31,18 +38,25 @@ Mnemos-M & closed & closed & n/a & n/a & closed & n/a & closed & closed$^\S$ \\
 \begin{minipage}{0.96\textwidth}
 \footnotesize
 $^\dagger$ by performing the rewrites an accepted write would have (\cref{prop:capacity}).
-$^\ddagger$ across session boundaries only; at finer capture granularity the channel is open
-(\cref{sec:eval-multisnapshot}).
+$^\ddagger$ with the sweep flush, closed at every capture granularity; the region-flush variant is
+closed only across session boundaries (\cref{sec:eval-multisnapshot}).
 $^\S$ given the clocked flush schedule; the clock itself remains visible.
+Mnemos-M/disk keeps headers on disk for stores larger than memory: its writes stay clock-driven and
+invisible to W, so it matches the write-only ORAM row, while a read observer sees its search access
+pattern.
 \end{minipage}
 \end{table*}
 
-\Cref{tab:crossscheme} places the designs among the alternatives. Oblivious RAM closes every
-column, which is why the write and query-equality channels of a partitioned store are costs rather
-than open problems: a closure exists and is priced. The memory-resident design reaches ORAM's
-column pattern for every channel except the clock, without obliviousness, by removing the disk from
-the query path instead of hiding accesses to it, an option open only because the threat model is
-local.
+\Cref{tab:crossscheme} places the designs among the alternatives, and grouping the columns by
+adversary class makes the design boundary explicit. Against the write observer W, a write-only
+oblivious index already closes every channel except search, and the memory-resident design and its
+disk variant reach that same pattern --- Mnemos-M/disk by writing on a clock while keeping headers on
+disk, Mnemos-M by removing the disk from the query path entirely, which additionally makes search and
+query-equality \emph{absent} rather than merely oblivious. Against the read observer RW only full
+obliviousness closes the search and query-equality channels, which is why Path ORAM is priced as the
+comparison rather than dismissed. The one row that changed most from the submission is the deployed
+stores: we report them as \emph{not detected} at the block granularity tested, not \emph{open}, which
+is what \cref{sec:eval-real} actually measured and what the submission's table wrongly overclaimed.
 
 \subsection{Residual Leakage}
 

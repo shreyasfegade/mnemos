@@ -1,35 +1,19 @@
-AI agents write their own long-term memory, retrieve it by semantic search, and keep it on the
-user's device, where encryption at rest is the default defense. This paper studies an adversary
-that obtains the storage layer partway through the life of such a store, for example through a
-compromised synchronization account or repeated disk imaging, observes later activity, and can
-steer the agent's inputs, but holds only stored state for records written earlier. For encrypted
-vector stores whose layout follows content, labels learned from induced writes transfer to the
-earlier records, and a transfer lemma shows the two cohorts are then exposed equally. The lemma
-also names its own precondition: transfer requires that the layout disclose which partition holds a
-given earlier record, which a growing layout does and a sealed fixed-size one does not. Subject
-drift appears to protect early records, but the adversary chooses what it induces, and one that
-induces with archival content rather than current content recovers the advantage in full, from
-$\REfourNaive$ to $\REfourAware$ on a timestamped corpus. Memories a language-model agent actually wrote carry
-the structure the attack needs.
-
-Against a store that withholds that precondition, three channels supply it anyway. A sequence of
-retained file versions reconstructs pre-compromise writes, contradicting the claim that history
-independence makes several snapshots no worse than one; the region holding an earlier record lies
-inside the version diff at every capture granularity tested. A bounded per-partition capacity
-discloses the earlier cohort's load whenever a write is refused, at near-perfect accuracy, unless a
-refusal performs the writes an acceptance would have. And an agent that acts on what it recalls
-leaks through the mere occurrence of a write, which makes deduplication a membership oracle for
-facts written before the compromise. Four of nine open-source agent-memory frameworks, read from
-their shipped source, make whether a write happens depend on what is already stored.
-
-We define dual-epoch security as an adaptive, leakage-parameterized game, give sufficient conditions
-on the storage layout, and show that forward and backward privacy do not imply it. We then evaluate
-three designs. A memory-resident store with content-oblivious placement and clocked flushes closes
-all three channels, because its writes carry no content, its searches touch no disk, and a flush
-occurs whether or not the agent wrote. Exhaustive search in memory is faster than the encrypted
-on-disk alternative only up to about $10^4$ records, but the partition index that costs a
-content-placed store its write channel costs this one nothing when it is kept in locked memory
-rather than on disk, and restores its lead at every size measured. A partitioned sealed store
-covers larger corpora with its residual channels stated, including one that is easy to
-misattribute: its keyed partition permutation is largely recovered from ordinary search traffic by
-an adversary that observes reads.
+AI agents write their own long-term memory to an encrypted store on the user's device, then retrieve
+it by semantic search. We study an adversary that obtains the storage layer partway through such a
+store's life --- through a synchronized backup or repeated disk imaging --- observes later activity,
+and can steer the agent's inputs, but holds only stored state for records written earlier. We show
+that historical confidentiality, the safety of data written before the compromise, is a distinct
+system-level property that encryption and existing snapshot or history-independence notions do not
+provide. For encrypted vector stores that place records by content, labels the adversary induces
+through new writes transfer to the earlier records, exposing both equally; a transfer lemma names the
+precondition, that the layout disclose which partition holds an earlier record. Even a store that
+seals that channel is reached by three others: retained file versions, per-partition capacity
+refusals, and derived writes, where an agent that deduplicates turns the mere occurrence of a write
+into a membership oracle for earlier facts. We formalize dual-epoch security as an adaptive,
+leakage-parameterized game, prove sufficient conditions covering capacity overflow, separate it from
+breach resistance and history independence, and give a reactive variant with a composition theorem
+for the self-writing agent. We evaluate three designs. A memory-resident store with content-oblivious
+placement and a clocked, write-only-oblivious flush closes every channel against a write observer;
+its flush costs kilobytes rather than megabytes and its writes reveal only a clock. A partitioned
+sealed store covers larger corpora with its residual channels stated. Every reported number is
+reproduced by a released artifact.
