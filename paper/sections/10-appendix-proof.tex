@@ -8,6 +8,21 @@ submits two equal-length histories --- admissible or not --- and issues polynomi
 operations. The proof proceeds through three games and then exhibits the simulator of
 \cref{def:dualepoch}.
 
+\paragraph{Cryptographic model} We make the primitives precise, as a reader asked. $\mathsf{AE}$ is
+XChaCha20-Poly1305, used as an authenticated cipher that is IND\$-CPA (ciphertexts are
+indistinguishable from uniform strings of the same length) and INT-CTXT. Nonces are $192$-bit and
+drawn uniformly at random per encryption; the width makes a collision negligible ($q^2/2^{193}$ over
+$q$ encryptions) and removes any nonce counter from disk. Each slot's associated data binds the
+ciphertext to its position and format: the tuple (file identifier, region index, slot index, format
+version), so a ciphertext moved to another slot fails authentication. The manifest and the partition
+table are themselves $\mathsf{AE}$ ciphertexts of fixed length under their own derived keys; the
+partition table is a ciphertext, not a PRF image, and is included in the snapshot as one of the
+fixed-length uniform strings of game $\mathrm{G}_2$. All working keys are derived from the master by
+HKDF, treated as a PRF with independent labels per key, so the derived keys are independent. The
+simulator is given the public structural parameters $(B, C, d, \text{block size}, w, \Delta, k)$ and
+the leakage $\mathcal{L}$; it is \emph{not} given $b$, the histories, or any plaintext. Adaptivity is
+permitted on physical locations the adversary has already observed, which the next paragraph treats.
+
 \paragraph{On adaptivity} $\mathcal{A}$ chooses each post-$\tau$ operation after seeing the leakage
 of every earlier one. This does not disturb the argument. Each hybrid step below replaces a
 primitive with an idealized version, uniformly over the whole game, rather than fixing the
