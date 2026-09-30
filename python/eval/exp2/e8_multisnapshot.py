@@ -252,9 +252,19 @@ def main() -> None:
     cents = lab.kmeans_centroids(vecs, B, seed=0)
     print(f"B={B} C={CAP} w={W}; null precision {1.0 / B:.4f}", flush=True)
 
+    # Empirical entropy of the region prior (records placed by content are region-skewed by topic
+    # frequency), so the ledger's Fano bound uses the true H(X) rather than log2 B. a reader.
+    import math
+
+    reg = np.argmax(vecs @ cents.T, axis=1)
+    rc = np.bincount(reg, minlength=B)
+    tot = int(rc.sum())
+    region_entropy = -sum((c / tot) * math.log2(c / tot) for c in rc if c > 0) if tot else 0.0
+
     results = {
         "experiment": "E8",
         "buckets": B,
+        "region_entropy_bits": region_entropy,
         "epoch_writes": W,
         "claim_under_test": (
             "history independence does not bound what a SEQUENCE of versions reveals"

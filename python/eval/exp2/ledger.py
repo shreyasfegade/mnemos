@@ -59,24 +59,38 @@ def h2(p: float) -> float:
     return -p * math.log2(p) - (1 - p) * math.log2(1 - p)
 
 
-def fano_bits(acc: float, k: int) -> float:
-    """Fano lower bound on I(S;V) for a uniform K-ary secret guessed with accuracy ``acc``."""
-    if acc is None or not math.isfinite(acc) or acc <= 1.0 / k:
-        return 0.0
-    pe = 1.0 - acc
-    return max(0.0, math.log2(k) - h2(pe) - pe * math.log2(k - 1))
+def fano_bits(acc: float, k: int, h_x: float | None = None) -> float:
+    """Fano lower bound on ``I(X;V)`` for a K-ary secret guessed with accuracy ``acc``.
 
-
-def acc_from_auc(auc: float) -> float:
-    """The balanced accuracy some threshold is guaranteed to reach, given only an AUC.
-
-    AUC - 1/2 is the area between the ROC curve and the diagonal, and that area is at most the
-    curve's greatest height above the diagonal, which is Youden's J. So J >= AUC - 1/2 and the best
-    threshold's balanced accuracy is >= 1/2 + J/2 = 1/4 + AUC/2. The bound is tight for some ROC
-    shapes and loose for most -- a perfectly separating classifier (AUC 1) is only credited with
-    accuracy 0.75 -- which is why E5 now records held-out accuracy directly and this is a fallback.
+    Fano's inequality gives ``H(X | V) <= h(Pe) + Pe*log2(K-1)``, hence
+    ``I(X;V) = H(X) - H(X|V) >= H(X) - h(Pe) - Pe*log2(K-1)``. The submission used
+    ``H(X) = log2 K``, which holds only for a **uniform** prior; under a skewed
+    topic prior ``H(X) < log2 K``, so the ``log2 K`` form can exceed the true mutual information and
+    is not a valid lower bound. We pass the **empirical** entropy ``h_x`` of the secret, measured
+    from the label distribution, and default to ``log2 K`` only where the prior is uniform by
+    construction --- the binary history games, whose challenge bit is a fair coin. The accuracy is
+    compared against the prior's best constant guess (passed by the caller as the chance rate);
+    below it the bound is zero.
     """
-    return 0.25 + 0.5 * max(auc, 1.0 - auc)
+    if acc is None or not math.isfinite(acc):
+        return 0.0
+    hx = math.log2(k) if h_x is None else h_x
+    pe = 1.0 - acc
+    cond = h2(pe) + (pe * math.log2(k - 1) if k > 1 else 0.0)
+    return max(0.0, hx - cond)
+
+
+def entropy_of(counts) -> float:
+    """Empirical Shannon entropy (bits) of a label distribution, for the Fano prior term."""
+    total = sum(counts)
+    if total <= 0:
+        return 0.0
+    h = 0.0
+    for c in counts:
+        if c > 0:
+            p = c / total
+            h -= p * math.log2(p)
+    return h
 
 
 def mde(lo: float, hi: float, n: int | None = None, metric: str = "") -> tuple[float | None, str]:
@@ -119,20 +133,25 @@ def row(
     null: float,
     how: str,
     n: int | None = None,
+    h_x: float | None = None,
+    prior: str = "uniform (assumed)",
 ) -> dict:
-    bits = fano_bits(acc, k)
-    cons = fano_bits(acc_lo, k) if acc_lo is not None else None
+    # ``h_x`` is the empirical entropy of the secret's prior; when None the secret is uniform by
+    # construction (a fair challenge bit, or a keyed permutation) and log2 K is exact. Passing the
+    # empirical entropy is what keeps the Fano value a valid *lower* bound under a skewed prior.
+    bits = None if acc is None else fano_bits(acc, k, h_x)
+    cons = fano_bits(acc_lo, k, h_x) if acc_lo is not None else None
     has_ci = lo is not None and hi is not None
-    # "Open" means the whole interval lies above the null. An interval entirely *below* it is not a
-    # leak: every attacker here orients its statistic on the training half, so a held-out value
-    # under the null is the small-sample anti-learning the paper reads it as, not a distinguisher
-    # running backwards. A result with no interval is neither open nor closed, and says so.
+    # "leaks" means the whole interval lies above the null. An interval entirely *below or spanning*
+    # it is "not detected": the attacker oriented its statistic on the training half, so a held-out
+    # value at or under the null is an absence of evidence, reported with the minimum detectable
+    # effect rather than as a closure. A result with no interval is neither, and says so.
     if not has_ci:
         status = "no interval"
     elif lo > null:
-        status = "open"
+        status = "leaks"
     else:
-        status = "closed"
+        status = "not detected"
     return {
         "channel": channel,
         "design": design,
@@ -147,14 +166,16 @@ def row(
         "null": null,
         "accuracy": acc,
         "accuracy_lo": acc_lo,
+        "prior": prior,
+        "entropy_bits": math.log2(k) if h_x is None else h_x,
         "bits": bits,
         "bits_conservative": cons,
-        "bits_max": math.log2(k),
+        "bits_max": math.log2(k) if h_x is None else h_x,
         "status": status,
         **dict(
             zip(
                 ("mde", "mde_basis"),
-                mde(lo, hi, n, metric) if has_ci and status == "closed" else (None, ""),
+                mde(lo, hi, n, metric) if has_ci and status == "not detected" else (None, ""),
                 strict=True,
             )
         ),
@@ -187,15 +208,17 @@ def from_e5(out: list[dict]) -> None:
         if r["arm"] not in names:
             continue
         channel, design = names[r["arm"]]
-        # The stronger of the two attackers, judged on the held-out half.
+        # The stronger of the two attackers, judged on the held-out half. The Fano value is computed
+        # from the held-out balanced *accuracy* the attacker commits to, never the AUC: AUC is a
+        # ranking measure, not a decoding accuracy, so there is no valid AUC->Fano conversion. A row
+        # without a recorded accuracy carries its AUC but no bit.
         best = max((r["learned"], r["hand_built"]), key=lambda a: abs(a["auc"] - 0.5))
         if "accuracy" in best:
             acc, acc_lo = best["accuracy"], best["accuracy_lo"]
             how = "Fano (K=2) on held-out balanced accuracy, threshold fixed on the training half"
         else:
-            acc = acc_from_auc(best["auc"])
-            acc_lo = acc_from_auc(best["lo"]) if best["lo"] > 0.5 else None
-            how = "Fano (K=2) on the accuracy AUC guarantees (J >= AUC - 1/2); loose"
+            acc = acc_lo = None
+            how = "AUC only; no accuracy recorded, so no MI bound (AUC is not a decoding accuracy)"
         out.append(
             row(
                 channel,
@@ -213,6 +236,7 @@ def from_e5(out: list[dict]) -> None:
                 0.5,
                 how,
                 n=r.get("n_heldout"),
+                prior="uniform (fair challenge bit)",
             )
         )
 
@@ -223,6 +247,12 @@ def from_e4(out: list[dict]) -> None:
         return
     k = d["fine"]["n_topics"]
     ch = d["fine"]["chance"]
+    hx = d["fine"].get("label_entropy_bits")
+    prior = (
+        "empirical topic entropy"
+        if hx is not None
+        else "uniform (assumed; corpus skew not recorded)"
+    )
     for c in d["fine"]["curve"]:
         if c["gap_eras"] not in (0, max(x["gap_eras"] for x in d["fine"]["curve"])):
             continue
@@ -242,6 +272,8 @@ def from_e4(out: list[dict]) -> None:
                 c["hi"],
                 0.0,
                 f"Fano (K={k}) on topic accuracy = chance + advantage",
+                h_x=hx,
+                prior=prior,
             )
         )
 
@@ -250,6 +282,12 @@ def from_e6(out: list[dict]) -> None:
     d = load("e6_stores.json")
     if not d:
         return
+    hx = d.get("label_entropy_bits")
+    prior = (
+        "empirical topic entropy"
+        if hx is not None
+        else "uniform (assumed; corpus skew not recorded)"
+    )
     for s in d["stores"]:
         k = round(1 / s["chance"])
         out.append(
@@ -268,6 +306,8 @@ def from_e6(out: list[dict]) -> None:
                 s.get("adv_hist_hi"),
                 0.0,
                 f"Fano (K={k}) on topic accuracy = chance + advantage",
+                h_x=hx,
+                prior=prior,
             )
         )
 
@@ -294,6 +334,7 @@ def from_e7(out: list[dict]) -> None:
                 m["exact_hi"],
                 m["null"],
                 f"Fano (K={b}) on the fraction of regions whose partition is recovered exactly",
+                prior="uniform (keyed permutation over B regions)",
             )
         )
 
@@ -320,6 +361,10 @@ def from_e8(out: list[dict]) -> None:
                 g["hi"],
                 g["null_precision"],
                 f"Fano (K={b}) on the probability of naming the region",
+                h_x=d.get("region_entropy_bits"),
+                prior="empirical region entropy"
+                if d.get("region_entropy_bits") is not None
+                else "uniform (assumed; region skew not recorded)",
             )
         )
     for c in d["cross_session"]:
@@ -340,6 +385,10 @@ def from_e8(out: list[dict]) -> None:
                 c["hi"],
                 c["null_precision"],
                 f"Fano (K={b}) on the probability of naming the region",
+                h_x=d.get("region_entropy_bits"),
+                prior="empirical region entropy"
+                if d.get("region_entropy_bits") is not None
+                else "uniform (assumed; region skew not recorded)",
             )
         )
 
@@ -370,6 +419,7 @@ def from_e9(out: list[dict]) -> None:
                 c["hi"],
                 0.5,
                 "Fano (K=2) on (1 + J)/2, J = rewrite-rate gap between full and open regions",
+                prior="uniform (full vs open region, balanced)",
             )
         )
 
@@ -397,6 +447,7 @@ def from_query_equality(out: list[dict]) -> None:
                     j["hi"],
                     0.0,
                     "Fano (K=2) on (1 + J)/2; tau fixed on held-out queries",
+                    prior="uniform (equal vs distinct query pair, balanced)",
                 )
             )
         return
@@ -435,8 +486,9 @@ def from_e3(out: list[dict]) -> None:
     for r in d.get("rows", []):
         lo, hi = r.get("lo"), r.get("hi")
         design = {"p": "Mnemos-P", "m": "Mnemos-M"}.get(r.get("engine"), r.get("engine"))
-        acc = r.get("accuracy", acc_from_auc(r["auc"]))
-        acc_lo = r.get("accuracy_lo", acc_from_auc(lo) if lo is not None and lo > 0.5 else None)
+        # No AUC->accuracy conversion: use the recorded held-out accuracy, or none (AUC-only row).
+        acc = r.get("accuracy")
+        acc_lo = r.get("accuracy_lo")
         out.append(
             row(
                 f"dedup membership ({r.get('dedup', '?')})",
@@ -452,7 +504,8 @@ def from_e3(out: list[dict]) -> None:
                 lo,
                 hi,
                 0.5,
-                "Fano (K=2); held-out accuracy if recorded, else the AUC bound",
+                "Fano (K=2) on held-out accuracy; AUC-only rows carry no MI bound",
+                prior="uniform (member vs non-member, balanced)",
             )
         )
 
@@ -470,12 +523,13 @@ def main() -> None:
     for r in out:
         cons = "--" if r["bits_conservative"] is None else f"{r['bits_conservative']:.3f}"
         if r["mde"] is None:
-            m = "undetermined" if r["status"] == "closed" else ""
+            m = "undetermined" if r["status"] == "not detected" else ""
         else:
             m = f"{r['mde']:.3f} ({r['metric']})"
+        bits = "  --  " if r["bits"] is None else f"{r['bits']:>6.3f}"
         print(
-            f"{r['channel'][:58]:<58} {r['design'][:18]:<18} {r['adversary']:<3} {r['status']:<11} "
-            f"{r['bits']:>6.3f} {cons:>6} {r['bits_max']:>5.2f}  {m}"
+            f"{r['channel'][:58]:<58} {r['design'][:18]:<18} {r['adversary']:<3} {r['status']:<12} "
+            f"{bits} {cons:>6} {r['bits_max']:>5.2f}  {m}"
         )
     print(f"\nwrote {OUT.relative_to(C.repo_root())}")
 

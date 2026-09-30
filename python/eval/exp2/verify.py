@@ -1033,7 +1033,7 @@ EXTRACTORS = {
 
 
 def _with_round3() -> None:
-    """Append the third round's registered checks. Imported late: they import ``Check`` from here."""
+    """Append the third round's registered checks. Imported late: they import ``Check``."""
     from eval.exp2 import verify_r3
 
     CHECKS.extend(verify_r3.CHECKS)

@@ -144,6 +144,69 @@ and does not. Together with the permutation recovery of \cref{sec:eval-permutati
 grouped mechanism defeats outright, this is why it is the one preferred against a read observer
 despite recognizing repeats more often.
 
+\section{From Attacker Performance to Information Lower Bounds}
+\label{supp:fano}
+
+The leakage ledger converts each channel's measured attacker performance into a lower bound, in
+bits, on the mutual information $I(X;V)$ between the secret $X$ the channel is about and the
+adversary's view $V$. The conversion is Fano's inequality, and this section states it exactly for
+each metric family, because a reader rightly asked that the derivation be explicit --- in
+particular that an AUC, which is a ranking statistic and not a decoding accuracy, never be fed to
+Fano as if it were one.
+
+\paragraph{The inequality} For a secret $X$ over $K$ values and any decoder that recovers it from
+$V$ with error probability $P_e$, Fano's inequality gives
+$H(X\mid V) \le h(P_e) + P_e\log_2(K-1)$, where $h$ is the binary entropy. Hence
+\[
+I(X;V) = H(X) - H(X\mid V) \;\ge\; H(X) - h(P_e) - P_e\log_2(K-1).
+\]
+The ledger evaluates this at the \emph{empirical} accuracy $1-P_e$ of the attacker the experiment
+exhibited. It is a lower bound twice over: Fano bounds the information any decoder needs, and the
+experiment's decoder is one particular decoder, so a better one can only raise $I(X;V)$.
+
+\paragraph{The prior term $H(X)$} The submitted ledger used $H(X)=\log_2 K$. That is exact only for a
+\emph{uniform} prior; under a skewed prior $H(X)<\log_2 K$ and the $\log_2 K$ form can exceed the
+true $I(X;V)$, so it is not a valid lower bound. The ledger now records, per row, whether the prior
+is uniform \emph{by construction} or empirical:
+\begin{itemize}
+\item \emph{Binary games} (E5, the refusal channel E9, query equality E15, dedup E3): $K=2$ and the
+secret is a fair challenge bit or a balanced held-out label, so $H(X)=1$ exactly.
+\item \emph{Permutation recovery} (E7): the secret is a region's logical partition under a
+\emph{keyed} permutation, uniform over the $B$ regions by construction, so $H(X)=\log_2 B$ exactly.
+This is why the headline ``\RLedgerPermBits{} of \RLedgerPermBitsMax{} bits of partition identity''
+is a valid bound rather than an artifact of assuming uniformity.
+\item \emph{Topic and region recovery} (E4, E6, E8): the prior is the corpus's topic (or region)
+distribution, which is skewed. The ledger uses the empirical entropy of that distribution, recorded
+by the experiment; where a run predates this recording the row is flagged
+\texttt{uniform (assumed)} and its bound is the conservative $\log_2 K$ value, which for these rows
+overstates rather than understates and is marked as such.
+\end{itemize}
+
+\paragraph{Metric families, and why AUC is not converted}
+\begin{itemize}
+\item \emph{Balanced accuracy} (binary games, dedup): used directly as $1-P_e$, with the threshold
+fixed on a training half and the accuracy measured on a held-out half, so it is the accuracy the
+attacker \emph{commits} to, not an in-sample optimum.
+\item \emph{Youden's $J$} (refusal, query equality): for a single balanced pair the balanced
+accuracy of the thresholded test is exactly $(1+J)/2$, so $J$ maps to accuracy without a ranking
+assumption.
+\item \emph{Advantage over chance} (topic recovery): the accuracy is $\text{chance}+\text{advantage}$
+directly.
+\item \emph{Precision} (multi-version): the probability the named region is correct is used as the
+decoding accuracy for a $K=B$ secret.
+\item \emph{AUC} is \textbf{not} converted. AUC measures ranking, not decoding, and the earlier
+$1/4+\text{AUC}/2$ bound credited a perfect classifier with only $0.75$ accuracy while crediting a
+useless one with more than chance --- it is loose in one direction and unfounded in the other. Where
+a channel is measured only by AUC and no held-out accuracy was recorded, the ledger reports the AUC
+and \emph{no} bit, rather than a fabricated one. Every headline bit in the paper comes from a row
+with a recorded accuracy or a $J$.
+\end{itemize}
+
+\paragraph{Units} The ledger states, per row, whether the secret is a binary history bit, a topic
+label, a region index, or a pair-equality bit, and $\log_2 K$ (or the empirical $H(X)$) is the
+ceiling against which the bits are read. A row's bound is never compared across units without that
+ceiling stated beside it.
+
 \section{Full Results}
 \label{supp:full}
 

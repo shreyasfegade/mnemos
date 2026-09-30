@@ -132,7 +132,7 @@ CHECKS = [
     # --- E20: the reactive (feedback-agent) game (registered 2026-09-28, before the run) --------
     _check(
         "E20 M sweep, stronger attacker AUC",
-        "sec:eval-reactive -- Theorem 2: the clock-only store is at chance against a feedback agent",
+        "sec:eval-reactive -- Theorem 2: clock-only store at chance vs a feedback agent",
         0.44,
         0.56,
         "Every flush writes the same slots, journal and manifest whatever the agent decided, so "

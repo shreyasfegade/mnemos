@@ -180,7 +180,20 @@ def run(texts, topics, names, coarse: bool):
             f"{hi:+.3f}]",
             flush=True,
         )
-    return {"n_topics": n_topics, "chance": 1.0 / n_topics, "n_records": n, "curve": curve}
+    # Empirical entropy of the cohort-H topic prior, so the leakage ledger's Fano bound uses the
+    # true H(X) rather than log2 K (which holds only for a uniform prior). a reader.
+    import math
+
+    counts = np.bincount(np.asarray(topics)[H], minlength=n_topics)
+    tot = counts.sum()
+    label_entropy = -sum((c / tot) * math.log2(c / tot) for c in counts if c > 0) if tot else 0.0
+    return {
+        "n_topics": n_topics,
+        "chance": 1.0 / n_topics,
+        "n_records": n,
+        "label_entropy_bits": label_entropy,
+        "curve": curve,
+    }
 
 
 def shuffled_control(texts, topics, names):

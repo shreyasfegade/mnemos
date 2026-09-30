@@ -804,8 +804,11 @@ def tex_text(value: str) -> str:
 
 def _ledger_row(r: dict) -> str:
     # A bound that holds at the experiment's confidence where an interval exists; the point bound
-    # otherwise, marked, because a number without an interval is not the same kind of claim.
-    if r["bits_conservative"] is not None:
+    # otherwise, marked, because a number without an interval is not the same kind of claim. An
+    # AUC-only row has no accuracy and so no bit, which the ledger states rather than invents.
+    if r["bits"] is None:
+        bits = "--$^\\dagger$"
+    elif r["bits_conservative"] is not None:
         bits = f"{r['bits_conservative']:.3f}"
     elif r["status"] == "no interval":
         bits = f"{r['bits']:.3f}$^\\ast$"
@@ -813,13 +816,15 @@ def _ledger_row(r: dict) -> str:
         bits = f"{r['bits']:.3f}"
     if r["mde"] is not None:
         mde = f"{r['mde']:.3f} ({r['metric']})"
-    elif r["status"] == "closed":
+    elif r["status"] == "not detected":
         mde = "undetermined"  # a zero-width interval says nothing about power; never print 0
     else:
         mde = "--"
-    status = {"open": r"\textbf{open}", "closed": "closed", "no interval": "no interval"}[
-        r["status"]
-    ]
+    status = {
+        "leaks": r"\textbf{leaks}",
+        "not detected": "not det.",
+        "no interval": "no interval",
+    }[r["status"]]
     # Escape first, then add the one piece of markup a channel name is allowed.
     chan = tex_text(r["channel"]).replace("post-tau", r"post-$\tau$")
     return " & ".join([chan, tex_text(r["design"]), r["adversary"], status, bits, mde]) + r" \\"
@@ -830,9 +835,12 @@ LEDGER_CAPTION = (
     r"between the secret and what the adversary observes, per observation of the unit the channel "
     r"is about (a record's topic, a region's partition, one game instance), taken at the lower end "
     r"of the experiment's 95\% interval so that it holds at the experiment's confidence; "
-    r"$^\ast$ marks a result with no interval, for which only the point bound exists. A test "
-    r"bounds leakage from below, so for a \emph{closed} channel the informative number is the last "
-    r"column: the smallest effect, in the experiment's own unit, it had 80\% power to detect."
+    r"$^\ast$ marks a result with no interval, for which only the point bound exists, and "
+    r"$^\dagger$ a channel measured only by AUC, which is a ranking statistic and carries no "
+    r"decoding-accuracy bound (the supplement derives the conversion). A test "
+    r"bounds leakage from below, so for a \emph{not detected} channel the informative number "
+    r"is the last column: the smallest effect, in the experiment's own unit, it had 80\% power to "
+    r"detect."
 )
 
 

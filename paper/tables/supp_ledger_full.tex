@@ -1,6 +1,6 @@
 \begin{table*}[t]
 \centering
-\caption{Every channel in one unit. \emph{Bits} is a Fano lower bound on the mutual information between the secret and what the adversary observes, per observation of the unit the channel is about (a record's topic, a region's partition, one game instance), taken at the lower end of the experiment's 95\% interval so that it holds at the experiment's confidence; $^\ast$ marks a result with no interval, for which only the point bound exists. A test bounds leakage from below, so for a \emph{closed} channel the informative number is the last column: the smallest effect, in the experiment's own unit, it had 80\% power to detect. Every measured channel, including every ablation.}
+\caption{Every channel in one unit. \emph{Bits} is a Fano lower bound on the mutual information between the secret and what the adversary observes, per observation of the unit the channel is about (a record's topic, a region's partition, one game instance), taken at the lower end of the experiment's 95\% interval so that it holds at the experiment's confidence; $^\ast$ marks a result with no interval, for which only the point bound exists, and $^\dagger$ a channel measured only by AUC, which is a ranking statistic and carries no decoding-accuracy bound (the supplement derives the conversion). A test bounds leakage from below, so for a \emph{not detected} channel the informative number is the last column: the smallest effect, in the experiment's own unit, it had 80\% power to detect. Every measured channel, including every ablation.}
 \label{tab:supp-ledger}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -8,45 +8,45 @@
 \toprule
 Channel & Design & Class & Status & Bits $\geq$ & Detectable $\geq$ \\
 \midrule
-structure transfer, historically aware adversary & growing layout & W & \textbf{open} & 0.815 & -- \\
-structure transfer, naive (current content) adversary & growing layout & W & closed & 0.000 & 0.004 (advantage) \\
-snapshot + post-$\tau$ writes (the game) & Mnemos-P & W & closed & 0.000 & 0.052 (AUC) \\
-game, S1 removed (growing regions) & Mnemos-P ablation & W & \textbf{open} & 1.000 & -- \\
-game, S2 removed (unsealed slots) & Mnemos-P ablation & W & \textbf{open} & 0.784 & -- \\
-game, per-slot writes, random slot & Mnemos-P ablation & W & closed & 0.000 & 0.051 (AUC) \\
-game, no keyed permutation & Mnemos-P ablation & W & closed & 0.000 & 0.052 (AUC) \\
-refusal, padded & Mnemos-P & W & closed & 0.000 & 0.051 (AUC) \\
-refusal, silent & Mnemos-P ablation & W & \textbf{open} & 0.682 & -- \\
-snapshot + post-$\tau$ writes (the game) & Mnemos-M & W & closed & 0.000 & 0.051 (AUC) \\
-game, content placement & Mnemos-M ablation & W & closed & 0.000 & 0.051 (AUC) \\
-game, first-free slot, whole-region writes & Mnemos-P ablation & W & closed & 0.000 & 0.052 (AUC) \\
-game, per-slot writes, first-free slot & Mnemos-P ablation & W & \textbf{open} & 1.000 & -- \\
-structure transfer, deployed store: append\_control & append\_control & W & closed & 0.000 & 0.005 (advantage) \\
-structure transfer, deployed store: chroma & chroma & W & closed & 0.000 & 0.081 (advantage) \\
-structure transfer, deployed store: faiss & faiss & W & closed & 0.000 & undetermined \\
-structure transfer, deployed store: lancedb & lancedb & W & closed & 0.000 & undetermined \\
-structure transfer, deployed store: lancedb\_indexed & lancedb\_indexed & W & closed & 0.000 & undetermined \\
-structure transfer, deployed store: sqlitevec & sqlitevec & W & closed & 0.000 & 0.005 (advantage) \\
-permutation recovery (spread\_s1) & Mnemos-P & RW & \textbf{open} & 4.905 & -- \\
-permutation recovery (spread\_s2) & Mnemos-P & RW & \textbf{open} & 1.827 & -- \\
-permutation recovery (grouped) & Mnemos-P & RW & \textbf{open} & 0.000 & -- \\
-multi-version diff, g=1 & Mnemos-P & W & \textbf{open} & 0.524 & -- \\
-multi-version diff, g=2 & Mnemos-P & W & \textbf{open} & 0.173 & -- \\
-multi-version diff, g=4 & Mnemos-P & W & \textbf{open} & 0.049 & -- \\
-multi-version diff, g=16 & Mnemos-P & W & \textbf{open} & 0.002 & -- \\
-multi-version diff, g=64 & Mnemos-P & W & \textbf{open} & 0.000 & -- \\
-multi-version diff, across a session, rewrite\_at\_lock off & Mnemos-P & W & \textbf{open} & 0.031 & -- \\
-multi-version diff, across a session, rewrite\_at\_lock on & Mnemos-P & W & closed & 0.000 & undetermined \\
-refusal, silent & Mnemos-P & W & \textbf{open} & 0.763 & -- \\
-refusal, padded & Mnemos-P & W & closed & 0.000 & undetermined \\
-query equality (spread\_s1), overlap threshold & Mnemos-P & RW & \textbf{open} & 0.887 & -- \\
-query equality (spread\_s2), overlap threshold & Mnemos-P & RW & \textbf{open} & 0.890 & -- \\
-query equality (spread\_s4), overlap threshold & Mnemos-P & RW & \textbf{open} & 0.252 & -- \\
-query equality (grouped), overlap threshold & Mnemos-P & RW & \textbf{open} & 0.566 & -- \\
-dedup membership (threshold) & Mnemos-P & W & \textbf{open} & 0.189 & -- \\
-dedup membership (threshold) & Mnemos-M & W & closed & 0.000 & undetermined \\
-dedup membership (llm) & Mnemos-P & W & \textbf{open} & 0.003 & -- \\
-dedup membership (llm) & Mnemos-M & W & closed & 0.000 & undetermined \\
+structure transfer, historically aware adversary & growing layout & W & \textbf{leaks} & 0.815 & -- \\
+structure transfer, naive (current content) adversary & growing layout & W & not det. & 0.007 & 0.004 (advantage) \\
+snapshot + post-$\tau$ writes (the game) & Mnemos-P & W & not det. & 0.002 & 0.052 (AUC) \\
+game, S1 removed (growing regions) & Mnemos-P ablation & W & \textbf{leaks} & 1.000 & -- \\
+game, S2 removed (unsealed slots) & Mnemos-P ablation & W & \textbf{leaks} & 0.784 & -- \\
+game, per-slot writes, random slot & Mnemos-P ablation & W & not det. & 0.006 & 0.051 (AUC) \\
+game, no keyed permutation & Mnemos-P ablation & W & not det. & 0.000 & 0.052 (AUC) \\
+refusal, padded & Mnemos-P & W & not det. & 0.001 & 0.051 (AUC) \\
+refusal, silent & Mnemos-P ablation & W & \textbf{leaks} & 0.682 & -- \\
+snapshot + post-$\tau$ writes (the game) & Mnemos-M & W & not det. & 0.001 & 0.051 (AUC) \\
+game, content placement & Mnemos-M ablation & W & not det. & 0.008 & 0.051 (AUC) \\
+game, first-free slot, whole-region writes & Mnemos-P ablation & W & not det. & 0.000 & 0.052 (AUC) \\
+game, per-slot writes, first-free slot & Mnemos-P ablation & W & \textbf{leaks} & 1.000 & -- \\
+structure transfer, deployed store: append\_control & append\_control & W & not det. & 0.000 & 0.005 (advantage) \\
+structure transfer, deployed store: chroma & chroma & W & not det. & 0.024 & 0.081 (advantage) \\
+structure transfer, deployed store: faiss & faiss & W & not det. & 0.000 & undetermined \\
+structure transfer, deployed store: lancedb & lancedb & W & not det. & 0.000 & undetermined \\
+structure transfer, deployed store: lancedb\_indexed & lancedb\_indexed & W & not det. & 0.000 & undetermined \\
+structure transfer, deployed store: sqlitevec & sqlitevec & W & not det. & 0.000 & 0.005 (advantage) \\
+permutation recovery (spread\_s1) & Mnemos-P & RW & \textbf{leaks} & 4.905 & -- \\
+permutation recovery (spread\_s2) & Mnemos-P & RW & \textbf{leaks} & 1.827 & -- \\
+permutation recovery (grouped) & Mnemos-P & RW & \textbf{leaks} & 0.000 & -- \\
+multi-version diff, g=1 & Mnemos-P & W & \textbf{leaks} & 0.524 & -- \\
+multi-version diff, g=2 & Mnemos-P & W & \textbf{leaks} & 0.173 & -- \\
+multi-version diff, g=4 & Mnemos-P & W & \textbf{leaks} & 0.049 & -- \\
+multi-version diff, g=16 & Mnemos-P & W & \textbf{leaks} & 0.002 & -- \\
+multi-version diff, g=64 & Mnemos-P & W & \textbf{leaks} & 0.000 & -- \\
+multi-version diff, across a session, rewrite\_at\_lock off & Mnemos-P & W & \textbf{leaks} & 0.031 & -- \\
+multi-version diff, across a session, rewrite\_at\_lock on & Mnemos-P & W & not det. & 0.000 & undetermined \\
+refusal, silent & Mnemos-P & W & \textbf{leaks} & 0.763 & -- \\
+refusal, padded & Mnemos-P & W & not det. & 0.000 & undetermined \\
+query equality (spread\_s1), overlap threshold & Mnemos-P & RW & \textbf{leaks} & 0.887 & -- \\
+query equality (spread\_s2), overlap threshold & Mnemos-P & RW & \textbf{leaks} & 0.890 & -- \\
+query equality (spread\_s4), overlap threshold & Mnemos-P & RW & \textbf{leaks} & 0.252 & -- \\
+query equality (grouped), overlap threshold & Mnemos-P & RW & \textbf{leaks} & 0.566 & -- \\
+dedup membership (threshold) & Mnemos-P & W & \textbf{leaks} & 1.000 & -- \\
+dedup membership (threshold) & Mnemos-M & W & not det. & 0.000 & undetermined \\
+dedup membership (llm) & Mnemos-P & W & \textbf{leaks} & 0.041 & -- \\
+dedup membership (llm) & Mnemos-M & W & not det. & 0.000 & undetermined \\
 \bottomrule
 \end{tabular}
 \end{table*}

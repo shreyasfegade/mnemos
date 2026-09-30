@@ -292,8 +292,14 @@ def collect() -> dict[str, str | None]:
         out["REtwentyoneDriveYears"] = big(round(g21["sweep"]["drive_years_at_600tbw"]["10.0"]))
     else:
         for k in (
-            "SweepKiB", "RegionMiB", "SweepGBDay", "RegionGBDay", "Ratio",
-            "PLockMiB", "SweepMs", "DriveYears",
+            "SweepKiB",
+            "RegionMiB",
+            "SweepGBDay",
+            "RegionGBDay",
+            "Ratio",
+            "PLockMiB",
+            "SweepMs",
+            "DriveYears",
         ):
             out[f"REtwentyone{k}"] = None
 

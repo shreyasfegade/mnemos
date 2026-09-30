@@ -29,8 +29,7 @@ from pathlib import Path
 import numpy as np
 
 from eval.exp2 import lab
-from eval.exp2.e1_longitudinal import frequency_labels, load_stream
-from eval.exp2.e1_longitudinal import read_flushes
+from eval.exp2.e1_longitudinal import frequency_labels, load_stream, read_flushes
 from eval.exp2.e8_multisnapshot import changed, region_digest
 from eval.lab import corpus as C
 from eval.lab.embcache import embed_cached
@@ -49,7 +48,7 @@ TRIALS = 20
 
 
 def guess_acc(hits: int, unlabelled: int, n: int, k: int) -> float:
-    """Accuracy crediting an unlabelled record with the uniform 1/k guess a rational adversary makes."""
+    """Accuracy crediting an unlabelled record with the uniform 1/k guess an adversary makes."""
     return (hits + unlabelled / k) / max(n, 1)
 
 
@@ -58,7 +57,9 @@ def one_trial(vecs, topics, n_topics, cents, trial: int) -> dict:
     tmp = Path(tempfile.mkdtemp())
     try:
         over = lab.merge(
-            lab.base_overrides(dim=DIM, buckets=B, capacity=CAP, block=BLOCK, epoch_writes=W, probe_spread=1),
+            lab.base_overrides(
+                dim=DIM, buckets=B, capacity=CAP, block=BLOCK, epoch_writes=W, probe_spread=1
+            ),
             {"v2": {"rewrite_at_lock": False}},
         )
         eng, _, _ = lab.create("p", tmp / "s", cents, over, {})
@@ -83,6 +84,7 @@ def one_trial(vecs, topics, n_topics, cents, trial: int) -> dict:
             versions.append(region_digest(part_file, B, CAP, slot_len))
 
         n_h = len(h_id_topic)
+
         # Per-record diff at each granularity: the regions that changed over the g flushes around
         # the record's write. Coarser g merges more flushes, so the candidate set grows.
         def candidates_at(g: int) -> list[set[int]]:
@@ -106,7 +108,9 @@ def one_trial(vecs, topics, n_topics, cents, trial: int) -> dict:
         by_topic: dict[int, list[list[int]]] = {t: [] for t in range(n_topics)}
         for t in range(n_topics):
             pool = pool_by_topic.get(t, [])
-            picks = rng.choice(pool, size=min(BUDGET, len(pool)), replace=False) if len(pool) else []
+            picks = (
+                rng.choice(pool, size=min(BUDGET, len(pool)), replace=False) if len(pool) else []
+            )
             for i in picks:
                 with contextlib.suppress(Exception):
                     eng.put(f"p{int(i)}", vecs[int(i)].tolist(), "{}")
@@ -119,7 +123,9 @@ def one_trial(vecs, topics, n_topics, cents, trial: int) -> dict:
             eng.close()
 
         # --- oracle: the region is known exactly.
-        o_hits = sum(1 for (_, tp), r in zip(h_id_topic, h_true_region, strict=True) if labels.get(r) == tp)
+        o_hits = sum(
+            1 for (_, tp), r in zip(h_id_topic, h_true_region, strict=True) if labels.get(r) == tp
+        )
         o_unl = sum(1 for r in h_true_region if r not in labels)
         oracle = guess_acc(o_hits, o_unl, n_h, n_topics)
 
@@ -174,7 +180,10 @@ def main() -> None:
         "oracle": {"acc_H": om, "lo": olo, "hi": ohi, "adv_H": om - chance},
         "composed": [],
     }
-    print(f"oracle (region known): acc {om:.3f} [{olo:.3f},{ohi:.3f}] adv {om - chance:+.3f}", flush=True)
+    print(
+        f"oracle (region known): acc {om:.3f} [{olo:.3f},{ohi:.3f}] adv {om - chance:+.3f}",
+        flush=True,
+    )
     for g in GRANULARITIES:
         accs = [r["composed"][g]["acc_H"] for r in runs]
         m, lo, hi = lab.boot_ci(accs)
@@ -191,8 +200,11 @@ def main() -> None:
             "coverage_H": cov,
         }
         results["composed"].append(row)
-        print(f"  composed g={g:>2}: acc {m:.3f} [{lo:.3f},{hi:.3f}] adv {m - chance:+.3f} "
-              f"({cand:.1f} candidate regions, coverage {cov:.2f})", flush=True)
+        print(
+            f"  composed g={g:>2}: acc {m:.3f} [{lo:.3f},{hi:.3f}] adv {m - chance:+.3f} "
+            f"({cand:.1f} candidate regions, coverage {cov:.2f})",
+            flush=True,
+        )
     OUT.write_text(json.dumps(results, indent=1), encoding="utf-8")
     print(f"wrote {OUT.relative_to(C.repo_root())}")
 

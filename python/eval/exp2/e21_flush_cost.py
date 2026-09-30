@@ -50,7 +50,12 @@ GEOMETRIES = {
 # The earlier shipped configuration of [m], and the revision's.
 MODES = {
     "regions": {"flush_mode": "regions", "tombstone_capacity": 4096},
-    "sweep": {"flush_mode": "sweep", "sweep_slots": 8, "journal_slots": 4, "tombstone_capacity": 512},
+    "sweep": {
+        "flush_mode": "sweep",
+        "sweep_slots": 8,
+        "journal_slots": 4,
+        "tombstone_capacity": 512,
+    },
 }
 
 
@@ -149,9 +154,7 @@ def measure(mode: str, b: int, c: int, rng) -> dict:
             "gb_per_day": per_day,
             "gb_per_8h_day": {str(d): bpf * 8 * 3600 / d / 1e9 for d in DELTAS},
             "sync_upload_per_flush": uploads,
-            "sync_upload_gb_per_day_at_10s": {
-                k: v * 8640 / 1e9 for k, v in uploads.items()
-            },
+            "sync_upload_gb_per_day_at_10s": {k: v * 8640 / 1e9 for k, v in uploads.items()},
             "drive_years_at_600tbw": {str(d): TBW / (bpf * 86400 / d * 365) for d in DELTAS},
         }
     finally:
@@ -159,10 +162,8 @@ def measure(mode: str, b: int, c: int, rng) -> dict:
 
 
 def with_contextlib_close(eng) -> None:
-    try:
+    with contextlib.suppress(Exception):
         eng.close()
-    except Exception:
-        pass
 
 
 def p_lock_cost(b: int, c: int, rng) -> dict:
@@ -174,7 +175,12 @@ def p_lock_cost(b: int, c: int, rng) -> dict:
         size = sum(f.stat().st_size for f in (tmp / "s").rglob("*") if f.is_file())
         t0 = time.perf_counter()
         with_contextlib_close(eng)
-        return {"buckets": b, "capacity": c, "store_bytes": size, "lock_seconds": time.perf_counter() - t0}
+        return {
+            "buckets": b,
+            "capacity": c,
+            "store_bytes": size,
+            "lock_seconds": time.perf_counter() - t0,
+        }
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -250,7 +256,12 @@ def lock_residual(rate: float, load: float, rng, sessions: int = 40, length: int
 def main() -> None:
     rng = np.random.default_rng(20260928)
     t0 = time.time()
-    res: dict = {"experiment": "E21", "tbw_assumed": TBW, "deltas_s": list(DELTAS), "geometries": {}}
+    res: dict = {
+        "experiment": "E21",
+        "tbw_assumed": TBW,
+        "deltas_s": list(DELTAS),
+        "geometries": {},
+    }
     for name, (b, c) in GEOMETRIES.items():
         res["geometries"][name] = {m: measure(m, b, c, rng) for m in MODES}
         res["geometries"][name]["p_lock"] = p_lock_cost(b, c, rng)

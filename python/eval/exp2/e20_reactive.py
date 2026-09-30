@@ -16,7 +16,7 @@ as the AUC of the best trace statistic, per arm:
 * ``M regions``          -- clocked whole-region flush (the earlier design). Prediction: at chance.
 * ``M flush on write``   -- the clock removed (``on_demand_flush``). Prediction: broken.
 * ``M content placement``-- clocked, but placement by content. Prediction: broken (the region a
-                            real write lands in is content-derived even though occurrence is hidden).
+                            real write lands in is content-derived even when occurrence hides).
 * ``P shipped``          -- Mnemos-P: on-demand flush, content placement, permutation. Prediction:
                             broken, which is what makes P dual-epoch secure (Thm 1) yet not
                             reactively secure -- the separation RDE => DE, DE =/=> RDE.
@@ -57,10 +57,25 @@ DEDUP_THRESHOLD = 0.9
 
 # Each arm: the engine, the ablation, and the parameter overrides that define the flush schedule.
 ARMS = [
-    {"name": "M sweep", "kind": "m", "abl": {}, "over": {"m": {"flush_mode": "sweep", "sweep_slots": 8, "journal_slots": 4}}},
+    {
+        "name": "M sweep",
+        "kind": "m",
+        "abl": {},
+        "over": {"m": {"flush_mode": "sweep", "sweep_slots": 8, "journal_slots": 4}},
+    },
     {"name": "M regions", "kind": "m", "abl": {}, "over": {"m": {"flush_mode": "regions"}}},
-    {"name": "M flush on write", "kind": "m", "abl": {"on_demand_flush": True}, "over": {"m": {"flush_mode": "regions"}}},
-    {"name": "M content placement", "kind": "m", "abl": {"content_placement": True}, "over": {"m": {"flush_mode": "regions"}}},
+    {
+        "name": "M flush on write",
+        "kind": "m",
+        "abl": {"on_demand_flush": True},
+        "over": {"m": {"flush_mode": "regions"}},
+    },
+    {
+        "name": "M content placement",
+        "kind": "m",
+        "abl": {"content_placement": True},
+        "over": {"m": {"flush_mode": "regions"}},
+    },
     {"name": "P shipped", "kind": "p", "abl": {}, "over": {}},
 ]
 
@@ -94,7 +109,11 @@ def _auc_ci(y, col, sign, te, rng) -> tuple[float, float, float]:
         yt, ct = y[te][s], sign * col[te][s]
         if len(np.unique(yt)) > 1 and len(np.unique(ct)) > 1:
             boots.append(roc_auc_score(yt, ct))
-    lo, hi = (float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5))) if boots else (a_te, a_te)
+    lo, hi = (
+        (float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5)))
+        if boots
+        else (a_te, a_te)
+    )
     return a_te, lo, hi
 
 
@@ -122,7 +141,9 @@ def play(arm: dict, texts, vecs, cents, assign, probes, rng) -> dict:
     tmp = Path(tempfile.mkdtemp())
     try:
         over = lab.merge(
-            lab.base_overrides(dim=DIM, buckets=B, capacity=CAP, block=BLOCK, epoch_writes=1, probe_spread=1),
+            lab.base_overrides(
+                dim=DIM, buckets=B, capacity=CAP, block=BLOCK, epoch_writes=1, probe_spread=1
+            ),
             arm["over"],
         )
         eng, _, _ = lab.create(arm["kind"], tmp / "s", cents, over, arm["abl"])
@@ -202,12 +223,19 @@ def main() -> None:
     n_each = args.probes // 2
     pool = rng.permutation(len(texts))
     member = pool[:n_each]
-    filler = pool[n_each : N_HIST]
+    filler = pool[n_each:N_HIST]
     nonmember = pool[N_HIST : N_HIST + n_each]
     probes = {"member": member, "nonmember": nonmember, "filler": filler}
 
-    results = {"experiment": "E20", "buckets": B, "capacity": CAP, "dedup_threshold": DEDUP_THRESHOLD,
-               "probes": args.probes, "note": "held-out AUC of the best trace statistic per arm", "rows": []}
+    results = {
+        "experiment": "E20",
+        "buckets": B,
+        "capacity": CAP,
+        "dedup_threshold": DEDUP_THRESHOLD,
+        "probes": args.probes,
+        "note": "held-out AUC of the best trace statistic per arm",
+        "rows": [],
+    }
 
     for arm in ARMS:
         t0 = time.time()
@@ -226,8 +254,12 @@ def main() -> None:
             "seconds": time.time() - t0,
         }
         results["rows"].append(row)
-        print(f"{arm['name']:>22}: AUC {learned['auc']:.3f} [{learned['lo']:.3f},{learned['hi']:.3f}] "
-              f"via {learned_stat}  ({row['seconds']:.0f}s)", flush=True)
+        print(
+            f"{arm['name']:>22}: AUC {learned['auc']:.3f} "
+            f"[{learned['lo']:.3f},{learned['hi']:.3f}] "
+            f"via {learned_stat}  ({row['seconds']:.0f}s)",
+            flush=True,
+        )
         OUT.write_text(json.dumps(results, indent=1), encoding="utf-8")
 
     print(f"wrote {OUT.relative_to(C.repo_root())}")
