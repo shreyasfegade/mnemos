@@ -257,6 +257,54 @@ def collect() -> dict[str, str | None]:
         rs = [r for r in rows1 if r["design"] == design]
         top = max(rs, key=lambda r: r["adv_H"]) if rs else None
         out[f"REone{tag}Max"] = ci_of(top, ("adv_H", "lo", "hi"))
+
+    # --- E20: the reactive (feedback-agent) game ---------------------------------------------
+    e20 = {r["arm"]: r for r in (load("e20_reactive.json") or {}).get("rows", [])}
+
+    def r20(arm: str) -> dict | None:
+        r = e20.get(arm)
+        if not r:
+            return None
+        return max((r["learned"], r["hand_built"]), key=lambda a: abs(a["auc"] - 0.5))
+
+    for arm, tag in (
+        ("M sweep", "MSweep"),
+        ("M regions", "MRegions"),
+        ("M flush on write", "MOnDemand"),
+        ("M content placement", "MContent"),
+        ("P shipped", "PShipped"),
+    ):
+        out[f"REtwenty{tag}"] = ci_of(r20(arm), ("auc", "lo", "hi"), 3)
+
+    # --- E21: what the clocked flush costs ----------------------------------------------------
+    e21 = load("e21_flush_cost.json")
+    g21 = (e21 or {}).get("geometries", {}).get("shipped")
+    if g21:
+        out["REtwentyoneSweepKiB"] = f(g21["sweep"]["bytes_per_flush"] / 1024, 1)
+        out["REtwentyoneRegionMiB"] = f(g21["regions"]["bytes_per_flush"] / 2**20, 1)
+        out["REtwentyoneSweepGBDay"] = f(g21["sweep"]["gb_per_day"]["10.0"], 2)
+        out["REtwentyoneRegionGBDay"] = f(g21["regions"]["gb_per_day"]["0.5"], 0)
+        out["REtwentyoneRatio"] = big(
+            round(g21["regions"]["gb_per_day"]["0.5"] / g21["sweep"]["gb_per_day"]["10.0"])
+        )
+        out["REtwentyonePLockMiB"] = f(g21["p_lock"]["store_bytes"] / 2**20, 0)
+        out["REtwentyoneSweepMs"] = f(g21["sweep"]["flush_ms_p50"], 1)
+        out["REtwentyoneDriveYears"] = big(round(g21["sweep"]["drive_years_at_600tbw"]["10.0"]))
+    else:
+        for k in (
+            "SweepKiB", "RegionMiB", "SweepGBDay", "RegionGBDay", "Ratio",
+            "PLockMiB", "SweepMs", "DriveYears",
+        ):
+            out[f"REtwentyone{k}"] = None
+
+    # --- E17: the composed attack on Mnemos-P ------------------------------------------------
+    e17 = load("e17_composed.json")
+    by17 = {r["granularity_flushes"]: r for r in (e17 or {}).get("composed", [])}
+    out["REseventeenOracle"] = ci_of(e17.get("oracle") if e17 else None, ("adv_H", "lo", "hi"))
+    for g, tag in ((1, "One"), (2, "Two"), (4, "Four"), (16, "Sixteen")):
+        r = by17.get(g)
+        out[f"REseventeenComposed{tag}"] = signed(r and r["adv_H"])
+        out[f"REseventeenCand{tag}"] = f(r and r["mean_candidates"], 1)
     return out
 
 

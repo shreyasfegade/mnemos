@@ -4,8 +4,9 @@
 Let $\Pi$ satisfy S1 to S4, let $F$ be the pseudorandom function used to derive record tags and
 the per-flush random choices, and let $\mathsf{AE}$ be the authenticated encryption scheme. Let
 $\mathcal{A}$ be a probabilistic polynomial-time adversary in $\mathbf{G}^{\mathrm{H}}$ that
-submits admissible histories and issues polynomially many post-$\tau$ operations. The proof
-proceeds through three games and then exhibits the simulator of \cref{def:dualepoch}.
+submits two equal-length histories --- admissible or not --- and issues polynomially many post-$\tau$
+operations. The proof proceeds through three games and then exhibits the simulator of
+\cref{def:dualepoch}.
 
 \paragraph{On adaptivity} $\mathcal{A}$ chooses each post-$\tau$ operation after seeing the leakage
 of every earlier one. This does not disturb the argument. Each hybrid step below replaces a
@@ -64,19 +65,24 @@ cohort-H record adds nothing to the view that depends on which region held it.
 function of the query, the partition table, the relabeling and fresh per-call randomness, none of
 which depends on $b$. Ranking and payload decryption occur in memory over the region images already
 read, so no further disk access is issued.
-\item \emph{Refusals.} Under S4 every submitted history is admissible, so no partition reaches
-capacity under either history and no write is refused under either. The refusal rule is therefore
-never exercised, and cannot distinguish. It is worth being precise about why the weaker argument
-fails: in a store with a \emph{global} load factor, one could argue that the refusal decision
-depends only on the total number of live records, which the equal-length condition makes identical
-under both histories. That argument does not survive here, because refusal depends on
-\emph{per-partition} load, and per-partition load is exactly what the two histories differ in. Only
-admissibility rules the case out. Admissibility must also count tombstoned records whose slots have
-not yet been freed, since those slots are occupied and a partition holding them can refuse.
-Independently of the theorem, S3 requires a refused write to perform the rewrites an accepted one
-would have, so that a deployment leaving the admissible regime degrades gracefully rather than
-disclosing the load directly; \cref{prop:capacity} states what is at stake and
-\cref{sec:eval-refusal} measures it.
+\item \emph{Refusals.} The submitted proof closed this case with an admissibility assumption: it
+required that neither history reach capacity, so that no write was ever refused. That assumption is
+now removed, and the case is closed by S3's padded refusal instead. Consider a post-$\tau$
+$\mathsf{put}$ whose target partition is full under one history and not under the other. Under both,
+S3 requires the store to rewrite the intended region: an accepted write re-seals the region with the
+new record among its slots, and a refused write re-seals the same region unchanged. By item~2 every
+slot of a rewritten region is a uniform string of the slot length whether or not it holds a live
+record, so the two rewrites are identically distributed, and the region index written is the same
+function of the (relabeled) target partition in both cases. The observation extends to a
+$\mathsf{put}$ that overflows a partition \emph{within} $\sigma_b$, before $\tau$: the refused writes
+rewrite their regions, and by item~2 the snapshot does not reveal a region's occupancy, so a history
+that overflows a partition and one that does not produce identically distributed snapshots. Hence
+the refusal rule is exercised freely under both histories without distinguishing them, and no
+admissibility restriction is needed. What overflow costs is availability, not confidentiality: a
+padded refusal discards the caller's write. \Cref{prop:capacity} states this as the
+capacity--confidentiality trade-off --- padded refusal (chosen here) hides the load at the price of
+lost writes, silent refusal keeps the writes at the price of the load --- and \cref{sec:eval-refusal}
+measures both, including the utilization at which the losses begin.
 \end{enumerate}
 
 Every component is thus a function of the public parameters, the leakage of the operations issued,
@@ -119,8 +125,87 @@ available.
 \paragraph{Necessity of the conditions} Condition S2 requires pseudorandom rather than merely
 CPA-secure ciphertexts because free slots are uniform strings that must be indistinguishable from
 live ones. Condition S3's whole-region rewrite is used in item 3: a per-slot write would reveal
-which slot changed and, accumulated, the occupancy that item 2 hides. The flush at $\tau$ required
-by the game closes the staged-remainder channel, and S4's admissibility closes the overflow channel
-of item 6. \Cref{prop:seal,prop:fp} show that dropping S1, S2 or S3 admits a distinguisher, which
-\cref{sec:eval-game} realizes as ablations, together with the observation that the keyed
-relabeling is \emph{not} among the conditions and that removing it leaves the game at chance.
+which slot changed and, accumulated, the occupancy that item 2 hides. S3's padded refusal is used in
+item 6 and is what lets the theorem cover overflow without an admissibility assumption; dropping it
+for silent refusal reopens the capacity channel of \cref{prop:capacity}, which
+\cref{sec:eval-refusal} measures. The flush at $\tau$ required by the game closes the
+staged-remainder channel. \Cref{prop:seal,prop:fp} show that dropping S1, S2 or S3 admits a
+distinguisher, which \cref{sec:eval-game} realizes as ablations, together with the observation that
+the keyed relabeling is \emph{not} among the conditions and that removing it leaves the game at
+chance.
+
+\section{Proof of the Composition Theorem~\ref{thm:reactive}}
+\label{supp:reactive}
+
+We prove that a store satisfying S1, S2 and the clock conditions C1--C3 is reactively
+$\mathcal{L}_{\mathrm{clock}}$-dual-epoch secure (\cref{def:reactive}) against every polynomial-time
+feedback agent $\mathsf{P}$. The structure mirrors the proof of \cref{thm:main}; what changes is that
+the operation sequence after $\tau$ is produced by $\mathsf{P}$ reacting to plaintext search results,
+so the argument must show that this reaction never reaches the adversary's view.
+
+\paragraph{Setup} Fix $\mathsf{P}$ and an adversary $\mathcal{A}$. In
+$\mathbf{G}^{\mathrm{R}}_{\Pi,\mathsf{P},\mathcal{A}}$ the challenger builds cohort~H from $\sigma_b$,
+flushes at $\tau$, and then for each adversary-supplied input runs one turn of $\mathsf{P}$: a
+sequence of $\mathsf{search}$ operations whose plaintext results $\mathsf{P}$ reads, followed by
+$\mathsf{put}$, $\mathsf{delete}$ or $\mathsf{update}$ operations that may depend on those results.
+The adversary receives $\mathcal{L}^{\mathrm{op}}$ after each turn and, separately, the clock leakage
+$\mathcal{L}_{\mathrm{clock}}$ of unlock, lock and flush times.
+
+\paragraph{Game $\mathrm{H}_0$} The real reactive game.
+
+\paragraph{Game $\mathrm{H}_1$} Replace every pseudorandom function under a store key by a lazily
+sampled random function, as in $\mathrm{G}_1$. The gap is $\mathsf{Adv}^{\mathrm{prf}}_F(\lambda)$ up
+to the number of derived keys. This step is oblivious to who chose the operations, so $\mathsf{P}$'s
+reactivity does not affect it.
+
+\paragraph{Game $\mathrm{H}_2$} Replace every ciphertext written to disk by a uniformly random string
+of the same length (C2), keeping plaintexts in challenger state so no stored ciphertext is decrypted.
+The gap is $\mathsf{Adv}^{\mathrm{ind\$}}_{\mathsf{AE}}(\lambda)$. After this step every byte on disk,
+in every slot and in the sealed journal that carries staged records between flushes, is a uniform
+string whose length is a public parameter.
+
+\paragraph{The view is a function of the clock} We show the adversary's view in $\mathrm{H}_2$ is
+determined by $\mathcal{L}_{\mathrm{clock}}$ and public randomness, independently of $b$, of the
+inputs, and of every branch $\mathsf{P}$ took.
+
+\begin{enumerate}
+\item \emph{Snapshot.} By S1 and $\mathrm{H}_2$ the snapshot is a tuple of fixed-length uniform
+strings whose count and lengths are public, identical under $b=0$ and $b=1$.
+\item \emph{Writes.} By C1 the set of disk locations a flush rewrites is the image of the flush index
+under the deterministic sweep: the $s$ slots after a cursor that advances by $s$ each flush from a
+start fixed at unlock. This set is a function of the flush index alone. It does not depend on how many
+records $\mathsf{P}$ staged, on their content, or on whether $\mathsf{P}$ wrote at all --- a flush
+occurs every $\Delta$ regardless (C1). By $\mathrm{H}_2$ the bytes written are uniform. So the write
+transcript is the clock's sequence of cursor ranges, filled with uniform bytes.
+\item \emph{Reads.} By C3 a $\mathsf{search}$ issues no disk access after the unlock scan. Therefore
+the $\mathsf{search}$ operations $\mathsf{P}$ performs, and the results it reads, produce \emph{no}
+storage event. This is the crux: the only place $\mathsf{P}$'s secret-dependent behaviour could enter
+the transcript is through the operations it issues, and its reads issue nothing while its writes are
+placed by the clock, not by content. The branch $\mathsf{P}$ takes is thus invisible.
+\item \emph{The journal.} Staged records wait in the fixed-size sealed journal, which C1 rewrites in
+full every flush whether it holds staged records or none; by $\mathrm{H}_2$ its bytes are uniform of
+fixed length. Its rewrites are on the clock and carry nothing.
+\item \emph{Deletions and updates.} A deletion writes nothing at call time (C1 admits only the
+clocked sweep as a writer); its slot is freed when the sweep reaches it, an event already accounted
+in item~2. An update is a deletion and a staged write, both covered.
+\end{enumerate}
+
+Every component is a function of the unlock/lock/flush clock and uniform bytes. A simulator given
+$\mathcal{L}_{\mathrm{clock}}$ emits the fixed-length uniform snapshot, and at each flush time emits
+the cursor range that flush index determines, filled with uniform bytes; it runs neither $\mathsf{P}$
+nor the challenge, and never sees $b$ or the inputs. Hence the real and simulated views are
+indistinguishable and
+\[
+\AdvR_{\Pi,\mathsf{P},\mathcal{A}}(\lambda) \le \mathsf{Adv}^{\mathrm{prf}}_F(\lambda) +
+\mathsf{Adv}^{\mathrm{ind\$}}_{\mathsf{AE}}(\lambda) \le \negl(\lambda).
+\]
+\hfill$\blacksquare$
+
+\paragraph{Why Mnemos-P is excluded} The proof uses C1 and C3 exactly where \cref{prop:derived}'s
+attack strikes. Mnemos-P flushes on demand, violating C1: a flush occurs \emph{because} $\mathsf{P}$
+staged a record, so the occurrence of a flush is the write-occurrence bit a deduplicating agent
+leaks. And Mnemos-P places by content, so even under a clocked flush the region a reactive write
+lands in would depend on the retrieved plaintext. The clock-only store closes both, which is why the
+composition holds for it and not for the partitioned design --- the separation
+$\mathrm{RDE}\Rightarrow\mathrm{DE}$, $\mathrm{DE}\not\Rightarrow\mathrm{RDE}$ of
+\cref{cor:m-reactive}. \Cref{sec:eval-reactive} measures both sides.

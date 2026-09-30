@@ -145,6 +145,30 @@ so that the index of the one slot written is the region's current load, gives \R
 Either protection alone suffices, as the lemma says, which makes S3 a condition on the pair
 (placement rule, write granularity) rather than on the write granularity alone.
 
+\subsection{The Reactive Game}
+\label{sec:eval-reactive}
+
+\Cref{def:dualepoch} lets the game distinguish a design from its ablations only through the leakage
+the adversary chooses to provoke; a reader noted that it cannot, on its own, tell Mnemos-M from a
+version of itself that places by content, because both are at chance when the adversary supplies
+every operation. The reactive game of \cref{def:reactive} can, and \cref{thm:reactive} says it
+should: it hands the post-$\tau$ operations to a feedback agent whose writes depend on what it
+retrieves. We run it with a deduplicating agent --- it writes a supplied fact only if a near-duplicate
+is not already stored --- and report the held-out AUC of the best trace statistic per design,
+oriented on a training half of the probes and scored on the other. The prediction, registered before
+the run, was that only the clock-only arms sit at chance.
+
+The outcome is stark. The shipped memory-resident store is at chance, \REtwentyMSweep; so is its
+whole-region-flush variant, \REtwentyMRegions. Removing the clock, so that a flush fires when the
+agent writes, is fully distinguished, \REtwentyMOnDemand --- the occurrence of a flush is the
+deduplication bit. Placing by content under a clock is distinguished too, \REtwentyMContent, because
+the region a reactive write lands in tracks the retrieved fact. And Mnemos-P, dual-epoch secure by
+\cref{thm:main}, is fully distinguished in the reactive game, \REtwentyPShipped: it flushes on demand
+\emph{and} places by content. The game therefore separates the memory-resident design from every
+ablation and from the partitioned design --- the empirical content of the $\mathrm{RDE}\Rightarrow
+\mathrm{DE}$, $\mathrm{DE}\not\Rightarrow\mathrm{RDE}$ separation, and the reason the positive result
+for Mnemos-M is \cref{thm:reactive} rather than a row in \cref{tab:e5}.
+
 \subsection{The Byte-Level Auditor}
 \label{sec:eval-audit}
 
