@@ -380,6 +380,17 @@ def collect() -> dict[str, str | None]:
     }
     for z, tag in ((0.8, "Low"), (1.2, "High")):
         out[f"REtwentythreePSkew{tag}"] = pct(skew[z]["p_util"] if z in skew else None)
+
+    # --- E28: attack cost, descriptive, from E2's logs ----------------------------------------
+    e28 = load("e28_attack_cost.json") or {}
+    sec = [m["seconds_per_turn"] for m in e28.get("models", [])]
+    out["REtwentyeightSecLo"] = f(min(sec), 1) if sec else None
+    out["REtwentyeightSecHi"] = f(max(sec), 1) if sec else None
+    mins = {(r["layout"], r["w_real"]): r for r in e28.get("minimum_detectable_budget", [])}
+    for key, tag in ((("growing", 1), "GrowOne"), (("p", 1), "POne"), (("p", 2), "PTwo")):
+        r = mins.get(key)
+        out[f"REtwentyeight{tag}Msgs"] = big(r and r["adversary_messages"])
+        out[f"REtwentyeight{tag}Min"] = f(r and r["agent_minutes_slowest_model"], 0)
     return out
 
 

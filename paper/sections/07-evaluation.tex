@@ -100,6 +100,14 @@ burst multiplies the signal against the fixed cover: at four records per turn th
 \REtwoBurstRatio{} times the single-record value, peaking at $+\REtwoBurstMax$. We registered that
 the padded design would stay within 0.05 of chance throughout; it does not.
 
+The attack is cheap in the adversary's currency. An induced turn is one supplied document or
+ticket, and the agent spends \REtwentyeightSecLo{} to \REtwentyeightSecHi~s on it with these models.
+On the growing layout the advantage clears zero at the smallest budget tested,
+\REtwentyeightGrowOneMsgs{} messages over ten topics (about \REtwentyeightGrowOneMin~min of agent
+time); on Mnemos-P a single-record attack needs \REtwentyeightPOneMsgs{} messages, and a burst of two
+clears zero at \REtwentyeightPTwoMsgs, though at a small advantage (descriptive analysis E28 of
+the E2 logs).
+
 Each interval resamples \emph{independent induction sequences}, each drawing its own cohort split,
 induction order and attacker fit. The longitudinal study (supplementary material) reports different
 advantages at nominally similar budgets because its budget counts induced records per topic while
@@ -227,7 +235,9 @@ An adversary that induces writes into a region and watches whether it is rewritt
 design refuses its first write at \REnineUtilP\% of nominal capacity, while Mnemos-M, with only a
 global bound, reaches \REnineUtilM\%. Sweeping $B \in \{64,128,256\}$, $C \in \{16,32,64\}$ and the
 Zipf skew of the topic workload (registered experiment E23), Mnemos-P's first refusal comes at
-\REtwentythreePWorst\% to \REtwentythreePBest\% of nominal capacity, and Mnemos-M's never before
+\REtwentythreePWorst\% to \REtwentythreePBest\% of nominal capacity, earlier as $B$ grows and as the
+skew rises (\REtwentythreePSkewLow\% to \REtwentythreePSkewHigh\% from Zipf 0.8 to 1.2), because the
+first partition to fill is the most frequent topic's; Mnemos-M's never comes before
 \REtwentythreeMWorst\%. A partitioned store that must keep every write is provisioned for its most
 frequent topic; padded refusal trades that provisioning for lost writes, a cost in availability,
 not confidentiality.

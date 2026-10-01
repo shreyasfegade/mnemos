@@ -122,12 +122,15 @@ Performance is measured on one machine (Intel i9-14900HX, 32\,GB, NVMe, Windows~
 the stacked encrypted file system). The deployed-store experiments use local instances holding public
 data under one encryption layer, over three store builds each, and their per-store conclusions
 depend on library versions. The version-granularity parameter is swept rather than measured against
-a provider's retention policy. Key custody is implemented for Windows only.
+a provider's retention policy. Performance is measured to $10^5$ records and retrieval with one
+embedding model. Key custody is implemented for Windows only.
 
 \paragraph{Construction}
 Both sealed designs remove a tombstoned record only when the maintenance cursor reaches its region.
 Records larger than one payload block are rejected rather than chunked. The partition table is fixed
-at creation, so a store whose subject matter drifts far enough eventually partitions poorly.
+at creation, so a store whose subject matter drifts far enough eventually partitions poorly. Rebuilding
+it is not evaluated: for Mnemos-P a rebuild rewrites every region and a corpus-trained table would
+violate S4, while Mnemos-M's logical table could be retrained in memory without a disk write.
 
 \subsection{Ethical Considerations}
 
