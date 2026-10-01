@@ -95,8 +95,8 @@ def run(kind: str, g: int, vecs, cents, trial: int) -> dict:
             dim=DIM, buckets=B, capacity=CAP, block=BLOCK, epoch_writes=W, probe_spread=1
         )
         eng, _, _ = lab.create(kind, tmp / "s", cents, over, {})
-        slot_len = int(eng.stat()["slot_len"])
-        part = tmp / "s" / "partitions.bin"
+        slot_len = int(eng.stat().get("slot_len", 0))
+        part = tmp / "s" / ("partitions.bin" if kind == "p" else "slab.bin")
 
         summaries = [backup(env, part.read_bytes())]
         rewritten_bytes = []
