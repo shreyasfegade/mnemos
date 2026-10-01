@@ -1,36 +1,27 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-For encrypted partitioned indexes whose partitions are placed by content, induced writes label
-partitions with topics, and where the layout also discloses which partition holds each stored
-record, those labels apply to records written before the compromise. The transfer lemma makes that
-condition precise: when it holds the two cohorts are exposed equally, and having been written early
-helps only when the agent's subject matter drifts and the adversary does not induce with archival
-content.
+Historical confidentiality, the protection of what an agent remembered before its storage was
+compromised, is a property of its own: encryption, snapshot security and history independence do
+not deliver it. For content-placed indexes, induced writes label partitions with topics, and where
+the layout discloses which partition holds each stored record those labels apply to records written
+before the compromise; the transfer lemma makes that condition precise, and a deployed store,
+pgvector under a stacked encrypted file system, meets it.
 
-Once the layout stops disclosing membership, fixed-size sealed regions with data-independent
-updates close the snapshot channel, and dual-epoch security states what that buys; but three
-channels reach the earlier cohort anyway. File versions reconstruct pre-compromise writes, which
-re-encryption at a session boundary defeats only at coarse capture. Bounded per-partition capacity
-discloses the earlier load through refusals, which an indistinguishable refusal closes. And an
-agent leaks through its own operations, down to the occurrence of a write, which makes
-deduplication a membership oracle.
+Fixed-size sealed regions with data-independent updates close the snapshot channel, and dual-epoch
+security states what that buys, overflow included. Three channels reach the earlier cohort anyway:
+file versions reconstruct pre-compromise writes, bounded per-partition capacity discloses the earlier
+load through refusals, and an agent leaks through its own operations, down to the occurrence of a
+write, which makes deduplication a membership oracle present in a widely used library.
 
-That last channel needs to be stated precisely. It is not that no storage design can close it. It
-is that no storage design whose operations depend on the content or the occurrence of what the
-agent does can close it, which leaves content-oblivious placement, in-memory search and a clocked
-flush schedule as a design that does. Because the threat model already grants that the adversary
-cannot read the unlocked process, that design is available in the local setting at a cost measured
-here in memory rather than in latency. Its exhaustive search loses to the partitioned design above
-about $10^4$ records, but a partition index kept in locked memory rather than on disk restores the
-lead at every size measured without reopening the write channel, because partitions that are
-logical rather than physical cost nothing an adversary can observe. The partitioned design remains
-the right tool above the memory bound, with its residual channels stated.
+No store whose operations depend on the content or the occurrence of what the agent does can close
+that last channel. A store whose disk behaviour is a function of the clock alone can, against every
+agent: placement independent of content, search in locked memory over a logical index, and a
+clocked write-only-oblivious sweep, at \REtwentyoneSweepKiB~KiB per flush. Keeping headers on disk
+extends it past the memory limit with its writes still invisible to a write observer.
 
-The open problems are the ones the residuals name. Oblivious access remains the only closure for
-the write and query-equality channels of a store too large to keep resident, and its cost against a
-constant-factor design remains to be measured. Version retention at the provider is outside the
-reach of anything the storage layer does, so secure deletion has no answer there. And the broader
-lesson is the one the measurements kept repeating: for memory an agent writes about its own work,
-the time a record was written is not a protection, and a leakage claim is only as good as the
-granularity at which it was tested against the bytes an adversary actually sees.
+The open problems are the ones the residuals name. A read observer of a store too large to keep
+resident is defeated only by oblivious search, whose cost against these designs remains to be
+measured on a common footing. Version retention at a provider is beyond the reach of the storage
+layer. And a leakage claim is only as good as the granularity at which it was tested against the
+bytes an adversary actually sees.
