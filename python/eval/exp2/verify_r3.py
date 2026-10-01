@@ -164,7 +164,18 @@ def e25() -> dict[str, float]:
     return out
 
 
+def e27() -> dict[str, float]:
+    d = _load("e27_archival_mix.json")
+    if not d:
+        return {}
+    rows = {r["alpha"]: r["adv_H"] for r in d["rows"]}
+    if 0.25 in rows and 0.0 in rows:
+        return {"E27 advantage at alpha=0.25 minus alpha=0": rows[0.25] - rows[0.0]}
+    return {}
+
+
 EXTRACTORS = {
+    "e27": e27,
     "e25": e25,
     "e21": e21,
     "e20": e20,
@@ -424,5 +435,17 @@ CHECKS = [
         "at n=100k and B=512, mostly from the page cache. Predict a median under 50 ms; a slower "
         "median is recorded as the price of leaving the memory limit.",
         "e25",
+    ),
+    # --- E27: archival alignment (registered 2026-10-01, before the run) ---
+    _check(
+        "E27 advantage at alpha=0.25 minus alpha=0",
+        "sec:eval-drift -- partial archival knowledge already recovers part of drift's protection",
+        0.0,
+        1.0,
+        "E4 shows full archival induction recovers the advantage drift removes. If the recovery "
+        "came only from an adversary with complete historical alignment it would be a weak threat; "
+        "predict that a quarter of the budget drawn from the archive already raises the advantage "
+        "on cohort H above the purely current adversary's.",
+        "e27",
     ),
 ]
