@@ -5,16 +5,15 @@ and can steer the agent's inputs, but holds only stored state for records writte
 that historical confidentiality, the safety of data written before the compromise, is a distinct
 system-level property that encryption and existing snapshot or history-independence notions do not
 provide. For encrypted vector stores that place records by content, labels the adversary induces
-through new writes transfer to the earlier records, exposing both equally; a transfer lemma names the
-precondition, that the layout disclose which partition holds an earlier record, and we confirm it
-against a real deployed store, pgvector under an encrypted filesystem. Even a store that
-seals that channel is reached by three others: retained file versions, per-partition capacity
-refusals, and derived writes, where an agent that deduplicates turns the mere occurrence of a write
-into a membership oracle for earlier facts. We formalize dual-epoch security as an adaptive,
-leakage-parameterized game, prove sufficient conditions covering capacity overflow, separate it from
-breach resistance and history independence, and give a reactive variant with a composition theorem
-for the self-writing agent. We evaluate three designs. A memory-resident store with content-oblivious
-placement and a clocked, write-only-oblivious flush closes every channel against a write observer;
-its flush costs kilobytes rather than megabytes and its writes reveal only a clock. A partitioned
-sealed store covers larger corpora with its residual channels stated. Every reported number is
-reproduced by a released artifact.
+through new writes transfer to the earlier records, exposing both equally; a transfer lemma names its
+precondition, that the layout disclose which partition holds an earlier record, which we confirm on a
+real deployed store, pgvector under an encrypted filesystem. A store that seals that channel is
+reached by three others: retained file versions, capacity refusals, and derived writes, where an
+agent that deduplicates turns the mere occurrence of a write into a membership oracle for earlier
+facts. We formalize dual-epoch security as an adaptive, leakage-parameterized game, prove sufficient
+conditions covering capacity overflow, separate it from breach resistance and history independence,
+and add a reactive variant whose composition theorem covers the self-writing agent. A memory-resident
+store with content-oblivious placement and a clocked, write-only-oblivious flush closes every channel
+against a write observer; its flush costs kilobytes rather than megabytes, and its writes reveal only
+a clock. A partitioned sealed store covers larger corpora with its residual channels stated. Every
+reported number is reproduced by a released artifact.
