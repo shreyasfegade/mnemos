@@ -70,6 +70,17 @@ def e20() -> dict[str, float]:
     return out
 
 
+def e16() -> dict[str, float]:
+    d = _load("e16_real_layouts.json")
+    if not d:
+        return {}
+    out: dict[str, float] = {}
+    for s in d.get("stores", []):
+        out[f"E16 {s['store']} adv_hist"] = s["adv_hist"]
+        out[f"E16 {s['store']} adv_hist lower"] = s["adv_hist_lo"]
+    return out
+
+
 def e17() -> dict[str, float]:
     d = _load("e17_composed.json")
     if not d:
@@ -85,7 +96,7 @@ def e17() -> dict[str, float]:
     return out
 
 
-EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17}
+EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17, "e16": e16}
 
 
 # ----------------------------------------------------------------------------- checks
@@ -217,5 +228,20 @@ CHECKS = [
         "At g=16 the diff merges sixteen flushes, so the candidate set is most of the file and the "
         "label vote is near-random; the advantage should sit near zero, as E8's precision does.",
         "e17",
+    ),
+    # --- E16: real content-placed layouts under gocryptfs (registered 2026-10-01, before the run) -
+    _check(
+        "E16 pgvector adv_hist lower",
+        "sec:eval-real -- pgvector ivfflat places inserts by content into list pages, so the "
+        "structure-transfer attack reaches cohort H on a real, deployed on-disk store",
+        0.0,
+        1.00,
+        "pgvector's ivfflat index assigns an insert to its nearest list and writes that list's "
+        "heap and index pages; induced writes should localize to the list pages their topic "
+        "selects, and the lemma transfers the labels to cohort H. The prediction is a detectable "
+        "channel: the held-out advantage interval lower end clears zero. If it does not, if WAL "
+        "and heap churn swamp the list-page signal at 4 KiB -- that null is recorded, and the "
+        "growing layout remains the clearest demonstration, which Table 6 and the abstract allow.",
+        "e16",
     ),
 ]

@@ -203,8 +203,47 @@ class AppendControl:
             os.fsync(fh.fileno())
 
 
+# FAISS OnDiskInvertedLists was evaluated as a target but dropped: its incremental per-add write
+# path segfaults in faiss 1.15 (the on-disk lists are built for the batch ``merge_ondisk`` pattern,
+# not single-record appends), so it cannot be driven one record at a time the way the attack needs.
+# The real content-placed on-disk target E16 uses is pgvector ivfflat below.
+
+
+class Pgvector:
+    placement = "content (ivfflat lists); an insert lands in its nearest list's pages after build"
+    schema = "pgvector ivfflat (lists=64, vector_ip_ops); built on training set, then inserts"
+
+    def __init__(self, path: Path, dim: int):
+        import pgserver
+
+        self.srv = pgserver.get_server(str(path / "pg"), cleanup_mode="stop")
+        self.dim = dim
+        self.srv.psql("CREATE EXTENSION IF NOT EXISTS vector;")
+        self.srv.psql(f"CREATE TABLE m (id serial PRIMARY KEY, v vector({dim}));")
+        self.n = 0
+
+    def _vec(self, row) -> str:
+        return "[" + ",".join(f"{float(z):.6f}" for z in row) + "]"
+
+    def train(self, x):
+        # Bulk-load the training set and build the ivfflat index, so placement is by content.
+        for row in x:
+            self.srv.psql(f"INSERT INTO m (v) VALUES ('{self._vec(row)}');")
+        self.n += len(x)
+        self.srv.psql("CREATE INDEX m_ivf ON m USING ivfflat (v vector_ip_ops) WITH (lists=64);")
+        self.srv.psql("CHECKPOINT;")
+
+    def add(self, x):
+        for row in x:
+            self.srv.psql(f"INSERT INTO m (v) VALUES ('{self._vec(row)}');")
+        self.n += len(x)
+        # Force the heap and index pages to disk so the ciphertext diff reflects this insert.
+        self.srv.psql("CHECKPOINT;")
+
+
 STORES = {
     "faiss": FaissIvf,
+    "pgvector": Pgvector,
     "chroma": Chroma,
     "lancedb": LanceRaw,
     "lancedb_indexed": LanceIndexed,
