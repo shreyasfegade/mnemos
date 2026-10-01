@@ -396,6 +396,17 @@ its partitions are the query's nearest, where half of Mnemos-P's are cover read 
 equality, and in memory that cover is unnecessary. The supplementary material tabulates every
 domain and probe mechanism.
 
+The one mechanism that resists permutation recovery against a read observer, grouped probing, is
+also the one that costs retrieval, and that cost belongs here rather than only in a supplementary
+table. Reading a whole disjoint group per query, rather than the query's nearest partitions, drops
+nDCG@10 from \REelevenGroupedSScifact{} to \REelevenGroupedScifact{} on SciFact and from
+\REelevenGroupedSFiqa{} to \REelevenGroupedFiqa{} on FiQA against the $s=2$ spread. This is the
+RW-class price of closing the permutation channel by layout: a read observer that the spread
+mechanism does not stop is stopped by grouping, at a quarter to a third of nDCG. It is why the
+memory-resident design, which removes the read channel entirely by keeping search off the disk,
+rather than the grouped partitioned mechanism, is the one we recommend where the store fits in
+memory.
+
 \subsection{Operating-System Artifacts}
 \label{sec:eval-artifacts}
 

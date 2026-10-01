@@ -186,3 +186,19 @@ not require; a public embedding model, with no security derived from its secrecy
 injection budget (A5), as a function of which results are reported. Availability, the integrity of
 agent behavior, microarchitectural side channels, and deployments spanning multiple hosts are out of
 scope.
+
+\paragraph{Passive versus active storage}
+The adversary of this paper is passive at the storage layer: it reads versions and induces writes
+through the agent, but does not itself modify, roll back, or fork the stored files. A compromised
+synchronization account could do all three, and tampering is a membership channel in its own right
+--- corrupt the region an earlier record would occupy and watch whether the agent later errs on that
+topic. We scope active tampering out of the confidentiality analysis, with justification rather than
+by omission. Every slot is an authenticated ciphertext (S2), so a tamper is not silent: it surfaces
+as an authentication failure at the next read, which Mnemos-M reaches at unlock (the whole store is
+read) and fails closed on, independently of content, and which Mnemos-P reaches when a search probes
+the region, observable to the RW class but not content-selected by the adversary. What authentication
+does not provide is rollback detection --- replacing the current files with an authentic earlier
+version --- for which a monotonic counter in hardware (a TPM NV index bound into the manifest's
+associated data) is the standard defense; we note it as the mechanism and leave its evaluation to
+future work, since it bears on freshness rather than on the historical-confidentiality property this
+paper establishes.

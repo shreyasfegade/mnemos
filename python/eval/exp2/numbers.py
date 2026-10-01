@@ -235,6 +235,19 @@ def collect() -> dict[str, str | None]:
     out["REelevenIvfGainMin"] = signed(min(gains)) if gains else None
     out["REelevenIvfGainMax"] = signed(max(gains)) if gains else None
 
+    def dom(name: str) -> dict | None:
+        return next((x for x in (e11 or {}).get("domains", []) if x["domain"] == name), None)
+
+    def nd(x: dict | None, key: str) -> float | None:
+        return x[key]["ndcg"] if x and key in x else None
+
+    for name in ("scifact", "fiqa"):
+        x = dom(name)
+        tag = name.capitalize()
+        out[f"REelevenGroupedExh{tag}"] = f(nd(x, "plaintext_exhaustive"))
+        out[f"REelevenGroupedS{tag}"] = f(nd(x, "p_s2"))
+        out[f"REelevenGrouped{tag}"] = f(nd(x, "p_grouped"))
+
     # --- E2: bursts ---------------------------------------------------------------------------
     e2 = load("e2_agent_attack.json")
     p2 = [r for r in (e2 or {}).get("rows", []) if r.get("layout", "p") == "p"]
