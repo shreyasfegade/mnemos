@@ -333,9 +333,7 @@ def collect() -> dict[str, str | None]:
     # --- E18: the dedup oracle against the real mem0 library ----------------------------------
     e18 = load("e18_real_mem0.json")
     if e18:
-        out["REeighteenAUC"] = ci(
-            e18["auc_write_vs_nonmember"], e18["lo"], e18["hi"], 2
-        )
+        out["REeighteenAUC"] = ci(e18["auc_write_vs_nonmember"], e18["lo"], e18["hi"], 2)
         out["REeighteenMemberWrite"] = f(e18["member_write_rate"], 2)
         out["REeighteenNonmemberWrite"] = f(e18["nonmember_write_rate"], 2)
         out["REeighteenModel"] = e18["model"].replace("_", r"\_")
@@ -349,8 +347,16 @@ def collect() -> dict[str, str | None]:
 
     # --- E22: the probe-design frontier (read amplification vs query equality) ----------------
     e22 = load("e22_probe_frontier.json") or {}
-    words = {1: "One", 2: "Two", 3: "Three", 4: "Four", 6: "Six", 8: "Eight", 16: "Sixteen",
-             32: "ThirtyTwo"}
+    words = {
+        1: "One",
+        2: "Two",
+        3: "Three",
+        4: "Four",
+        6: "Six",
+        8: "Eight",
+        16: "Sixteen",
+        32: "ThirtyTwo",
+    }
     sp = {r["spread"]: r for r in e22.get("spread", [])}
     gr = {r["group_size"]: r for r in e22.get("grouped", [])}
     for s in (1, 2, 3, 4, 6, 8):
@@ -366,6 +372,7 @@ def collect() -> dict[str, str | None]:
 
     # --- E23: refusal onset vs geometry and skew ----------------------------------------------
     e23 = load("e23_sensitivity.json")
+
     # Percentages of nominal capacity, as \REnineUtilP is.
     def pct(v: float | None) -> str | None:
         return f(None if v is None else 100 * v, 0)
@@ -380,6 +387,35 @@ def collect() -> dict[str, str | None]:
     }
     for z, tag in ((0.8, "Low"), (1.2, "High")):
         out[f"REtwentythreePSkew{tag}"] = pct(skew[z]["p_util"] if z in skew else None)
+
+    # --- E19: the multi-version channel through restic -----------------------------------------
+    e19 = {
+        (r["kind"], r["granularity_flushes"]): r
+        for r in (load("e19_restic.json") or {}).get("rows", [])
+    }
+    for (kind, g), tag in ((("p", 1), "POne"), (("p", 4), "PFour")):
+        r = e19.get((kind, g))
+        out[f"REnineteenPrec{tag}"] = ci_of(r, ("precision", "lo", "hi"))
+    for (kind, g), tag in ((("p", 1), "POne"), (("m", 1), "MOne")):
+        r = e19.get((kind, g))
+        out[f"REnineteenAdded{tag}"] = f(r and r["mean_data_added"] / 1024, 0)
+        out[f"REnineteenRewritten{tag}"] = f(r and r["mean_rewritten_bytes"] / 1024, 0)
+        out[f"REnineteenAmp{tag}"] = f(r and r["upload_amplification"], 0)
+    m1 = e19.get(("m", 1))
+    out["REnineteenMBlobs"] = f(m1 and m1["mean_new_blobs"], 1)
+
+    # --- E25: Mnemos-M/disk at scale ---------------------------------------------------------
+    e25 = {
+        (r["engine"], r["n"]): r
+        for r in (load("e25_scale.json") or {}).get("rows", [])
+        if "error" not in r
+    }
+    for eng, tag in (("m-disk", "Disk"), ("m-sweep-ivf", "Mem"), ("p", "P")):
+        r = e25.get((eng, 100_000))
+        out[f"REtwentyfive{tag}Search"] = f(r and r["search_ms"]["p50"], 1)
+        out[f"REtwentyfive{tag}Put"] = f(r and r["put_sparse_ms"]["p50"], 1)
+        out[f"REtwentyfive{tag}Unlock"] = f(r and r["unlock_s"], 1)
+        out[f"REtwentyfive{tag}RAM"] = f(r and r["resident_bytes"] / 1e6, 1)
 
     # --- E28: attack cost, descriptive, from E2's logs ----------------------------------------
     e28 = load("e28_attack_cost.json") or {}

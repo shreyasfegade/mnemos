@@ -215,7 +215,12 @@ induced writes, and a write observer does neither. Against Mnemos-M neither lear
 Version diffs supply that membership. The region holding a pre-$\tau$ record is inside the diff at
 every granularity tested; granularity sets how precisely it is named, down to the $1/B$ null when the
 diff covers the whole file. Re-encrypting the whole file at a session boundary makes a
-cross-session diff total and drives the precision to exactly the null.
+cross-session diff total and drives the precision to exactly the null. A real backup tool keeps
+versions the attack can use (registered experiment E19): backing Mnemos-P up with restic after every
+flush and restoring each snapshot through restic's own interface gives precision
+\REnineteenPrecPOne{} against the $1/64$ null, and \REnineteenPrecPFour{} at one snapshot per four
+flushes. An adversary holding the encrypted repository without its key sees only how much each
+snapshot added; for Mnemos-M that is exactly \REnineteenMBlobs{} new chunk per snapshot, a constant.
 
 \paragraph{The composed attack}
 We ran the full chain, version diffs to membership, induced writes to labels, composed to a cohort-H
@@ -311,14 +316,22 @@ free slot. It writes \REtwentyoneSweepKiB~KiB per flush whether the flush carrie
 and at $\Delta = 10$~s, \REtwentyoneSweepGBDay~GB a day: roughly \REtwentyoneRatio${\times}$ less, and
 about \REtwentyoneDriveYears{} years of continuous operation against a $600$~TBW rating. Locking
 Mnemos-M rewrites nothing extra; locking Mnemos-P rewrites its whole file,
-\REtwentyonePLockMiB~MiB, which a synchronization client uploads in full each session.
+\REtwentyonePLockMiB~MiB, which a synchronization client uploads in full each session. A
+chunking backup erases part of the sweep's advantage in upload volume: restic stores whole chunks of
+about a megabyte, so a snapshot of Mnemos-M adds \REnineteenAddedMOne~KiB for \REnineteenRewrittenMOne~KiB
+rewritten, and of Mnemos-P \REnineteenAddedPOne~KiB for \REnineteenRewrittenPOne~KiB (E19).
 
 \paragraph{Above the memory limit}
 Against the write observer W that anchors the threat model, the partitioned design is not the
 right tool above the memory limit. Mnemos-M/disk (\cref{sec:mnemos-m}) keeps only the position map
 and logical index in memory and leaves headers and payloads on disk, written only by the sweep, so
 its writes remain a function of the clock and every write-side channel stays closed against W at
-any size. A read observer RW sees its search access pattern, which only oblivious search closes;
+any size. At $10^5$ records (registered experiment E25) it holds \REtwentyfiveDiskRAM~MB resident
+against Mnemos-M's \REtwentyfiveMemRAM~MB, searches in \REtwentyfiveDiskSearch~ms against
+Mnemos-P's \REtwentyfivePSearch~ms, writes a sparse record in \REtwentyfiveDiskPut~ms against
+\REtwentyfivePPut~ms, and pays \REtwentyfiveDiskUnlock~s at unlock to read every header. Resident
+memory and unlock time are linear in $n$, so the measurement extrapolates to a few megabytes and
+about a minute and a half at $10^6$; we did not measure beyond $10^5$. A read observer RW sees its search access pattern, which only oblivious search closes;
 \cref{sec:background} compares that cost against recent disk-oblivious ANN and private-memory
 systems~\cite{rathee2026onyx,kaviani2026opal,zhu2025compass}. The partitioned design remains the
 construction \cref{thm:main} is proved for and the point of comparison, not the recommended
