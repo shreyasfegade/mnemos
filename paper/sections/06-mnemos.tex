@@ -113,8 +113,9 @@ reaches copies a synchronization provider already retains.
 
 The master key is wrapped by a hardware key store, the Windows TPM through the CNG Platform Crypto
 Provider, and unwrapped into a locked, promptly zeroized region only while the store is unlocked;
-working keys are derived from it by HKDF. Custody is paired with locking on suspend and hibernate
-notifications (\cref{sec:artifacts}).
+working keys are derived from it by HKDF. Custody is paired with a guard that locks every store on
+the operating system's suspend notification (\cref{sec:artifacts}), tested with the broadcast
+Windows sends before sleep.
 
 Every disk-visible operation emits one typed event naming the file ranges it touched. That stream is
 the transcript the attack harness consumes, so an attack cannot observe more than the storage
