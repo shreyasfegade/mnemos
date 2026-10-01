@@ -148,7 +148,24 @@ def e19() -> dict[str, float]:
     return out
 
 
+def e25() -> dict[str, float]:
+    d = _load("e25_scale.json")
+    if not d:
+        return {}
+    rows = {(r["engine"], r["n"]): r for r in d["rows"] if "error" not in r}
+    out = {}
+    disk, mem = rows.get(("m-disk", 100_000)), rows.get(("m-sweep-ivf", 100_000))
+    if disk and mem:
+        out["E25 M/disk resident over M resident, n=100k"] = (
+            disk["resident_bytes"] / mem["resident_bytes"]
+        )
+    if disk:
+        out["E25 M/disk search p50 ms, n=100k"] = disk["search_ms"]["p50"]
+    return out
+
+
 EXTRACTORS = {
+    "e25": e25,
     "e21": e21,
     "e20": e20,
     "e17": e17,
@@ -386,5 +403,26 @@ CHECKS = [
         "restic chunks at ~1 MiB (min 512 KiB) and the store's ciphertext is incompressible, so a "
         "snapshot cannot add fewer bytes than the flush rewrote; predict amplification >= 1.",
         "e19",
+    ),
+    # --- E25: Mnemos-M/disk at scale (registered 2026-10-01, before the run) ---
+    _check(
+        "E25 M/disk resident over M resident, n=100k",
+        "sec:mnemos-m -- M/disk keeps only a position map and partition ids resident",
+        0.0,
+        0.05,
+        "Mnemos-M keeps every header and payload (~1.8 KB per slot at E10's geometry) in the "
+        "arena; M/disk keeps only a few bytes of partition id per slot. Predict the ratio of "
+        "resident bytes under 5%.",
+        "e25",
+    ),
+    _check(
+        "E25 M/disk search p50 ms, n=100k",
+        "sec:eval-perf -- M/disk search stays interactive at 100k records",
+        0.0,
+        50.0,
+        "A search reads and decrypts the headers of its 8 probed logical partitions, about 1,600 "
+        "at n=100k and B=512, mostly from the page cache. Predict a median under 50 ms; a slower "
+        "median is recorded as the price of leaving the memory limit.",
+        "e25",
     ),
 ]
