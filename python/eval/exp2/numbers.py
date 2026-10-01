@@ -417,6 +417,11 @@ def collect() -> dict[str, str | None]:
         out[f"REtwentyfive{tag}Unlock"] = f(r and r["unlock_s"], 1)
         out[f"REtwentyfive{tag}RAM"] = f(r and r["resident_bytes"] / 1e6, 1)
 
+    # --- E27: how much archival alignment the adversary needs ---------------------------------
+    e27 = {r["alpha"]: r for r in (load("e27_archival_mix.json") or {}).get("rows", [])}
+    for a, tag in ((0.0, "Zero"), (0.1, "Tenth"), (0.25, "Quarter"), (1.0, "Full")):
+        out[f"REtwentyseven{tag}"] = signed(e27[a]["adv_H"]) if a in e27 else None
+
     # --- E28: attack cost, descriptive, from E2's logs ----------------------------------------
     e28 = load("e28_attack_cost.json") or {}
     sec = [m["seconds_per_turn"] for m in e28.get("models", [])]
