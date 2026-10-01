@@ -223,10 +223,16 @@ def run_attack(vecs, topics, n_topics, cents, budget: int, w_real: int, trial: i
         )
         eng, _, _ = lab.create("p", tmp / "s", cents, over, {})
 
+        # Each trial is an *independent induction sequence*: it draws its own cohort-H / cohort-P
+        # split, not just its own induction order. The earlier harness fixed the
+        # split at the median and varied only the order, so the bootstrap over trials captured
+        # within-split noise rather than seed-to-seed variance. Re-drawing the split per trial makes
+        # the resampling unit a whole independent sequence, which the interval should reflect.
         n = len(vecs)
+        perm = rng.permutation(n)
         half = n // 2
-        H = np.arange(half)
-        P = np.arange(half, n)
+        H = perm[:half]
+        P = perm[half:]
 
         for i in H:
             with contextlib.suppress(Exception):
@@ -290,9 +296,11 @@ def run_growing(vecs, topics, n_topics, cents, budget: int, w_real: int, trial: 
     rng = np.random.default_rng(900 + trial)
     part = np.argmax(vecs @ cents.T, axis=1)
     n = len(vecs)
+    # Independent split per trial, as in run_attack.
+    perm = rng.permutation(n)
     half = n // 2
-    H = np.arange(half)
-    P = np.arange(half, n)
+    H = perm[:half]
+    P = perm[half:]
     by_topic_pool: dict[int, list[int]] = defaultdict(list)
     for i in P:
         by_topic_pool[int(topics[i])].append(int(i))
@@ -363,6 +371,7 @@ def main() -> None:
                     "lo": lo,
                     "hi": hi,
                     "trials": args.trials,
+                    "resample_unit": "independent induction sequence (own cohort split + order)",
                 }
                 results["rows"].append(row)
                 print(
