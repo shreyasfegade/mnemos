@@ -88,11 +88,28 @@ touch cohort-H blocks, and the labels still carry no topic information, \advhist
 \REsixChroma$; which blocks an insert touches is a function of graph structure and insertion order,
 not only of content. The supplementary material tabulates every store.
 
-What the deployed stores establish is therefore the premise of \cref{lem:transfer} rather than its
-conclusion: transfer needs a layout that discloses which partition holds a given stored record, and
-none of these stores discloses that at the granularity a block-level observer sees. The
-growing-region layout of \cref{sec:transfer} does, which is why the attack works against it. A
-larger budget, a finer block size, or a store that exposes per-list offsets could change this; the
+These six stores establish the premise of \cref{lem:transfer} rather than its conclusion: transfer
+needs a layout that discloses which partition holds a given stored record, and none of them discloses
+that at the granularity a block-level observer sees. A store that exposes per-list offsets would, and
+one does.
+
+\paragraph{A real store the attack reaches: pgvector}
+We added \texttt{pgvector}, the PostgreSQL vector extension, with an \texttt{ivfflat} index built on
+the cohort and inserts afterward, inside the same \texttt{gocryptfs} volume, driven through real SQL
+with a checkpoint after each write so the ciphertext reflects it. Unlike the six stores above,
+\texttt{pgvector}'s \texttt{ivfflat} assigns an insert to its nearest list and writes that list's
+heap and index pages, so the layout \emph{does} disclose per-list placement to a block observer.
+The attack reaches cohort H: held-out \advhist{} is \REsixteenPgAdv{} over \REsixteenPgSeeds{} seeds
+against a chance rate of \REsixteenPgChance, the interval entirely above zero. This is the target
+\cref{lem:transfer} predicts and the one the deployed-store null did not provide --- a real, widely
+deployed, content-addressed on-disk store whose placement transfers to the pre-compromise cohort.
+It is weaker than the growing-layout construction, because Postgres interleaves list pages with
+write-ahead log and heap churn that a 4\,KiB observer cannot fully separate, but it clears chance at
+the lower bound, which the growing layout alone could not claim for a shipped system.
+
+The reading across both is that structure transfer is neither universal nor hypothetical: it needs a
+content-disclosing layout, most deployed stores do not expose one at block granularity, and at least
+one widely used store does. A larger budget or a finer block size could move the others; the
 measurement bounds what was observed, not what is possible.
 
 \subsection{Real-Agent Induction and the Deduplication Oracle}

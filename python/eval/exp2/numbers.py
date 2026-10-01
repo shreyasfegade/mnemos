@@ -322,6 +322,13 @@ def collect() -> dict[str, str | None]:
     by17 = {r["granularity_flushes"]: r for r in (e17 or {}).get("composed", [])}
     orc = e17.get("oracle") if e17 else None
     out["REseventeenOracle"] = signed(orc["adv_H"]) if orc else None
+
+    # --- E16: real content-placed layouts under gocryptfs ------------------------------------------
+    e16 = load("e16_real_layouts.json")
+    pg = next((s for s in (e16 or {}).get("stores", []) if s["store"] == "pgvector"), None)
+    out["REsixteenPgAdv"] = ci_of(pg, ("adv_hist", "adv_hist_lo", "adv_hist_hi")) if pg else None
+    out["REsixteenPgChance"] = f(pg["chance"], 3) if pg else None
+    out["REsixteenPgSeeds"] = str(pg["seeds"]) if pg else None
     for g, tag in ((1, "One"), (2, "Two"), (4, "Four"), (16, "Sixteen")):
         r = by17.get(g)
         out[f"REseventeenComposed{tag}"] = signed(r and r["adv_H"])
