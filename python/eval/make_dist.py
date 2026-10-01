@@ -25,7 +25,7 @@ from eval.lab import corpus as C
 
 PAPER = C.repo_root() / "paper"
 DIST = PAPER / "dist"
-ROOTS = ("main", "supplement")
+ROOTS = ("main", "supplement", "response")
 INCLUDE = re.compile(r"\\(?:input|include|includegraphics(?:\[[^\]]*\])?)\{([^}]+)\}")
 
 
