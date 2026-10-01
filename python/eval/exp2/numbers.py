@@ -320,7 +320,8 @@ def collect() -> dict[str, str | None]:
     # --- E17: the composed attack on Mnemos-P ------------------------------------------------
     e17 = load("e17_composed.json")
     by17 = {r["granularity_flushes"]: r for r in (e17 or {}).get("composed", [])}
-    out["REseventeenOracle"] = ci_of(e17.get("oracle") if e17 else None, ("adv_H", "lo", "hi"))
+    orc = e17.get("oracle") if e17 else None
+    out["REseventeenOracle"] = signed(orc["adv_H"]) if orc else None
     for g, tag in ((1, "One"), (2, "Two"), (4, "Four"), (16, "Sixteen")):
         r = by17.get(g)
         out[f"REseventeenComposed{tag}"] = signed(r and r["adv_H"])

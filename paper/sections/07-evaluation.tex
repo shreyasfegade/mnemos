@@ -251,6 +251,22 @@ threat model rather than an assumption. Re-encrypting the whole file at a sessio
 cross-session diff total, and drives the precision to exactly the null. \Cref{tab:ledger} gives the
 channel in bits at each granularity; the full table is in the supplementary material.
 
+\paragraph{The composed attack end to end}
+A reader asked us to run the full chain the paper motivates --- version diffs to membership, induced
+writes to labels, compose to a cohort-H topic --- rather than the oracle that supplies membership, and
+to report it beside that oracle. We did, on Mnemos-P with membership derived from actual diffs at
+$g \in \{1, 2, 4, 16\}$, and the registered prediction, that the composition would reach cohort H,
+\emph{failed}. On agent memories the induced-label map does not localize topics on the sealed, padded
+layout: even the oracle, handed each cohort-H record's exact region, recovers its topic only at
+chance, \REseventeenOracle{} advantage, consistent with the Mnemos-P rows of \cref{sec:eval-induction}.
+The composed attack, choosing among the \REseventeenCandOne{} candidate regions a $g=1$ diff names, is
+no better, \REseventeenComposedOne, and drifts slightly below chance as coarser diffs enlarge the
+candidate set and the committed label map anti-learns. The finding is stronger for the sealed design
+than the prediction assumed: Mnemos-P keeps cohort H at chance whether membership is withheld,
+supplied by an oracle, or reconstructed from version diffs. The multi-version channel is real and
+measured above, but on this corpus it does not compose with the write-channel label map into a
+cohort-H topic recovery, because that label map is itself weak on the partitioned design.
+
 \paragraph{Refusals}
 An adversary that induces writes destined for a region and watches whether the region is rewritten
 measures \cref{prop:capacity} directly. A refusal that writes nothing is not a small leak: a full

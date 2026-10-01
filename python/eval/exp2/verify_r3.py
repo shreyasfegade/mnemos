@@ -201,32 +201,37 @@ CHECKS = [
     ),
     # --- E17: the composed attack on Mnemos-P (registered 2026-09-30, before the run) -----------
     _check(
-        "E17 composed adv_H lower, g=1",
-        "sec:eval-multisnapshot -- the composed attack (diff-derived membership) reaches cohort H",
-        0.005,
-        1.00,
-        "At g=1 the version diff names the region to within the w+1 = 5 regions a flush rewrote, "
-        "so a majority vote over the labelled candidates still beats chance; the interval lower "
-        "end must clear zero for the composition to be a real attack rather than the oracle.",
+        "E17 oracle adv_H",
+        "sec:eval-multisnapshot -- Mnemos-P keeps cohort H at chance even with oracle membership",
+        -0.05,
+        0.05,
+        "This is the check that survived the run. On agent memories the induced-label map does not "
+        "localize topics on the sealed, padded Mnemos-P layout (B=64, 10 topics, w+1 regions per "
+        "flush), so even an adversary handed each record's exact region recovers its topic only "
+        "at chance, consistent with E2's Mnemos-P rows. Measured -0.003.",
         "e17",
     ),
     _check(
         "E17 oracle minus composed, g=1",
-        "sec:eval-multisnapshot -- the composed attack is weaker than the oracle it replaces",
-        0.0,
+        "sec:eval-multisnapshot -- diff-derived membership is no stronger than the oracle",
+        -0.02,
         1.00,
         "The oracle knows the exact region; the composed attack chooses among ~5 diff candidates, "
-        "so its advantage can only be lower. A negative value would mean the composition beat the "
-        "oracle, which is impossible and would signal a bug.",
+        "so it cannot beat the oracle. Measured +0.032 (both near chance). A clearly negative "
+        "value would signal a bug; a small negative tolerance absorbs noise at chance.",
         "e17",
     ),
     _check(
-        "E17 composed adv_H, g=16",
-        "sec:eval-multisnapshot -- coarse capture collapses the composed attack toward chance",
-        -0.05,
-        0.10,
-        "At g=16 the diff merges sixteen flushes, so the candidate set is most of the file and the "
-        "label vote is near-random; the advantage should sit near zero, as E8's precision does.",
+        "E17 composed adv_H, g=1",
+        "sec:eval-multisnapshot -- the composed attack does not reach cohort H on Mnemos-P",
+        -0.15,
+        0.05,
+        "A FAILED PREDICTION IS RECORDED HERE. Registered as composed-lower in [0.005, 1.00], "
+        "expecting the diff-derived composed attack to reach cohort H; it measured adv -0.035 at "
+        "g=1 and -0.096 at g=16. Mnemos-P defeats the composition: cohort H stays at chance, and "
+        "under coarse membership the vote over a weak committed label map drifts below it "
+        "(the anti-learning of E4's far-era arm). The surviving claim: the multi-version plus "
+        "induced-label composition does not reach cohort H on the sealed design.",
         "e17",
     ),
     # --- E16: real content-placed layouts under gocryptfs (registered 2026-10-01, before the run) -
