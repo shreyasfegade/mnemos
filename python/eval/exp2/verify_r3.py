@@ -70,6 +70,16 @@ def e20() -> dict[str, float]:
     return out
 
 
+def e23() -> dict[str, float]:
+    d = _load("e23_sensitivity.json")
+    if not d:
+        return {}
+    return {
+        "E23 Mnemos-P worst utilisation at first refusal": d["p_util_worst"],
+        "E23 Mnemos-M worst utilisation at first refusal": d["m_util_worst"],
+    }
+
+
 def e22() -> dict[str, float]:
     d = _load("e22_probe_frontier.json")
     if not d:
@@ -122,7 +132,7 @@ def e17() -> dict[str, float]:
     return out
 
 
-EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17, "e16": e16, "e18": e18, "e22": e22}
+EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17, "e16": e16, "e18": e18, "e22": e22, "e23": e23}
 
 
 # ----------------------------------------------------------------------------- checks
@@ -288,6 +298,26 @@ CHECKS = [
         "positive. mem0's LLM dedup is lenient on paraphrases, so the gap may be modest (like "
         "E3's LLM arm, AUC ~0.62), but its sign is the claim. A non-positive gap is recorded.",
         "e18",
+    ),
+    # --- E23: capacity/refusal sensitivity (registered 2026-10-01, before the run) ---
+    _check(
+        "E23 Mnemos-P worst utilisation at first refusal",
+        "sec:eval-refusal -- under skew Mnemos-P leaves the admissible regime well before full",
+        0.0,
+        0.60,
+        "The capacity trade-off is geometry- and skew-dependent; across B in {64,128,256}, C in "
+        "{16,32,64} and Zipf a in {0.8,1.0,1.2} the worst-case utilisation at the first refusal "
+        "should sit well below 1.0 -- the point of M9. Predict the worst case is under 0.60.",
+        "e23",
+    ),
+    _check(
+        "E23 Mnemos-M worst utilisation at first refusal",
+        "sec:eval-refusal -- Mnemos-M's global-only bound admits essentially every slot",
+        0.95,
+        1.00,
+        "Mnemos-M has no per-partition capacity, so it refuses only when the whole store is full; "
+        "across the same grid its utilisation at first refusal should be ~1.0 regardless of skew.",
+        "e23",
     ),
     # --- E22: probe-design frontier (registered 2026-10-01, before the run) ---
     _check(
