@@ -80,7 +80,8 @@ def main() -> None:
                     f"n={n:>7} {kind:>12}: search p50 {r['search_ms']['p50']:8.3f} ms "
                     f"p95 {r['search_ms']['p95']:8.3f} | put(sparse) p50 "
                     f"{r['put_sparse_ms']['p50']:7.3f} ms | "
-                    f"RAM {r['resident_bytes'] / 1e6:8.2f} MB | disk {r['disk_bytes'] / 1e6:8.1f} MB | unlock {r['unlock_s']:6.2f} s",
+                    f"RAM {r['resident_bytes'] / 1e6:8.2f} MB | "
+                    f"disk {r['disk_bytes'] / 1e6:8.1f} MB | unlock {r['unlock_s']:6.2f} s",
                     flush=True,
                 )
             OUT.write_text(json.dumps(out, indent=1), encoding="utf-8")
