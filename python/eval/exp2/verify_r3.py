@@ -70,6 +70,17 @@ def e20() -> dict[str, float]:
     return out
 
 
+def e18() -> dict[str, float]:
+    d = _load("e18_real_mem0.json")
+    if not d:
+        return {}
+    return {
+        "E18 real mem0 dedup oracle AUC": d["auc_write_vs_nonmember"],
+        "E18 real mem0 dedup oracle AUC lower": d["lo"],
+        "E18 member minus nonmember write rate": d["member_write_rate"] - d["nonmember_write_rate"],
+    }
+
+
 def e16() -> dict[str, float]:
     d = _load("e16_real_layouts.json")
     if not d:
@@ -96,7 +107,7 @@ def e17() -> dict[str, float]:
     return out
 
 
-EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17, "e16": e16}
+EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17, "e16": e16, "e18": e18}
 
 
 # ----------------------------------------------------------------------------- checks
@@ -248,5 +259,19 @@ CHECKS = [
         "and heap churn swamp the list-page signal at 4 KiB -- that null is recorded, and the "
         "growing layout remains the clearest demonstration, which Table 6 and the abstract allow.",
         "e16",
+    ),
+    # --- E18: dedup oracle vs real mem0 2.2.1 (registered 2026-10-01, before the run) ---
+    _check(
+        "E18 member minus nonmember write rate",
+        "sec:eval-dedup -- against the real mem0 library a member fact is written less than a "
+        "non-member, so the occurrence of a vector-store write is a membership signal",
+        0.05,
+        1.00,
+        "mem0's LLM add/skip stage deduplicates a fact already in memory, so a member probe (an "
+        "exact repeat of a seeded fact) should produce a vector-store write less often than a "
+        "non-member. The write-rate gap is the oracle's signal at the file level; predict it is "
+        "positive. mem0's LLM dedup is lenient on paraphrases, so the gap may be modest (like "
+        "E3's LLM arm, AUC ~0.62), but its sign is the claim. A non-positive gap is recorded.",
+        "e18",
     ),
 ]

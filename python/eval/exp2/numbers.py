@@ -323,7 +323,7 @@ def collect() -> dict[str, str | None]:
     orc = e17.get("oracle") if e17 else None
     out["REseventeenOracle"] = signed(orc["adv_H"]) if orc else None
 
-    # --- E16: real content-placed layouts under gocryptfs ------------------------------------------
+    # --- E16: real content-placed layouts under gocryptfs ---------------------------------------
     e16 = load("e16_real_layouts.json")
     pg = next((s for s in (e16 or {}).get("stores", []) if s["store"] == "pgvector"), None)
     out["REsixteenPgAdv"] = ci_of(pg, ("adv_hist", "adv_hist_lo", "adv_hist_hi")) if pg else None
