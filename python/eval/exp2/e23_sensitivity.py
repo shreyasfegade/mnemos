@@ -85,7 +85,9 @@ def main() -> None:
         json.loads(line)
         for line in (C.repo_root() / "data" / "d2-beir" / "notes.jsonl").open(encoding="utf-8")
         if line.strip()
-    ][:6000]
+    ][:4000]
+    # The same 4,000 records as E22, whose embeddings are cached; the workload samples from them
+    # with replacement, so the corpus size does not bound the number of puts.
     vecs = embed_cached([r["text"] for r in rows])
     # Topic labels: cluster into a modest number of topics for the skew to act on.
     n_topics = 12
