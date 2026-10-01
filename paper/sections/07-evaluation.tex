@@ -51,6 +51,20 @@ is the one the gap-zero row supports: drift protects early records against an ad
 induces with current material, and considerably less against one that does not. The coarse-taxonomy
 arm is scored against coarse labels, so its chance rate is one in four rather than one in twelve.
 
+Two features of the curve are worth explaining rather than leaving as noise, since a reader asked.
+The advantage turns \emph{negative} at the far eras (\REfourNaive{} at the largest gap, an interval
+entirely below zero), which is systematic mislabelling, not sampling error: the attacker fixes its
+partition-to-topic map on the induced era and commits to it, and once that era's cluster geometry has
+drifted from cohort H's, the committed map assigns cohort-H records to the wrong topic more often than
+a uniform guess would. A held-out map that has anti-learned its target scores below chance, which is
+exactly what a stale map does. Conversely the gap-zero advantage (\REfourAware) exceeds the
+i.i.d.\ shuffled control (\REfourShuffled), because the shuffled control mixes every era and so
+dilutes the era-specific partition structure, while gap-zero induction draws from the \emph{same} era
+as cohort H and matches that structure; the comparison that isolates drift is gap-zero against the far
+eras, not against the shuffle. Because the topic prior is skewed, advantage is reported over $1/K$ and,
+in the supplementary material, over the majority-class baseline, so that a design's standing does not
+rest on an artificially low chance rate.
+
 \subsection{Deployed Stores, and Time-Placed Controls}
 \label{sec:eval-real}
 

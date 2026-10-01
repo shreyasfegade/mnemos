@@ -187,9 +187,14 @@ def run(texts, topics, names, coarse: bool):
     counts = np.bincount(np.asarray(topics)[H], minlength=n_topics)
     tot = counts.sum()
     label_entropy = -sum((c / tot) * math.log2(c / tot) for c in counts if c > 0) if tot else 0.0
+    # Majority-class rate, so advantage can be reported over the skewed baseline, not only 1/K
+    #. A design whose chance rate is the majority class rather than uniform does
+    # not get credit for beating an artificially low 1/K.
+    majority_rate = float(counts.max() / tot) if tot else 1.0 / n_topics
     return {
         "n_topics": n_topics,
         "chance": 1.0 / n_topics,
+        "majority_rate": majority_rate,
         "n_records": n,
         "label_entropy_bits": label_entropy,
         "curve": curve,

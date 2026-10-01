@@ -109,6 +109,7 @@ def collect() -> dict[str, str | None]:
     # --- E4: drift (the abstract's range) --------------------------------------------------------
     out["REfourNaive"] = signed(verified.get("E4 adv_H, naive (current content)"), 2)
     out["REfourAware"] = signed(verified.get("E4 adv_H, historically aware"), 2)
+    out["REfourShuffled"] = signed(verified.get("E4 adv_H, i.i.d. control"), 2)
 
     # --- E6: deployed stores -------------------------------------------------------------------
     e6 = load("e6_stores.json")
