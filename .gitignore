@@ -103,4 +103,3 @@ python/eval/results/**/*.npz
 .venv-fw/
 tools/bin/
 uv.lock
-python/eval/e8/results16/
