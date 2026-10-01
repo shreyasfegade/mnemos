@@ -132,7 +132,32 @@ def e17() -> dict[str, float]:
     return out
 
 
-EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17, "e16": e16, "e18": e18, "e22": e22, "e23": e23}
+def e19() -> dict[str, float]:
+    d = _load("e19_restic.json")
+    if not d:
+        return {}
+    rows = {(r["kind"], r["granularity_flushes"]): r for r in d["rows"]}
+    out = {}
+    if ("p", 1) in rows:
+        out["E19 Mnemos-P precision through restic-restored versions, g=1"] = rows[("p", 1)][
+            "precision"
+        ]
+        out["E19 Mnemos-P restic upload over bytes rewritten, g=1"] = rows[("p", 1)][
+            "upload_amplification"
+        ]
+    return out
+
+
+EXTRACTORS = {
+    "e21": e21,
+    "e20": e20,
+    "e17": e17,
+    "e16": e16,
+    "e18": e18,
+    "e22": e22,
+    "e23": e23,
+    "e19": e19,
+}
 
 
 # ----------------------------------------------------------------------------- checks
@@ -340,5 +365,26 @@ CHECKS = [
         "group, with probability ~group_size/B; a larger group means fewer groups, more "
         "a higher false-positive rate, and a lower J. Predict J at g=32 below g=2.",
         "e22",
+    ),
+    # --- E19: the multi-version channel through restic (registered 2026-10-01, before the run) ---
+    _check(
+        "E19 Mnemos-P precision through restic-restored versions, g=1",
+        "sec:eval-multisnapshot -- a real backup tool keeps versions the region diff can use",
+        0.05,
+        1.00,
+        "restic restores byte-exact files, so a key holder diffing consecutive restored snapshots "
+        "should reproduce E8's per-flush precision (0.21 at B=64, null 1/64 = 0.016). Predict at "
+        "least 0.05: well above the null. A lower value would mean the tool's versioning blunts "
+        "the channel, and is recorded.",
+        "e19",
+    ),
+    _check(
+        "E19 Mnemos-P restic upload over bytes rewritten, g=1",
+        "sec:eval-perf -- content-defined chunking uploads whole chunks around each rewrite",
+        1.0,
+        1000.0,
+        "restic chunks at ~1 MiB (min 512 KiB) and the store's ciphertext is incompressible, so a "
+        "snapshot cannot add fewer bytes than the flush rewrote; predict amplification >= 1.",
+        "e19",
     ),
 ]
