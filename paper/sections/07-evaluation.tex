@@ -138,6 +138,18 @@ the padded design to stay within 0.05 of chance throughout, and registered that 
 running the burst arms; it does not. An agent that writes in bursts leaves the partitioned
 design's write channel considerably more open than single-record measurements suggest.
 
+Each interval here resamples \emph{independent induction sequences}: a trial draws its own
+cohort-H/cohort-P split as well as its own induction order, so the twenty units are whole sequences
+rather than reorderings of one split, and the interval reflects seed-to-seed variance (Reviewer~1
+noted the earlier harness fixed the split and resampled only within it). This also reconciles the
+two agent-memory measurements a reader flagged as disagreeing: the longitudinal study in the
+supplementary material and this one report different advantages at nominally similar budgets because
+their budgets are different quantities --- the longitudinal budget counts induced writes per topic,
+while this one counts \emph{turns}, each a burst of $w_{\mathrm{real}}$ records --- and they run on
+different record counts; expressed in records per topic they agree that agent memories carry
+transferable structure under a growing layout and that Mnemos-P holds single-record attacks near
+chance.
+
 The deduplication oracle of \cref{sec:attack-derived} is measured next, with every arm tabulated
 in the supplementary material. The measurement has to
 avoid a circularity the setting invites: prompting the agent to write about a retrieved subject and
