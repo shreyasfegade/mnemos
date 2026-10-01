@@ -70,6 +70,20 @@ def e20() -> dict[str, float]:
     return out
 
 
+def e22() -> dict[str, float]:
+    d = _load("e22_probe_frontier.json")
+    if not d:
+        return {}
+    sp = {r["spread"]: r for r in d.get("spread", [])}
+    gr = {r["group_size"]: r for r in d.get("grouped", [])}
+    out: dict[str, float] = {}
+    if 2 in sp and 8 in sp:
+        out["E22 spread J drop, s2 minus s8"] = sp[2]["threshold_j"] - sp[8]["threshold_j"]
+    if 2 in gr and 32 in gr:
+        out["E22 grouped J drop, g2 minus g32"] = gr[2]["threshold_j"] - gr[32]["threshold_j"]
+    return out
+
+
 def e18() -> dict[str, float]:
     d = _load("e18_real_mem0.json")
     if not d:
@@ -108,7 +122,7 @@ def e17() -> dict[str, float]:
     return out
 
 
-EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17, "e16": e16, "e18": e18}
+EXTRACTORS = {"e21": e21, "e20": e20, "e17": e17, "e16": e16, "e18": e18, "e22": e22}
 
 
 # ----------------------------------------------------------------------------- checks
@@ -274,5 +288,27 @@ CHECKS = [
         "positive. mem0's LLM dedup is lenient on paraphrases, so the gap may be modest (like "
         "E3's LLM arm, AUC ~0.62), but its sign is the claim. A non-positive gap is recorded.",
         "e18",
+    ),
+    # --- E22: probe-design frontier (registered 2026-10-01, before the run) ---
+    _check(
+        "E22 spread J drop, s2 minus s8",
+        "sec:eval-query -- more random cover (larger s) weakens the overlap-threshold test",
+        0.0,
+        1.00,
+        "Each query reads s*k regions, (s-1)*k fresh random cover, so the expected overlap "
+        "between two equal queries falls as s grows (the gap formula k(1-(2s-1)k/B)); the held-out "
+        "query-equality J at s=8 should fall below s=2. The frontier shape is the deliverable; "
+        "check fixes its direction.",
+        "e22",
+    ),
+    _check(
+        "E22 grouped J drop, g2 minus g32",
+        "sec:eval-query -- a larger grouped anonymity set weakens query-equality recognition",
+        0.0,
+        1.00,
+        "Grouped probing reads one whole group, so two distinct queries collide when they share a "
+        "group, with probability ~group_size/B; a larger group means fewer groups, more "
+        "a higher false-positive rate, and a lower J. Predict J at g=32 below g=2.",
+        "e22",
     ),
 ]
