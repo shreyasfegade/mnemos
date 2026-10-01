@@ -36,6 +36,9 @@ STEPS = (
     # The supplement reads main.aux through xr, so it is built after main is final.
     ("pdflatex", "supplement"),
     ("pdflatex", "supplement"),
+    # The response letter quotes the same macros and cites the revised paper's sections.
+    ("pdflatex", "response"),
+    ("pdflatex", "response"),
 )
 
 
@@ -75,7 +78,7 @@ def main() -> None:
     for tool, job in STEPS:
         run(tool, job)
     problems: list[str] = []
-    for job in ("main", "supplement"):
+    for job in ("main", "supplement", "response"):
         p, summary = check(job, started)
         problems.extend(p)
         if summary:

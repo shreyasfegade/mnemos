@@ -43,7 +43,12 @@ PREAMBLE = r"""
 \newcommand{\advhist}{\mathrm{Adv}_{\mathrm{hist}}}
 \newcommand{\advpost}{\mathrm{Adv}_{\mathrm{post}}}
 \newcommand{\AdvH}{\mathsf{Adv}^{\mathrm{H}}}
+\newcommand{\AdvR}{\mathsf{Adv}^{\mathrm{R}}}
 \newcommand{\negl}{\mathsf{negl}}
+\newcommand{\pt}[1]{\par\textbf{#1}\par}
+\newcommand{\done}{\textbf{[done]}}
+\newcommand{\pdone}{\textbf{[partly done]}}
+\newcommand{\planned}{\textbf{[in progress]}}
 """
 
 TYPE_NAMES = {
@@ -349,7 +354,8 @@ def build(root: str, title: str, author: str, abstract: str | None, keywords: st
 
 def main() -> None:
     main_src = (PAPER / "main.tex").read_text(encoding="utf-8")
-    title = re.search(r"\\title\{([^}]*)\}", main_src).group(1)
+    # The title carries a LaTeX line break for the PDF; Word metadata wants one line.
+    title = re.sub(r"\s*\\\\\s*", " ", re.search(r"\\title\{([^}]*)\}", main_src).group(1))
     keywords = " ".join(
         re.search(r"\\begin\{IEEEkeywords\}(.*?)\\end\{IEEEkeywords\}", main_src, re.S)
         .group(1)
@@ -362,6 +368,12 @@ def main() -> None:
         "wrote",
         build(
             "supplement", f"Supplementary Material for \u201c{title}\u201d", author, None, None
+        ).relative_to(C.repo_root()),
+    )
+    print(
+        "wrote",
+        build(
+            "response", f"Response to Reviewers: \u201c{title}\u201d", author, None, None
         ).relative_to(C.repo_root()),
     )
 
