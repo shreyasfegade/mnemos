@@ -174,7 +174,23 @@ def e27() -> dict[str, float]:
     return {}
 
 
+def e26() -> dict[str, float]:
+    d = _load("e26_second_model.json")
+    if not d:
+        return {}
+    rows = {r["domain"]: r for r in d["domains"]}
+    sf = rows.get("scifact")
+    if not sf:
+        return {}
+    return {
+        "E26 nomic SciFact: quantisation cost": sf["plaintext_exhaustive"]["ndcg"]
+        - sf["m_int8_exhaustive"]["ndcg"],
+        "E26 nomic SciFact: M ivf k8 minus P s=2": sf["m_ivf_k8"]["ndcg"] - sf["p_s2"]["ndcg"],
+    }
+
+
 EXTRACTORS = {
+    "e26": e26,
     "e27": e27,
     "e25": e25,
     "e21": e21,
@@ -447,5 +463,25 @@ CHECKS = [
         "predict that a quarter of the budget drawn from the archive already raises the advantage "
         "on cohort H above the purely current adversary's.",
         "e27",
+    ),
+    # --- E26: a second embedding model (registered 2026-10-01, before the run) ---
+    _check(
+        "E26 nomic SciFact: quantisation cost",
+        "sec:eval-recall -- int8 quantisation is nearly free with a second embedding model too",
+        -0.02,
+        0.02,
+        "With bge, int8 costs at most a few thousandths of nDCG@10. Quantisation error is a "
+        "property of the vector norms, not of one model, so predict |cost| under 0.02 with "
+        "nomic-embed-text on SciFact.",
+        "e26",
+    ),
+    _check(
+        "E26 nomic SciFact: M ivf k8 minus P s=2",
+        "sec:eval-recall -- the in-memory index beats Mnemos-P at matched work, model-independent",
+        0.0,
+        1.0,
+        "Mnemos-M's eight in-memory partitions are all the query's nearest, while half of "
+        "Mnemos-P's eight at s=2 are random cover; predict M ivf k8 >= P s=2 on nDCG@10.",
+        "e26",
     ),
 ]
