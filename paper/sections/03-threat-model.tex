@@ -17,9 +17,8 @@ genuine agent output that content filtering cannot separate from organic ones. A
 \emph{local}, so the client/server distinction on which the security analysis of schemes such as
 Sophos \cite{bost2016sophos} relies does not apply: both reside on the same disk.
 
-The last property is load-bearing in a way the searchable-encryption framing obscures. There is no
-remote server that must hold the index, so the disk can be removed from the query path altogether.
-\Cref{sec:mnemos-m} takes that option and \cref{sec:eval-perf} measures what it costs.
+With no remote server that must hold the index, the disk can be removed from the query path
+altogether; \cref{sec:mnemos-m} takes that option.
 
 \subsection{Partitioned Encrypted Vector Indexes}
 
@@ -34,31 +33,9 @@ typically buffered and flushed in batches of $w$ records, called \emph{epochs}. 
 analysis distinguishes two storage layouts. In an \emph{unpadded} layout, each partition occupies
 a file region whose size is proportional to the number of records it holds. In a \emph{padded}
 layout, each partition occupies exactly $C$ slots regardless of occupancy. A forward-private scheme
-additionally maintains per-partition state such as update counters. The notation
-used throughout the paper is summarized in \cref{tab:notation}.
-
-\begin{table}[t]
-\centering
-\caption{Notation}
-\label{tab:notation}
-\small
-\begin{tabular}{@{}lp{0.68\columnwidth}@{}}
-\toprule
-Symbol & Meaning \\
-\midrule
-$B$, $C$ & partitions (or regions); slots per partition \\
-$w$ & records written per flush (\emph{epoch\_writes}) \\
-$\Delta$ & clocked flush interval (\cref{sec:mnemos-m}) \\
-$k_{\mathrm{probe}}$, $\mathit{top\_k}$ & partitions probed per search; records returned \\
-$s$, $p$ & probe spread and probe retention (\cref{sec:mnemos-read}) \\
-$\tau$ & time of compromise \\
-H, P & records written before $\tau$; at or after $\tau$ \\
-$\beta$ & injection budget: induced writes per topic \\
-$g$ & version-capture granularity, in flushes (\cref{sec:eval-multisnapshot}) \\
-\advhist, \advpost & topic-recovery advantage on cohorts H and P \\
-\bottomrule
-\end{tabular}
-\end{table}
+additionally maintains per-partition state such as update counters. Cohort H is the records
+written before the compromise time $\tau$ and cohort P those written after; \advhist{} and
+\advpost{} are topic-recovery advantage on each. The supplementary material tabulates the notation.
 
 \subsection{The \texorpdfstring{$\tau$}{tau}-Arrival Adversary}
 \label{sec:tau-adversary}
@@ -85,27 +62,21 @@ local storage driver: a kernel-mode driver can read the unlocked process's memor
 and collapses the distinction the model is built on, so it is out of scope rather than a weaker RW.
 \end{itemize}
 
-\Cref{tab:tau} summarizes the two views; results about probe patterns, query equality and
-permutation recovery apply to RW only, and \cref{sec:eval} labels every result with its class. The
-two classes and the version-retention, OS-artifact and hibernation capabilities below are
-\emph{distinct} adversary powers, not a single one under different names: a sync account retains
-versions but sees no reads; a network-share server sees reads but retains no history; an imaging
-adversary obtains OS artifacts and a hibernation image but observes nothing live. A design is
-credited with closing a channel only against the class that has the capability to observe it.
+\Cref{tab:tau} summarizes the two views; \cref{sec:eval} labels every result with its class. The
+classes and the version-retention, OS-artifact and hibernation capabilities below are distinct
+powers: a sync account retains versions but sees no reads, a network-share server sees reads but
+retains no history, and an imaging adversary obtains artifacts but observes nothing live. A design
+is credited with closing a channel only against the class that can observe it.
 
 \paragraph{Why induction rather than exfiltration}
-A reader asked why an adversary who can induce writes does not simply exfiltrate memory through
-indirect prompt injection \cite{greshake2023injection}, which needs the same ability to get content
-in front of the agent. The two abilities come apart in the deployments this attack targets. A memory
-pipeline such as mem0's runs an extraction and deduplication step with \emph{no tools and no egress}:
-it reads the supplied document, decides what to store, and writes, but has no channel to send data
-out, so injected instructions have nothing to act on. More generally the storage side channel is the
-residual threat exactly when injection is \emph{defended} --- an egress-gated agent, an
-injection-hardened summarizer, a sandbox that blocks tool use on untrusted content
-\cite{debenedetti2025defeating} --- because those defenses stop the agent from acting on injected
-instructions but do not stop it from \emph{remembering} the content, which is what the induced write
-records. Where injection is undefended it does dominate, and we say so; the contribution is the
-regime where it is not.
+An adversary who can put content in front of the agent could instead try indirect prompt injection
+\cite{greshake2023injection}. The two abilities come apart where this attack applies. A memory
+pipeline such as mem0's extraction step has \emph{no tools and no egress}: it reads the document,
+decides what to store, and writes, so injected instructions have nothing to act on. And injection
+defenses --- egress gating, hardened summarizers, sandboxes that block tool use on untrusted content
+\cite{debenedetti2025defeating} --- stop the agent from \emph{acting} on content, not from
+\emph{remembering} it. Where injection is undefended it dominates; the storage channel is the
+residual threat where it is defended.
 
 \begin{table}[t]
 \centering
@@ -127,11 +98,9 @@ Keys, process memory & none & none \\
 \end{tabular}
 \end{table}
 
-Hardware key custody (\cref{sec:mnemos-keys}) is meaningful precisely for these adversaries,
-because it protects a disk image or a synchronized copy read offline. It does not, and is not
-claimed to, protect against malware running as the user, which can ask the key store to unwrap the
-master key or read decrypted records from process memory directly. That adversary is out of scope
-for every storage-layer design.
+Hardware key custody (\cref{sec:mnemos-keys}) protects a disk image or synchronized copy read
+offline. It does not protect against malware running as the user, which can ask the key store to
+unwrap the master key; that adversary is out of scope for every storage-layer design.
 
 \subsection{Capture Granularity}
 \label{sec:granularity}
@@ -145,28 +114,21 @@ capture weakens every write-channel attack against W.
 \subsection{Pre-\texorpdfstring{$\tau$}{tau} State a Real System Retains}
 \label{sec:artifacts}
 
-The assumption that the adversary observes nothing before $\tau$ deserves scrutiny on a real
-operating system, because ordinary artifacts record past activity: the NTFS change journal, on by
-default, records that and when the store's files were written, and volume shadow copies,
-file-history snapshots and an SSD's flash translation layer, which retains superseded pages after
-an in-place rewrite \cite{wei2011reliably}, preserve earlier contents. \Cref{sec:eval-artifacts}
-audits the evaluation machine rather than asserting the point.
-
-The $\tau$-arrival model should therefore be read as granting the adversary the state at $\tau$
-\emph{and} whatever earlier state these artifacts preserve. That this costs nothing does not follow
-from history independence: in the sense of Naor and Teague \cite{naor2001anti} it relates a
-\emph{single} representation to the operation sequence that produced it, and says nothing about a
-\emph{sequence} of representations, which differ exactly in the regions rewritten in between. A
-synchronization account that retains version history thus moves the effective compromise boundary
-back to the start of its retention window. \Cref{sec:attack-multisnapshot} develops this as an
-attack, and \cref{sec:mnemos-write} gives the countermeasure.
+Ordinary artifacts record activity before $\tau$: the NTFS change journal records when the
+store's files were written, and shadow copies, file-history snapshots and an SSD's flash
+translation layer, which retains superseded pages \cite{wei2011reliably}, preserve earlier
+contents (\cref{sec:eval-artifacts} audits them). The model therefore grants the adversary the
+state at $\tau$ \emph{and} whatever earlier state these artifacts preserve. History independence in
+the sense of Naor and Teague \cite{naor2001anti} is a single-snapshot notion and does not bound what
+a \emph{sequence} of representations reveals; a synchronization account that retains versions
+moves the effective compromise boundary back to the start of its retention window
+(\cref{sec:attack-multisnapshot}, countermeasure in \cref{sec:mnemos-write}).
 
 \paragraph{Hibernation}
-A hibernation image captures physical memory, including a locked arena and an unwrapped master
-key, since locking pages prevents paging but not hibernation; an imaging adversary that takes the
-disk after the machine hibernated with the store unlocked defeats key custody entirely. The
-countermeasure is a deployment requirement: lock the store and zeroize its arena on suspend and
-hibernate notifications.
+A hibernation image captures a locked arena and the unwrapped master key, since locking pages
+prevents paging but not hibernation. Locking the store and zeroizing its arena on suspend and
+hibernate notifications is therefore a deployment requirement, and the guarantee is conditional on
+the operating system delivering that notification.
 
 \subsection{Assets, Goals, and Assumptions}
 
@@ -192,13 +154,9 @@ The adversary of this paper is passive at the storage layer: it reads versions a
 through the agent, but does not itself modify, roll back, or fork the stored files. A compromised
 synchronization account could do all three, and tampering is a membership channel in its own right
 --- corrupt the region an earlier record would occupy and watch whether the agent later errs on that
-topic. We scope active tampering out of the confidentiality analysis, with justification rather than
-by omission. Every slot is an authenticated ciphertext (S2), so a tamper is not silent: it surfaces
-as an authentication failure at the next read, which Mnemos-M reaches at unlock (the whole store is
-read) and fails closed on, independently of content, and which Mnemos-P reaches when a search probes
-the region, observable to the RW class but not content-selected by the adversary. What authentication
-does not provide is rollback detection --- replacing the current files with an authentic earlier
-version --- for which a monotonic counter in hardware (a TPM NV index bound into the manifest's
-associated data) is the standard defense; we note it as the mechanism and leave its evaluation to
-future work, since it bears on freshness rather than on the historical-confidentiality property this
-paper establishes.
+topic. We scope tampering out of the confidentiality analysis for a stated reason: every slot is an
+authenticated ciphertext (S2), so a tamper surfaces as an authentication failure. Mnemos-M reads the
+whole store at unlock and fails closed, independently of content; Mnemos-P fails when a search probes
+the region, which the RW class observes. Authentication does not detect rollback to an authentic
+earlier version; a hardware monotonic counter bound into the manifest's associated data is the
+standard defense, and we leave it to future work.

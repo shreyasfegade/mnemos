@@ -39,8 +39,8 @@ Mnemos-M & closed & closed & n/a & closed & closed$^\S$ & closed & n/a & n/a \\
 \begin{minipage}{0.96\textwidth}
 \footnotesize
 $^\dagger$ by performing the rewrites an accepted write would have (\cref{prop:capacity}).
-$^\ddagger$ with the sweep flush, closed at every capture granularity; the region-flush variant is
-closed only across session boundaries (\cref{sec:eval-multisnapshot}).
+$^\ddagger$ closed across session boundaries by re-encryption at lock; within a session, version
+diffs name a record's region (\cref{sec:eval-multisnapshot}).
 $^\S$ given the clocked flush schedule; the clock itself remains visible.
 Mnemos-M/disk keeps headers on disk for stores larger than memory: its writes stay clock-driven and
 invisible to W, so it matches the write-only ORAM row, while a read observer sees its search access
@@ -48,16 +48,13 @@ pattern.
 \end{minipage}
 \end{table*}
 
-\Cref{tab:crossscheme} places the designs among the alternatives, and grouping the columns by
-adversary class makes the design boundary explicit. Against the write observer W, a write-only
-oblivious index already closes every channel except search, and the memory-resident design and its
-disk variant reach that same pattern --- Mnemos-M/disk by writing on a clock while keeping headers on
-disk, Mnemos-M by removing the disk from the query path entirely, which additionally makes search and
-query-equality \emph{absent} rather than merely oblivious. Against the read observer RW only full
-obliviousness closes the search and query-equality channels, which is why Path ORAM is priced as the
-comparison rather than dismissed. The one row that changed most from the submission is the deployed
-stores: we report them as \emph{not detected} at the block granularity tested, not \emph{open}, which
-is what \cref{sec:eval-real} actually measured and what the submission's table wrongly overclaimed.
+\Cref{tab:crossscheme} places the designs among the alternatives, grouped by adversary class.
+Against the write observer W, a write-only oblivious index closes every channel, and the
+memory-resident design and its disk variant reach the same pattern: Mnemos-M/disk by writing on a
+clock, Mnemos-M by also removing the disk from the query path, which makes search and query equality
+\emph{absent} rather than oblivious. Against the read observer RW only full obliviousness closes
+search and query equality. Deployed stores other than pgvector are reported as \emph{not detected}
+at the block granularity tested, which is what \cref{sec:eval-real} measured.
 
 \begin{table*}[t]
 \centering
@@ -86,27 +83,24 @@ Opal (TEE) & W, RW & $O(\log)^\ast$ & oblivious$^\ast$ & enclave$^\ast$ & per-ac
 \end{tabular}
 \end{table*}
 
-\Cref{tab:arch} draws the frontier the readers asked for. Read down the security column: the
-memory-resident designs close the historical channels, including the derived-write channel, against
-the write observer at a write cost of one clocked sweep run, without obliviousness; the ORAM-based
-systems close them against the read observer too, at a per-access cost, and are the right comparison
-for that stronger adversary rather than a baseline this work claims to beat. The gap the table makes
-visible is that between W and RW: everything to the memory-resident designs' right buys read-side
-obliviousness that a write observer does not need, and the contribution is to show how much is closed
-without paying for it.
+\Cref{tab:arch} draws the architectural frontier. The memory-resident designs close the historical
+channels, the derived-write channel included, against the write observer at the cost of one clocked
+sweep run, without obliviousness; the ORAM-based systems also close them against the read observer,
+at a per-access cost, and are the comparison for that stronger adversary rather than a baseline this
+work claims to beat. The gap is between W and RW: the ORAM-based rows buy read-side obliviousness
+that a write observer does not need.
 
 \subsection{Residual Leakage}
 
-Mnemos-P keeps an open write channel, since a real record is always written to its content region
-and padding raises the cost without removing it; query equality survives both probe mechanisms; the
-keyed permutation does not survive a read observer; version diffs are closed only across session
-boundaries; and derived writes are open. Mnemos-M is bounded by resident memory, a hard bound: the
-index and by default every payload live in the locked arena. Its clock is visible, so an observer
-learns when the store was open though not whether anything was written, and an unlock reads the
-whole store. And it inherits A3: if the adversary can read process memory, a memory-resident index
-is the worst place to have put the plaintext, which is why hibernation is treated as a first-class
-threat. For both, no storage-layer measure reaches copies a synchronization provider has already
-retained, so secure deletion is bounded by what the provider keeps.
+Mnemos-P keeps an open write channel, since a real record is always written to its content region;
+query equality survives both probe mechanisms; the keyed permutation does not survive a read
+observer; version diffs are closed only across sessions; and derived writes are open. Mnemos-M's
+clock is visible, so an observer learns when the store was open though not whether anything was
+written. Mnemos-M is bounded by resident memory, and Mnemos-M/disk lifts that bound at the price of a
+search access pattern visible to RW. Both inherit A3: if the adversary can read process memory, a
+memory-resident index is the worst place to have put the plaintext, which is why hibernation is a
+deployment requirement. No storage-layer measure reaches copies a synchronization provider has
+already retained.
 
 \subsection{Limitations}
 
@@ -118,16 +112,17 @@ session, but the Python embedder sits outside it, so plaintext embeddings may re
 embedding path.
 
 \paragraph{Agent experiments}
-The agent results use local models of moderate size through a mem0-style pipeline rather than the
-mem0 library itself, and the induced corpus is issue text from one public tracker. The deduplication
-oracle is measured both with a model making the add-or-skip decision and with a similarity
-threshold, because production pipelines use both, but neither is a deployment.
+The agent results use local models of moderate size, and the induced corpus is issue text from one
+public tracker. The deduplication oracle is measured with a model deciding, with a similarity
+threshold, and in the unmodified mem0 library; other frameworks the census flags were not run end to
+end.
 
 \paragraph{Scope of the measurements}
-Performance is measured on one machine. The deployed-store experiment uses local instances holding
-public data under one encryption layer, and its per-store conclusions depend on library versions
-that change. The version-granularity parameter is swept rather than measured against a provider's
-retention policy, which would require authenticated access to that provider.
+Performance is measured on one machine (Intel i9-14900HX, 32\,GB, NVMe, Windows~11, with WSL2 for
+the stacked encrypted file system). The deployed-store experiments use local instances holding public
+data under one encryption layer, over three store builds each, and their per-store conclusions
+depend on library versions. The version-granularity parameter is swept rather than measured against
+a provider's retention policy. Key custody is implemented for Windows only.
 
 \paragraph{Construction}
 Both sealed designs remove a tombstoned record only when the maintenance cursor reaches its region.
@@ -137,11 +132,9 @@ at creation, so a store whose subject matter drifts far enough eventually partit
 \subsection{Ethical Considerations}
 
 The attacks were run against implementations built for this study and against public or synthetic
-corpora and public issue trackers; no third-party production system was attacked, and the deployed
-stores of \cref{sec:eval-real} were local instances holding public data. The vulnerable layout
-arises from a natural implementation choice, and the countermeasures are layout changes that
-designers of partitioned encrypted indexes can adopt, which is why the attacks and the
-countermeasures are disclosed together.
+corpora; no third-party production system was attacked, and the deployed stores and library of
+\cref{sec:eval-real,sec:eval-dedup} were local instances holding public data. The countermeasures
+are layout changes designers of encrypted indexes can adopt, and are disclosed with the attacks.
 
 \subsection{Disclosure of AI Assistance}
 

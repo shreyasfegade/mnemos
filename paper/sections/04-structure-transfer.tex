@@ -33,13 +33,10 @@ against deployed assistants \cite{rehberger2024spaiware,unit42memory} and across
 A flush of $w$ records reveals the set of partitions that received a record. The adversary repeats
 the induction and combines the observed sets with one of two estimators.
 
-\emph{Intersection.} If several induced records are known to fall into the same partition,
-intersecting the partition sets of their flushes isolates that partition. If the other $w-1$
-records of each flush fall into partitions uniformly at random, an unrelated partition appears in
-a flush with probability $q = 1 - (1 - 1/B)^{w-1}$ and survives $r$ intersections with probability
-$q^{r}$. The expected number of unrelated survivors, $(B-1)q^{r}$, falls below one once
-$r > \ln(B-1) / \ln(1/q)$. The required number of repetitions grows with $w$, so batching raises
-the cost of the attack without preventing it. An adversary generally cannot tell which induced
+\emph{Intersection.} If several induced records are known to share a partition, intersecting the
+partition sets of their flushes isolates it; with the other $w-1$ records uniform, an unrelated
+partition survives $r$ intersections with probability $q^r$, $q = 1 - (1 - 1/B)^{w-1}$, so batching
+raises the cost without preventing the attack. The adversary cannot generally tell which induced
 records share a partition, so this estimator is retained only as an upper bound.
 
 \emph{Frequency analysis.} Without attribution, the adversary computes, for each topic $t$ and
@@ -130,12 +127,10 @@ the capture granularity $g$ of \cref{sec:granularity}, and \cref{sec:eval-multis
 as a function of $g$, together with the session-boundary re-encryption that defeats it when the
 adversary cannot capture more finely than a session.
 
-\subsection{Counting Persisted Per-Keyword State}
+\paragraph{Persisted per-keyword state}
 \label{sec:attack-counting}
-
-Forward-private schemes persist per-keyword state, such as Sophos's update counters
-\cite{bost2016sophos} and Diana's counter-indexed GGM keys \cite{bost2017forward}, and in the local
-setting that state is in the snapshot, so an adversary with auxiliary keyword frequencies can match
-counters to keywords. Ties among the many rare keywords bound it: on D3, keyword recovery averages
-0.05 and topic accuracy never exceeds the most-frequent-class baseline, so the channel that makes
-\cref{prop:fp} a separation is weak in practice. The supplementary material gives the sweep.
+Forward-private schemes persist per-keyword state, such as Sophos's counters \cite{bost2016sophos}
+and Diana's counter-indexed GGM keys \cite{bost2017forward}, which in the local setting is in the
+snapshot. Matching counters to auxiliary keyword frequencies is bounded by ties among rare keywords:
+on D3, keyword recovery averages 0.05 and topic accuracy never exceeds the most-frequent-class
+baseline (supplementary material).

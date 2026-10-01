@@ -42,13 +42,14 @@
 \begin{document}
 
 \title{Supplementary Material for\\
-``Structure Transfer Attacks and Dual-Epoch Security for Encrypted Agent Memory''}
+``Historical Confidentiality for Encrypted Agent Memory:\\ Dual-Epoch Security and the Channels
+That Defeat It''}
 
 \author{Shreyas~Fegade%
 \IEEEcompsocitemizethanks{\IEEEcompsocthanksitem S. Fegade is an independent researcher.\protect\\
 E-mail: shreyasf@icloud.com}}
 
-\markboth{Supplementary Material}{Fegade: Structure Transfer Attacks and Dual-Epoch Security}
+\markboth{Supplementary Material}{Fegade: Historical Confidentiality for Encrypted Agent Memory}
 
 \maketitle
 
@@ -58,6 +59,51 @@ proof sketch appear in the main paper. Numbering of theorems, definitions, propo
 sections follows the main paper throughout.
 
 \input{sections/10-appendix-proof}
+
+\section{Proofs of Lemma~\ref{lem:slot} and the Separations}
+\label{supp:separations}
+
+\paragraph{\Cref{lem:slot}} The placement rule is invariant under any permutation of the slot labels
+of $r$, and by hypothesis nothing else distinguishes them, so the labels are exchangeable. Hence the
+set $O_b(r)$ of slots cohort H occupies at $\tau$ is a uniformly random subset of size $L_b(r)$,
+whatever the history. Post-$\tau$ records draw uniformly without replacement from its complement, so
+$k$ of them occupy a uniformly random ordered $k$-subset of the complement of a uniformly random
+$L_b(r)$-subset, which is a uniformly random ordered $k$-subset of all $C$ labels whenever
+$k \le C - L_b(r)$. The hypothesis that no partition is overfilled guarantees that bound under both
+histories, so the distribution does not depend on $b$. By S2 the snapshot does not reveal $O_b(r)$,
+so the adversary cannot condition on it.
+
+\paragraph{\Cref{prop:fp}} Take any forward- and Type-II-backward-private dynamic SSE scheme and
+adjoin to its client state a per-partition update counter, incremented on each $\mathsf{put}$ and
+stored under a pseudorandom handle in the snapshot. Forward and backward privacy are transcript
+notions and are unaffected by client-side state, so the augmented scheme keeps them. The snapshot now
+reveals a \emph{multiset} of counter values: $m$ records written to one partition yield $\{m\}$,
+$m/2$ written to each of two yield $\{m/2,m/2\}$, and no relabeling of partitions maps one to the
+other. The distinguisher submits those two histories and reads the multiset off the snapshot, so
+$\AdvH = 1/2$.
+
+\paragraph{\Cref{prop:breach}} Breach resistance asks that a single snapshot be simulatable from
+$\mathcal{L}^{\mathrm{snap}}$. That is the $\tau$-only restriction of \cref{def:dualepoch}, so a
+dual-epoch simulator stopped at $\tau$ is a breach-resistance simulator. For the converse, the
+witness of \cref{prop:fp} is breach-resistant with respect to a snapshot leakage that includes the
+counter multiset, and forward/backward private, and is not dual-epoch secure with respect to the
+same leakage once the post-$\tau$ writes are read jointly with it: induced puts tell the adversary
+which counter is which topic, and the multiset then gives cohort H's per-topic load. Neither of the
+two notions constrains that joint object.
+
+\paragraph{\Cref{prop:hi}} History independence fixes the distribution of the stored state given its
+\emph{contents}, so two insertion orders of one set are indistinguishable. The two challenge
+histories of \cref{def:dualepoch} may hold different sets. A content-placed, strongly
+history-independent store still holds a topic's records in that topic's region, and a growing
+layout reveals each region's size; with $\sigma_0$ placing $m$ records on one topic and $\sigma_1$
+spreading them over two, the snapshot's region sizes differ, and the distinguisher wins with
+advantage $1/2$. \Cref{prop:seal} isolates the two properties that remove the channel.
+
+\paragraph{\Cref{prop:seal}} With growing regions, a region's size is its occupancy, so the histories
+above are distinguished from one snapshot even though no order inside a region is revealed. With
+fixed-size regions whose free slots are not sealed, free slots are distinguishable from ciphertext
+(for instance, zero bytes), so the boundary between written and unwritten slots again gives each
+region's occupancy. \Cref{sec:eval-game} realizes both stores as ablations.
 
 \section{The Counting Study in Full}
 \label{supp:counting}
@@ -150,16 +196,16 @@ despite recognizing repeats more often.
 The leakage ledger converts each channel's measured attacker performance into a lower bound, in
 bits, on the mutual information $I(X;V)$ between the secret $X$ the channel is about and the
 adversary's view $V$. The conversion is Fano's inequality, and this section states it exactly for
-each metric family, because a reader rightly asked that the derivation be explicit --- in
-particular that an AUC, which is a ranking statistic and not a decoding accuracy, never be fed to
-Fano as if it were one.
+each metric family. In particular an AUC, which is a ranking statistic and not a decoding accuracy,
+is never fed to Fano as if it were one.
 
 \paragraph{The inequality} For a secret $X$ over $K$ values and any decoder that recovers it from
 $V$ with error probability $P_e$, Fano's inequality gives
 $H(X\mid V) \le h(P_e) + P_e\log_2(K-1)$, where $h$ is the binary entropy. Hence
-\[
-I(X;V) = H(X) - H(X\mid V) \;\ge\; H(X) - h(P_e) - P_e\log_2(K-1).
-\]
+\begin{align*}
+I(X;V) &= H(X) - H(X\mid V)\\
+       &\ge H(X) - h(P_e) - P_e\log_2(K-1).
+\end{align*}
 The ledger evaluates this at the \emph{empirical} accuracy $1-P_e$ of the attacker the experiment
 exhibited. It is a lower bound twice over: Fano bounds the information any decoder needs, and the
 experiment's decoder is one particular decoder, so a better one can only raise $I(X;V)$.
@@ -207,6 +253,75 @@ label, a region index, or a pair-equality bit, and $\log_2 K$ (or the empirical 
 ceiling against which the bits are read. A row's bound is never compared across units without that
 ceiling stated beside it.
 
+\section{Replication Units and Attacker Specification}
+\label{supp:units}
+
+\Cref{tab:supp-units} names, for each experiment, the unit an interval resamples and how many
+independent units there are. An interval is only as wide as the unit is independent: resampling
+records within one store measures sampling noise in that store, not the variation between stores,
+so every row resamples the outermost unit that was drawn afresh. Means over at least 20 units carry
+a percentile bootstrap interval (10{,}000 resamples); means over fewer carry a Student-$t$ interval,
+because a percentile bootstrap over three to five values has only a handful of distinct resample
+means and undercovers. AUC intervals resample the held-out units. Every threshold, orientation or
+classifier is fitted on a training half of the units and scored on the other half; no parameter
+is tuned on the units it is scored on.
+
+\begin{table}[t]
+\centering
+\caption{The independent unit behind every interval. ``Fresh'' means the unit draws its own
+store, cohort split and attacker fit.}
+\label{tab:supp-units}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrl@{}}
+\toprule
+Exp. & Unit (fresh per unit) & $n$ & Interval \\
+\midrule
+E1 & trial (store, split) & 20 & bootstrap \\
+E2 & induction sequence (split, order, fit) & 20 & bootstrap \\
+E3 & probe & 80/class & bootstrap, AUC \\
+E4 & centroid seed (table, store) & 5/gap & Student-$t$ \\
+E5 & game instance & 1{,}000/bit & bootstrap, AUC \\
+E6 & seed (store build) & 3 & Student-$t$ \\
+E7 & store & 20 & bootstrap \\
+E8 & trial (store, versions) & 20 & bootstrap \\
+E9 & trial (store) & 20 & bootstrap \\
+E15 & store (query split) & 20 & bootstrap \\
+E16 & seed (PostgreSQL cluster) & 3 & Student-$t$ \\
+E17 & trial (store, versions) & 20 & bootstrap \\
+E18 & probe & 30/class & bootstrap, AUC \\
+E20 & probe & 400 & bootstrap, AUC \\
+E21 & session & 40 & descriptive \\
+E22 & store & 20/point & bootstrap \\
+E23 & grid point & 1 & descriptive \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The two experiments with three units (E6, E16) are the deployed-store measurements, where one unit
+is a full store build under a stacked encrypted file system. Their intervals are correspondingly
+wide, and a null there is reported as ``not detected'' with its interval, not as a closed channel.
+
+\paragraph{The learned attacker} The dual-epoch game (E5) uses one learned distinguisher, fixed
+before any arm was run: scikit-learn's
+\texttt{HistGradientBoostingClassifier} with 200 iterations, maximum depth 3 and
+\texttt{random\_state} 0, and no other hyperparameter set or searched. Its features are the
+per-instance trace summary the arm computes from the observer's view (per-region write counts and
+their spread, and for slot-granular arms the number of distinct slots touched and the mean, maximum
+and standard deviation of their indices). The instances of both bits are shuffled together and
+split in half; the classifier is fitted on one half and its AUC and balanced accuracy, at a
+threshold fixed on the training half, are reported on the other. Each arm also reports one named
+hand-built statistic, oriented on the training half, so that a weak learner cannot make an arm look
+closed without the hand-built statistic disagreeing.
+
+The reactive game (E20) has a one-dimensional observation per probe, so it uses no classifier. It
+scores three named trace statistics (flushes per turn, region writes per turn, and writes landing
+in the probe's content region), each
+oriented on the training half of the probes, and reports the one whose held-out AUC departs
+furthest from one half. Taking the maximum of three on the held-out half biases the reported AUC
+away from chance, which is the conservative direction for an arm claimed to be at chance: the clock-only
+arm is at chance even under that selection.
+
 \section{Full Results}
 \label{supp:full}
 
@@ -234,6 +349,41 @@ describe cohort H as well --- but they reach a given cohort-H record only if the
 which partition holds it, which a growing layout does and a sealed fixed-size one does not
 (\cref{lem:transfer}).}
 \label{fig:threat}
+\end{figure*}
+
+\begin{table}[t]
+\centering
+\caption{Notation}
+\label{tab:notation}
+\small
+\begin{tabular}{@{}lp{0.68\columnwidth}@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$B$, $C$ & partitions (or regions); slots per partition \\
+$w$ & records written per flush (\emph{epoch\_writes}) \\
+$\Delta$, $k$ & clocked flush interval; slots per sweep flush \\
+$k_{\mathrm{probe}}$, $\mathit{top\_k}$ & partitions probed per search; records returned \\
+$s$ & probe spread \\
+$\tau$ & time of compromise \\
+H, P & records written before $\tau$; at or after $\tau$ \\
+$\beta$ & injection budget: induced writes per topic \\
+$g$ & version-capture granularity, in flushes \\
+\advhist, \advpost & topic-recovery advantage on cohorts H and P \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_crossover.pdf}
+\caption{Where the choice between the designs is decided (main paper, \cref{sec:eval-perf}). Three
+measures on different scales are shown as small multiples over a shared $n$. Mnemos-M's exhaustive
+ranking is linear in $n$ and crosses the partitioned design between \REtenCrossLo{} and
+\REtenCrossHi{} records; with its partition index held in memory (hollow markers) it stays ahead
+at every size, paid for at unlock, where every record's partition is recomputed. The middle panel,
+resident memory, is what bounds Mnemos-M; the index leaves it unchanged.}
+\label{fig:crossover}
 \end{figure*}
 
 \input{tables/e4_drift}

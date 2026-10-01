@@ -346,6 +346,40 @@ def collect() -> dict[str, str | None]:
         r = by17.get(g)
         out[f"REseventeenComposed{tag}"] = signed(r and r["adv_H"])
         out[f"REseventeenCand{tag}"] = f(r and r["mean_candidates"], 1)
+
+    # --- E22: the probe-design frontier (read amplification vs query equality) ----------------
+    e22 = load("e22_probe_frontier.json") or {}
+    words = {1: "One", 2: "Two", 3: "Three", 4: "Four", 6: "Six", 8: "Eight", 16: "Sixteen",
+             32: "ThirtyTwo"}
+    sp = {r["spread"]: r for r in e22.get("spread", [])}
+    gr = {r["group_size"]: r for r in e22.get("grouped", [])}
+    for s in (1, 2, 3, 4, 6, 8):
+        out[f"REtwentytwoSpread{words[s]}"] = ci_of(
+            sp.get(s), ("threshold_j", "threshold_j_lo", "threshold_j_hi")
+        )
+    for g in (2, 4, 8, 16, 32):
+        r = gr.get(g)
+        out[f"REtwentytwoGroup{words[g]}"] = ci_of(
+            r, ("threshold_j", "threshold_j_lo", "threshold_j_hi")
+        )
+        out[f"REtwentytwoGroupAmp{words[g]}"] = f(r and r["read_amplification_x"], 1)
+
+    # --- E23: refusal onset vs geometry and skew ----------------------------------------------
+    e23 = load("e23_sensitivity.json")
+    # Percentages of nominal capacity, as \REnineUtilP is.
+    def pct(v: float | None) -> str | None:
+        return f(None if v is None else 100 * v, 0)
+
+    out["REtwentythreePWorst"] = pct(e23 and e23["p_util_worst"])
+    out["REtwentythreePBest"] = pct(e23 and e23["p_util_best"])
+    out["REtwentythreeMWorst"] = pct(e23 and e23["m_util_worst"])
+    skew = {
+        g["zipf"]: g
+        for g in (e23 or {}).get("grid", [])
+        if g["buckets"] == 256 and g["capacity"] == 32
+    }
+    for z, tag in ((0.8, "Low"), (1.2, "High")):
+        out[f"REtwentythreePSkew{tag}"] = pct(skew[z]["p_util"] if z in skew else None)
     return out
 
 

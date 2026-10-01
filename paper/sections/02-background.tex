@@ -17,12 +17,9 @@ data from the leakage profile of $k$-nearest-neighbor queries \cite{kornaropoulo
 query type an encrypted vector store serves. Volume-hiding constructions pad response sizes to
 remove this channel \cite{kamara2019volume,patel2019mitigating}. Xu et al. showed that
 leakage-abuse attacks remain effective against schemes that are both forward and backward private
-\cite{xu2023leakage}. A parallel line makes SSE efficient when the index itself lives on the
-client's disk: local and page-efficient SSE bound how scattered a query's reads are, and Minaud and
-Reichle give dynamic constructions with constant storage and near-optimal locality
-\cite{minaud2022dynamic}. That the index is local rather than outsourced is the setting of this
-paper too, but locality bounds where a query reads, not what a compromise of the local disk reveals
-about earlier writes.
+\cite{xu2023leakage}. Local SSE bounds how scattered a query's reads are on the client's own disk
+\cite{minaud2022dynamic}; it concerns where a query reads, not what a compromise of that disk
+reveals about earlier writes.
 
 \subsection{Forward Privacy, Backward Privacy, and Injection}
 
@@ -36,9 +33,8 @@ searches reveal about deleted entries and is classified into Types I to III
 \cite{bost2017forward}; Ghareh Chamani et al. give constructions across this range
 \cite{chamani2018new}. Amjad, Kamara, and Moataz generalize forward privacy to injection security
 \cite{amjad2023injection}. These notions are defined over the transcript of operations observed
-by a persistent adversary. In prior injection attacks the adversary supplies documents verbatim,
-whereas in the setting of this paper the adversary controls only the task that causes the agent
-to write.
+by a persistent adversary. In prior injection attacks the adversary supplies documents verbatim;
+here it controls only the task that causes the agent to write.
 
 \subsection{Snapshot Adversaries and History Independence}
 
@@ -60,21 +56,16 @@ contents; Buchbinder and Petrank establish its inherent costs \cite{buchbinder20
 been applied to file systems \cite{bajaj2013hifs} and combined with oblivious
 storage and secure deletion \cite{roche2016oblivious}, and Trabucco et al.\ give a practical
 history-independent index for queryable-encrypted databases that scales to millions of records
-\cite{trabucco2026history}. History independence is nonetheless a single-snapshot notion in the
-sense of Naor and Teague, and does not by itself hide the content-based placement that our transfer
-attack exploits across two cohorts: an HI content-placed index still sends a topic's records to that
-topic's region, so it can be dual-epoch \emph{insecure} while being history-independent
-(\cref{prop:hi}). A separate line hides \emph{writes} rather than reads --- write-only ORAM, in HIVE
-\cite{blass2014hive}, DetWoORAM \cite{roche2017detwooram}, and the file-synchronization system
-ObliviSync \cite{aviv2017oblivisync}, which uses fixed-rate syncs to hide write occurrence and
-timing. That is exactly the anchoring write-only setting of this paper, and the memory-resident
-design's sweep flush is a write-only-oblivious store specialized to agent memory; \cref{sec:relations}
-and \cref{sec:eval-perf} draw the comparison. Oblivious RAM
-\cite{goldreich1996software,stefanov2013path} hides access patterns completely at a
-polylogarithmic cost per access. The present work differs from breach resistance in that it
-compares two cohorts of data under a single adversary, rather than two classes of adversary, and
-it identifies the history-independence property that a dynamic encrypted vector index must
-satisfy against that adversary.
+\cite{trabucco2026history}. An HI content-placed index still sends a topic's records to that
+topic's region, so it can be history-independent and dual-epoch \emph{insecure} (\cref{prop:hi}).
+Write-only ORAM hides \emph{writes} rather than reads: HIVE \cite{blass2014hive}, DetWoORAM
+\cite{roche2017detwooram}, and ObliviSync \cite{aviv2017oblivisync}, which uses fixed-rate syncs
+to hide write occurrence and timing for synchronized folders. That is the anchoring setting of this
+paper, and Mnemos-M's sweep is a write-only-oblivious store specialized to agent memory; what is new
+is its combination with an in-memory semantic index, the derived-write analysis, and the reactive
+composition theorem. Oblivious RAM \cite{goldreich1996software,stefanov2013path} hides all access
+patterns at polylogarithmic cost. Dual-epoch security differs from breach resistance in comparing two
+cohorts of data under one adversary rather than two classes of adversary (\cref{sec:relations}).
 
 \subsection{Private Vector Search}
 
