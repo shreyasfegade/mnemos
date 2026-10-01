@@ -214,6 +214,7 @@ paper:
 # was, with retracted numbers and revision-history language in it -- cannot be produced again.
 dist: verify lint-paper paper
     python -m eval.exp2.numbers --strict
+    python -m eval.check_response
     python -m eval.make_dist
     python -m eval.make_docx
 
