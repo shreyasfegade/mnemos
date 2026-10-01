@@ -189,7 +189,21 @@ def e26() -> dict[str, float]:
     }
 
 
+def e24() -> dict[str, float]:
+    d = _load("e24_table_source.json")
+    if not d:
+        return {}
+    t = d["tables"]
+    return {
+        "E24 Mnemos-P s=2 nDCG, corpus-trained minus public table": t["corpus_trained"]["p_s2"][
+            "ndcg"
+        ]
+        - t["public"]["p_s2"]["ndcg"]
+    }
+
+
 EXTRACTORS = {
+    "e24": e24,
     "e26": e26,
     "e27": e27,
     "e25": e25,
@@ -483,5 +497,17 @@ CHECKS = [
         "Mnemos-M's eight in-memory partitions are all the query's nearest, while half of "
         "Mnemos-P's eight at s=2 are random cover; predict M ivf k8 >= P s=2 on nDCG@10.",
         "e26",
+    ),
+    # --- E24: the retrieval price of S4 (registered 2026-10-01, before the run) ---
+    _check(
+        "E24 Mnemos-P s=2 nDCG, corpus-trained minus public table",
+        "sec:conditions -- S4 (a public table) costs Mnemos-P retrieval, but not most of it",
+        -0.01,
+        0.15,
+        "A table trained on the store's own records fits its partitions to the data, so it should "
+        "retrieve at least as well as a public table trained on a different corpus; predict a gain "
+        "between zero and 0.15 nDCG@10 -- large enough to be a real price for S4, small enough "
+        "that the public table remains usable.",
+        "e24",
     ),
 ]
