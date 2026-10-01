@@ -77,7 +77,8 @@ def e18() -> dict[str, float]:
     return {
         "E18 real mem0 dedup oracle AUC": d["auc_write_vs_nonmember"],
         "E18 real mem0 dedup oracle AUC lower": d["lo"],
-        "E18 member minus nonmember write rate": d["member_write_rate"] - d["nonmember_write_rate"],
+        # Non-member minus member: a member is deduplicated and writes less, so the gap is positive.
+        "E18 nonmember minus member write rate": d["nonmember_write_rate"] - d["member_write_rate"],
     }
 
 
@@ -262,7 +263,7 @@ CHECKS = [
     ),
     # --- E18: dedup oracle vs real mem0 2.2.1 (registered 2026-10-01, before the run) ---
     _check(
-        "E18 member minus nonmember write rate",
+        "E18 nonmember minus member write rate",
         "sec:eval-dedup -- against the real mem0 library a member fact is written less than a "
         "non-member, so the occurrence of a vector-store write is a membership signal",
         0.05,

@@ -329,6 +329,19 @@ def collect() -> dict[str, str | None]:
     out["REsixteenPgAdv"] = ci_of(pg, ("adv_hist", "adv_hist_lo", "adv_hist_hi")) if pg else None
     out["REsixteenPgChance"] = f(pg["chance"], 3) if pg else None
     out["REsixteenPgSeeds"] = str(pg["seeds"]) if pg else None
+
+    # --- E18: the dedup oracle against the real mem0 library ----------------------------------
+    e18 = load("e18_real_mem0.json")
+    if e18:
+        out["REeighteenAUC"] = ci(
+            e18["auc_write_vs_nonmember"], e18["lo"], e18["hi"], 2
+        )
+        out["REeighteenMemberWrite"] = f(e18["member_write_rate"], 2)
+        out["REeighteenNonmemberWrite"] = f(e18["nonmember_write_rate"], 2)
+        out["REeighteenModel"] = e18["model"].replace("_", r"\_")
+    else:
+        for k in ("AUC", "MemberWrite", "NonmemberWrite", "Model"):
+            out[f"REeighteen{k}"] = None
     for g, tag in ((1, "One"), (2, "Two"), (4, "Four"), (16, "Sixteen")):
         r = by17.get(g)
         out[f"REseventeenComposed{tag}"] = signed(r and r["adv_H"])

@@ -152,6 +152,20 @@ Mnemos-P, and the clocked flush takes the same arm to \REthreeMLlmAUC. The separ
 the one \cref{prop:derived} predicts, and it is why the proposition is stated about stores whose
 operations depend on content or occurrence, rather than about storage designs in general.
 
+\paragraph{The real mem0 library}
+A reader asked for the oracle against the actual library rather than a pipeline resembling it. We ran
+\textbf{mem0 2.2.1} with a local on-disk Qdrant collection and \texttt{\REeighteenModel} making the
+add/skip decision, and measured the write-occurrence oracle at the file level: the adversary supplies
+a fact and sees only whether the Qdrant collection's data files grew. mem0 deduplicates a member:
+a fact already stored produces a vector-store write on \REeighteenMemberWrite{} of probes against
+\REeighteenNonmemberWrite{} for a novel non-member, an AUC of \REeighteenAUC{} --- stronger on the
+real library than the \REthreePLlmAUC{} our mem0-style pipeline reached, because mem0's extraction
+canonicalizes a repeated fact into a form its store already holds. gocryptfs was not needed for this
+run: as \cref{sec:eval-real} establishes, its ciphertext mirrors these files block for block, so
+whether a write \emph{occurs} --- the entire signal --- is identical with or without the encryption
+layer. The oracle is therefore not confined to our harness: it is present in a widely used
+agent-memory library as shipped.
+
 \subsection{The Dual-Epoch Game}
 \label{sec:eval-game}
 
