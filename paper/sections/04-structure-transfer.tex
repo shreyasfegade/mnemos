@@ -127,10 +127,3 @@ the capture granularity $g$ of \cref{sec:granularity}, and \cref{sec:eval-multis
 as a function of $g$, together with the session-boundary re-encryption that defeats it when the
 adversary cannot capture more finely than a session.
 
-\paragraph{Persisted per-keyword state}
-\label{sec:attack-counting}
-Forward-private schemes persist per-keyword state, such as Sophos's counters \cite{bost2016sophos}
-and Diana's counter-indexed GGM keys \cite{bost2017forward}, which in the local setting is in the
-snapshot. Matching counters to auxiliary keyword frequencies is bounded by ties among rare keywords:
-on D3, keyword recovery averages 0.05 and topic accuracy never exceeds the most-frequent-class
-baseline (supplementary material).

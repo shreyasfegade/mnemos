@@ -18,8 +18,9 @@ experiment's independent units: bootstrap from twenty units, Student-$t$ below; 
 material names the unit and its count for every experiment and specifies the learned attacker.
 Attacks read only the engine's emitted event stream, which is the storage adversary's view, and
 every number in the text is generated from the stored results. Outcomes registered before a run are
-marked as such, including three that failed (\cref{sec:eval-induction}, the composed attack of
-\cref{sec:eval-multisnapshot}, and query equality at $s = 4$ in the supplementary material).
+marked as such, including four that failed (\cref{sec:eval-induction}, the composed attack of
+\cref{sec:eval-multisnapshot}, the price of S4 in \cref{sec:eval-recall}, and query equality at
+$s = 4$ in the supplementary material).
 
 \subsection{Structure Transfer, and What Drift Is Worth}
 \label{sec:eval-transfer}
@@ -350,13 +351,25 @@ during indexing (\REelevenRefusals). Quantisation to int8 costs at most \REeleve
 nDCG@10 on any domain, and fixed probing up to \REelevenProbeCostMax. Mnemos-M's in-memory index,
 scoring the same eight partitions as Mnemos-P at $s = 2$, gains \REelevenIvfGainMin{} to
 \REelevenIvfGainMax{} on every domain, since all eight are the query's nearest where half of
-Mnemos-P's are cover.
+Mnemos-P's are cover. Both findings hold with a second, independently trained embedding model,
+\texttt{nomic-embed-text} (registered experiment E26): int8 costs \REtwentysixSciQuant{} on
+SciFact and \REtwentysixNfQuant{} on NFCorpus, and the in-memory index scores \REtwentysixSciMIvf{}
+and \REtwentysixNfMIvf{} against Mnemos-P's \REtwentysixSciP{} and \REtwentysixNfP.
 
 Grouped probing, the one mechanism that resists permutation recovery against a read observer, is
 also the one that costs retrieval: reading a whole disjoint group per query drops nDCG@10 from
 \REelevenGroupedSScifact{} to \REelevenGroupedScifact{} on SciFact and from \REelevenGroupedSFiqa{}
 to \REelevenGroupedFiqa{} on FiQA against the $s=2$ spread. That price is why the memory-resident
 design, which removes the read channel by keeping search off the disk, is the one we recommend.
+
+Condition S4 has a price of its own, and it is paid in capacity rather than ranking (registered
+experiment E24, whose prediction of a gain under 0.15 failed). A public table, trained on a
+different corpus, ranks SciFact about as well as one trained on SciFact itself (plaintext IVF
+\REtwentyfourIvfPub{} against \REtwentyfourIvfOwn), but it puts \REtwentyfourShare\% of the corpus
+in one partition, so Mnemos-P refuses \REtwentyfourRefusedPub{} documents while indexing and scores
+\REtwentyfourPPub{} against \REtwentyfourPOwn. Mnemos-M, with no per-partition bound, scores
+\REtwentyfourMPub{} and \REtwentyfourMOwn: its logical table can be public at no cost, and could be
+retrained in memory without a disk write.
 
 \subsection{Operating-System Artifacts}
 \label{sec:eval-artifacts}

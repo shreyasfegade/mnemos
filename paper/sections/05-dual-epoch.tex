@@ -196,8 +196,9 @@ There is a scheme that is forward and Type-II backward private but not dual-epoc
 \end{proposition}
 \noindent The witness adjoins a per-partition put counter to the client state of any such scheme.
 Transcript notions are blind to it, but the snapshot's multiset of counters separates $m$ puts to one
-partition from $m/2$ to each of two. \Cref{sec:attack-counting} reports that this particular state
-leaks little on a realistic corpus; the existence separation and its magnitude are separate claims.
+partition from $m/2$ to each of two. Such state (Sophos's counters \cite{bost2016sophos}, Diana's
+GGM keys \cite{bost2017forward}) leaks little on a realistic corpus (supplementary material); the
+existence separation and its magnitude are separate claims.
 
 \begin{proposition}[Breach resistance is implied, and insufficient]
 \label{prop:breach}

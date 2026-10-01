@@ -422,6 +422,27 @@ def collect() -> dict[str, str | None]:
     for a, tag in ((0.0, "Zero"), (0.1, "Tenth"), (0.25, "Quarter"), (1.0, "Full")):
         out[f"REtwentyseven{tag}"] = signed(e27[a]["adv_H"]) if a in e27 else None
 
+    # --- E24: the retrieval price of S4 (public vs corpus-trained table) -----------------------
+    e24 = (load("e24_table_source.json") or {}).get("tables", {})
+    for src, tag in (("public", "Pub"), ("corpus_trained", "Own")):
+        t = e24.get(src)
+        out[f"REtwentyfourP{tag}"] = f(t and t["p_s2"]["ndcg"], 3)
+        out[f"REtwentyfourM{tag}"] = f(t and t["m_ivf_k8"]["ndcg"], 3)
+        out[f"REtwentyfourIvf{tag}"] = f(t and t["plaintext_ivf"]["ndcg"], 3)
+        out[f"REtwentyfourRefused{tag}"] = big(t and t["p_s2"]["refused_during_indexing"])
+    pub = e24.get("public")
+    out["REtwentyfourShare"] = f(pub and 100 * pub["max_partition_share"], 1)
+
+    # --- E26: a second embedding model -------------------------------------------------------
+    e26 = {r["domain"]: r for r in (load("e26_second_model.json") or {}).get("domains", [])}
+    for dom, tag in (("scifact", "Sci"), ("nfcorpus", "Nf")):
+        r = e26.get(dom)
+        out[f"REtwentysix{tag}Quant"] = signed(
+            r and r["plaintext_exhaustive"]["ndcg"] - r["m_int8_exhaustive"]["ndcg"]
+        )
+        out[f"REtwentysix{tag}MIvf"] = f(r and r["m_ivf_k8"]["ndcg"], 3)
+        out[f"REtwentysix{tag}P"] = f(r and r["p_s2"]["ndcg"], 3)
+
     # --- E28: attack cost, descriptive, from E2's logs ----------------------------------------
     e28 = load("e28_attack_cost.json") or {}
     sec = [m["seconds_per_turn"] for m in e28.get("models", [])]
