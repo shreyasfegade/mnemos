@@ -183,6 +183,24 @@ exp2-agent:
 exp2-stores:
     python -m eval.exp2.e6_stores --n 3000 --hist 300 --budget 30
 
+# ---------------------------------------------------------------- pre-submission (round 4)
+#
+# Every pending experiment (E16 extension, E6 extension, E29-E33), then aggregation, verifier,
+# checked paper build and export (PDF, DOCX, LaTeX). Three lanes run in parallel: GPU/Ollama,
+# WSL stores, Windows/Syncthing. About 2.5 h; resumable; writes a report to
+# python/eval/logs/overnight/latest-report.md. The predictions are in eval/exp2/verify_r4.py and
+# must be committed first (the preflight checks).
+overnight:
+    cd python; ..\.venv\Scripts\python.exe -u -m eval.overnight
+
+# Preflight and the plan only; runs nothing.
+overnight-plan:
+    cd python; ..\.venv\Scripts\python.exe -m eval.overnight --dry-run
+
+# Continue an interrupted overnight run, skipping stages that finished.
+overnight-resume:
+    cd python; ..\.venv\Scripts\python.exe -u -m eval.overnight --resume
+
 # Gather every round-2 result and audit that each point estimate carries an interval.
 exp2-collect:
     python -m eval.exp2.collect

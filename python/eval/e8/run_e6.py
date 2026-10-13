@@ -25,6 +25,28 @@ What this does instead
    directory, and the harness asserts that directory is not the plaintext mount and that a known
    plaintext marker does not appear in it.
 
+Capture granularity (E32)
+=========================
+``--checkpoint-every g`` groups the induced writes into versions of ``g`` writes: the store is made
+durable and the ciphertext snapshotted once per group, as a synchronization client that coalesces
+changes would capture it. Frequency analysis then works on versions that each carry ``g`` induced
+records of mixed topics. Cohort H is still written one record at a time, because its per-record
+block map is the harness's scoring ground truth, not the adversary's view. ``g = 1`` reproduces E16.
+
+Performance (identical semantics)
+=================================
+* The ciphertext snapshot rehashes only files whose (inode, size, mtime, ctime) changed since the
+  previous snapshot; a 19,000-block store is otherwise re-read in full after every write.
+* pgvector talks to the server over one autocommit ``psycopg2`` connection instead of spawning a
+  shell and ``psql`` per statement. Every insert and every ``CHECKPOINT`` is still its own
+  autocommitted statement, in the same order.
+
+The per-write ``CHECKPOINT`` and fsync through gocryptfs dominate a run (about a minute per seed
+either way), so the real saving is running seeds in parallel (``run_par_wsl.sh``). Postgres's
+background work (autovacuum, the background writer) is timing-dependent, so a seed is not
+bit-reproducible run to run; the seed fixes the sampling, and the interval across seeds carries
+the rest.
+
     python3 run_e6.py --emb emb.npy --labels labels.npy --store faiss \
         --plain /mnt/p --cipher /mnt/c --out faiss.json
 """
@@ -48,18 +70,53 @@ BLOCK = 4096
 # --------------------------------------------------------------------------- ciphertext diffing
 
 
-def block_hashes(root: Path) -> dict[tuple[str, int], str]:
-    out: dict[tuple[str, int], str] = {}
-    for f in sorted(root.rglob("*")):
-        if f.is_file():
+class BlockHasher:
+    """Block hashes of every file under a root, rehashing only files whose metadata changed.
+
+    A file is rehashed when its inode, size, mtime or ctime differs from the previous snapshot,
+    which any ``write(2)`` through gocryptfs changes. The result is the same dictionary
+    :func:`block_hashes` returns, at the cost of reading only what changed.
+    """
+
+    def __init__(self) -> None:
+        self._cache: dict[str, tuple[tuple[int, int, int, int], dict[int, str]]] = {}
+
+    def __call__(self, root: Path) -> dict[tuple[str, int], str]:
+        out: dict[tuple[str, int], str] = {}
+        seen: set[str] = set()
+        for f in sorted(root.rglob("*")):
             try:
-                data = f.read_bytes()
+                st = f.stat()
             except OSError:
                 continue
+            if not f.is_file():
+                continue
             name = str(f.relative_to(root))
-            for i in range(0, max(len(data), 1), BLOCK):
-                out[(name, i // BLOCK)] = hashlib.sha1(data[i : i + BLOCK]).hexdigest()
-    return out
+            seen.add(name)
+            key = (st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns)
+            hit = self._cache.get(name)
+            if hit is None or hit[0] != key:
+                try:
+                    data = f.read_bytes()
+                except OSError:
+                    continue
+                blocks = {
+                    i // BLOCK: hashlib.sha1(data[i : i + BLOCK]).hexdigest()
+                    for i in range(0, max(len(data), 1), BLOCK)
+                }
+                self._cache[name] = (key, blocks)
+            else:
+                blocks = hit[1]
+            for b, h in blocks.items():
+                out[(name, b)] = h
+        for gone in set(self._cache) - seen:
+            del self._cache[gone]
+        return out
+
+
+def block_hashes(root: Path) -> dict[tuple[str, int], str]:
+    """A full, uncached snapshot. Kept for the markers check and for any caller without state."""
+    return BlockHasher()(root)
 
 
 def changed(a: dict, b: dict) -> set[tuple[str, int]]:
@@ -221,24 +278,48 @@ class Pgvector:
         self.srv.psql("CREATE EXTENSION IF NOT EXISTS vector;")
         self.srv.psql(f"CREATE TABLE m (id serial PRIMARY KEY, v vector({dim}));")
         self.n = 0
+        self.checkpoint_each_add = True
+        # One autocommit connection: each statement still commits on its own, exactly as the
+        # per-statement psql calls did, without a shell and a client process per statement.
+        self.conn = None
+        try:
+            import psycopg2
+
+            self.conn = psycopg2.connect(self.srv.get_uri())
+            self.conn.autocommit = True
+        except Exception as e:  # fall back to psql, which is slower but equivalent
+            print(f"psycopg2 unavailable ({e}); using psql per statement", flush=True)
 
     def _vec(self, row) -> str:
         return "[" + ",".join(f"{float(z):.6f}" for z in row) + "]"
 
+    def _sql(self, stmt: str) -> None:
+        if self.conn is None:
+            self.srv.psql(stmt if stmt.rstrip().endswith(";") else stmt + ";")
+            return
+        with self.conn.cursor() as cur:
+            cur.execute(stmt)
+
     def train(self, x):
-        # Bulk-load the training set and build the ivfflat index, so placement is by content.
+        # Load the training set row by row, each insert its own transaction exactly as E16's
+        # per-statement psql calls did, then build the ivfflat index so placement is by content.
         for row in x:
-            self.srv.psql(f"INSERT INTO m (v) VALUES ('{self._vec(row)}');")
+            self._sql(f"INSERT INTO m (v) VALUES ('{self._vec(row)}')")
         self.n += len(x)
-        self.srv.psql("CREATE INDEX m_ivf ON m USING ivfflat (v vector_ip_ops) WITH (lists=64);")
-        self.srv.psql("CHECKPOINT;")
+        self._sql("CREATE INDEX m_ivf ON m USING ivfflat (v vector_ip_ops) WITH (lists=64)")
+        self._sql("CHECKPOINT")
 
     def add(self, x):
         for row in x:
-            self.srv.psql(f"INSERT INTO m (v) VALUES ('{self._vec(row)}');")
+            self._sql(f"INSERT INTO m (v) VALUES ('{self._vec(row)}')")
         self.n += len(x)
         # Force the heap and index pages to disk so the ciphertext diff reflects this insert.
-        self.srv.psql("CHECKPOINT;")
+        if self.checkpoint_each_add:
+            self._sql("CHECKPOINT")
+
+    def durable(self):
+        """Make everything written so far reach the data files (one version, E32)."""
+        self._sql("CHECKPOINT")
 
 
 STORES = {
@@ -299,7 +380,15 @@ def main() -> None:
     ap.add_argument(
         "--seed", type=int, default=0, help="repeat index; varies the split and the draws"
     )
+    ap.add_argument(
+        "--checkpoint-every",
+        type=int,
+        default=1,
+        help="induced writes per captured version (E32); 1 reproduces E16",
+    )
     args = ap.parse_args()
+    g = max(1, args.checkpoint_every)
+    snap_of = BlockHasher()
 
     emb = np.load(args.emb).astype(np.float32)
     labels_arr = np.load(args.labels)
@@ -327,12 +416,12 @@ def main() -> None:
     t0 = time.time()
     # --- cohort H, one record at a time, with a snapshot after each. The resulting map is the
     # harness's ground truth for scoring and is never available to the adversary.
-    prev = block_hashes(cipher)
+    prev = snap_of(cipher)
     h_blocks: list[set] = []
     for i in hist_idx:
         store.add(emb[i : i + 1])
         sync()
-        snap = block_hashes(cipher)
+        snap = snap_of(cipher)
         h_blocks.append(changed(prev, snap))
         prev = snap
     tau_snapshot_blocks = len(prev)
@@ -354,12 +443,19 @@ def main() -> None:
         schedule.extend((t, int(r)) for r in picks)
     rng.shuffle(schedule)
 
-    induced: list[tuple[int, set]] = []
-    for t, r in schedule:
-        store.add(emb[r : r + 1])
+    # Versions of g induced writes each. At g = 1 this is one version per write, as in E16.
+    induced_versions: list[tuple[list[int], set]] = []
+    if g > 1 and hasattr(store, "checkpoint_each_add"):
+        store.checkpoint_each_add = False
+    for start in range(0, len(schedule), g):
+        group = schedule[start : start + g]
+        for _t, r in group:
+            store.add(emb[r : r + 1])
+        if g > 1 and hasattr(store, "durable"):
+            store.durable()
         sync()
-        snap = block_hashes(cipher)
-        induced.append((t, changed(prev, snap)))
+        snap = snap_of(cipher)
+        induced_versions.append(([t for t, _ in group], changed(prev, snap)))
         prev = snap
 
     # --- ciphertext sanity: the directory we diffed must not contain our plaintext marker.
@@ -372,26 +468,35 @@ def main() -> None:
             except OSError:
                 pass
 
-    # --- held-out split of the induced writes.
-    rng.shuffle(induced)
-    cut = len(induced) // 2
-    label_half, score_half = induced[:cut], induced[cut:]
+    # --- held-out split of the induced versions.
+    # Shuffled as a list, exactly as E16 shuffled its list of writes, so at g = 1 the split (and
+    # therefore every number) is identical to the runs made before this option existed.
+    order_v = list(range(len(induced_versions)))
+    rng.shuffle(order_v)
+    cut = len(order_v) // 2
+    label_half = [induced_versions[i] for i in order_v[:cut]]
+    score_half = [induced_versions[i] for i in order_v[cut:]]
 
-    all_blocks = sorted({b for _, s in induced for b in s} | {b for s in h_blocks for b in s})
+    all_blocks = sorted(
+        {b for _, s in induced_versions for b in s} | {b for s in h_blocks for b in s}
+    )
     block_index = {b: i for i, b in enumerate(all_blocks)}
 
+    # Frequency analysis over versions: for topic t, the fraction of versions carrying an induced
+    # record on t in which each block changed. At g = 1 this is exactly the per-write rate.
     by_topic: dict[int, list[set]] = {t: [] for t in range(n_topics)}
-    for t, s in label_half:
-        by_topic[t].append(s)
+    for ts, s in label_half:
+        for t in set(ts):
+            by_topic[t].append(s)
     lab = frequency_labels(by_topic, n_topics, block_index)
 
-    # Held-out localisation: does a *scored* induced write's blocks carry its own topic?
+    # Held-out localisation: does a scored version's blocks carry one of its own topics?
     hit = tot = 0
-    for t, s in score_half:
+    for ts, s in score_half:
         got = majority_topic(s, block_index, lab)
         if got is not None:
             tot += 1
-            hit += int(got == t)
+            hit += int(got in ts)
     localisation_heldout = hit / tot if tot else 0.0
 
     # Adv_hist: the quantity that matters. Does the adversary's label map identify the topics of
@@ -425,10 +530,14 @@ def main() -> None:
         "budget_per_topic": args.budget,
         "block_size": BLOCK,
         "induced_order": "interleaved across topics (so recency cannot imitate content placement)",
+        "checkpoint_every": g,
+        "induced_versions": len(induced_versions),
         "tau_snapshot_blocks": tau_snapshot_blocks,
         "distinct_changed_blocks": len(all_blocks),
         "blocks_labelled": len(lab),
-        "mean_blocks_per_write": float(np.mean([len(s) for _, s in induced])) if induced else 0.0,
+        "mean_blocks_per_write": (
+            float(np.mean([len(s) for _, s in induced_versions]) / g) if induced_versions else 0.0
+        ),
         "localisation_heldout": localisation_heldout,
         "localisation_scored_n": tot,
         "adv_hist": acc_h_guess - chance,

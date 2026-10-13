@@ -62,7 +62,7 @@ $\mathcal{L}^{\mathrm{snap}}$.
 operations \emph{adaptively}, each chosen after the leakage of the earlier ones, and may reference
 records of $\sigma_b$. After each it receives $\mathcal{L}^{\mathrm{op}}$, never a search result.
 \item $\mathcal{A}$ outputs $b'$; its advantage is
-$\AdvH_{\Pi,\mathcal{A}}(\lambda) = \bigl|\Pr[b'=b] - \tfrac{1}{2}\bigr|$.
+$\AdvH_{\Pi,\mathcal{A}}(\lambda) = \lvert \Pr[b'=b] - \tfrac{1}{2}\rvert$.
 \end{enumerate}
 
 \begin{definition}[$\mathcal{L}$-dual-epoch security]
@@ -361,7 +361,7 @@ artifact is kept in the store's journal or outside the synchronized and imaged s
 The memory-resident store of \cref{sec:mnemos-m} with back-pressure satisfies C1--C3 and is reactively
 dual-epoch secure against every feedback agent, for both adversary classes. Without back-pressure it meets C1
 at every flush except a lock whose backlog exceeds the journal, which reveals that it did. Mnemos-P
-is not RDE (\cref{prop:derived}), so $\text{RDE} \Rightarrow \text{DE}$ and $\text{DE} \not\Rightarrow
+is not RDE (\cref{prop:derived}), so $\text{RDE} \Rightarrow \text{DE}$ and $\text{DE} \nRightarrow
 \text{RDE}$.
 \end{corollary}
 

@@ -1039,6 +1039,12 @@ def _with_round3() -> None:
     CHECKS.extend(verify_r3.CHECKS)
     EXTRACTORS.update(verify_r3.EXTRACTORS)
 
+    # Round four (pre-submission), registered 2026-10-13 before any of its experiments ran.
+    from eval.exp2 import verify_r4
+
+    CHECKS.extend(verify_r4.CHECKS)
+    EXTRACTORS.update(verify_r4.EXTRACTORS)
+
 
 def main() -> None:
     _with_round3()
