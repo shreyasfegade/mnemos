@@ -1,18 +1,18 @@
-AI agents write their own long-term memory to an encrypted local store and retrieve it by semantic
-search. We study an adversary that obtains the storage layer partway through such a
-store's life, through a synchronized backup or repeated disk imaging, observes later activity, and
-can steer the agent's inputs, but holds only stored state for records written earlier. We show that
-historical confidentiality, the safety of data written before the compromise, is a distinct
-system-level property that encryption, snapshot security and history independence do not provide.
-For stores that place records by content, topic labels the adversary induces through new writes
-transfer to earlier records; a transfer lemma names the precondition, that the layout disclose which
-partition holds an earlier record, and a deployed store, pgvector under an encrypted filesystem,
-meets it. A store that seals that channel is reached by three others: retained file versions,
-capacity refusals, and derived writes, where an agent that deduplicates turns the occurrence of a
-write into a membership oracle, which we confirm in the unmodified mem0 library. We formalize
-dual-epoch security as an adaptive, leakage-parameterized game, prove sufficient conditions covering
-overflow, separate it from breach resistance and history independence, and give a reactive variant
-whose composition theorem covers the self-writing agent. A store with content-independent placement,
-in-memory search and a clocked write-only-oblivious flush closes every channel against a write
-observer, at kilobytes per flush, and extends past the memory limit with its writes still hidden.
-A released artifact reproduces every number.
+AI agents write their own long-term memory to an encrypted store and retrieve it by semantic
+search. We ask what an adversary who obtains that storage midway, through a synchronized backup or
+repeated disk images, learns about records written \emph{before} the
+compromise. This historical confidentiality is not provided by encryption, snapshot security or
+history independence. In stores that place records by content, topic labels the adversary attaches
+to partitions by inducing new writes transfer to earlier records whenever the layout discloses their
+partition; pgvector under an encrypted file system does. Sealing the layout is not enough: retained
+versions name an earlier record's region at \REnineteenPrecRatio{} times the chance rate, capacity
+refusals expose a topic's load, and the agent itself leaks. A pipeline that skips facts it already
+holds turns the occurrence of a write into a membership oracle, with AUC \REeighteenAUCPt{} in the
+unmodified mem0 library and present in four of nine frameworks we inspected. We define
+dual-epoch security as an adaptive, leakage-parameterized game, prove sufficient conditions that
+tolerate overflow, separate it from breach resistance and history independence, and prove that
+against a self-writing agent a store is secure exactly when what it reveals is independent of what
+the agent does. A store with content-independent placement, search in locked memory and a clocked
+write-only-oblivious sweep meets that condition: it sits at chance in the reactive game (AUC
+\REtwentyMSweepPt, against \REtwentyPShippedPt{} for the padded design), writes
+\REtwentyoneSweepKiB~KiB per flush, and extends past the memory limit with its writes still hidden.

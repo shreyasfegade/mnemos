@@ -148,6 +148,7 @@ def collect() -> dict[str, str | None]:
         out[f"REnine{tag}AUC"] = ci_of(c, ("auc_full_vs_open", "lo", "hi"))
         out[f"REnine{tag}Full"] = f(c and c["mean_write_rate_full_regions"])
         out[f"REnine{tag}Open"] = f(c and c["mean_write_rate_open_regions"])
+        out[f"REnine{tag}AUCPt"] = f(c and c["auc_full_vs_open"], 2)
     cap9 = {c["engine"]: c for c in (e9 or {}).get("capacity_arm", [])}
     out["REnineUtilP"] = (
         f(cap9["p"]["utilisation_at_first_refusal"] * 100, 1) if "p" in cap9 else None
@@ -453,6 +454,24 @@ def collect() -> dict[str, str | None]:
         r = mins.get(key)
         out[f"REtwentyeight{tag}Msgs"] = big(r and r["adversary_messages"])
         out[f"REtwentyeight{tag}Min"] = f(r and r["agent_minutes_slowest_model"], 0)
+
+    # --- Point values for the abstract and introduction, where an interval would not fit -----
+    out["REsixteenPgAcc"] = f(pg and pg["adv_hist"] + pg["chance"], 3)
+    out["REsixteenPgAdvPt"] = signed(pg and pg["adv_hist"], 2)
+    out["REeighteenAUCPt"] = f(e18 and e18["auc_write_vs_nonmember"], 2)
+    p19 = e19.get(("p", 1))
+    out["REnineteenPrecRatio"] = f(p19 and p19["precision"] * 64, 0)
+    out["REtwentyMSweepPt"] = f((r20("M sweep") or {}).get("auc"), 2)
+    out["REtwentyPShippedPt"] = f((r20("P shipped") or {}).get("auc"), 2)
+
+    # --- E21: the drain policy's lock residual (sessions whose lock needs extra flushes) -------
+    res = (e21 or {}).get("lock_residual", [])
+    sus = [r["residual_rate"] for r in res if r["sustainable"]]
+    uns = [r["residual_rate"] for r in res if not r["sustainable"]]
+    out["REtwentyoneResidualSustain"] = f(100 * max(sus), 0) if sus else None
+    out["REtwentyoneResidualLo"] = f(100 * min(uns), 0) if uns else None
+    out["REtwentyoneResidualHi"] = f(100 * max(uns), 0) if uns else None
+    out["REtwentyoneSessions"] = str(res[0]["sessions"]) if res else None
     return out
 
 

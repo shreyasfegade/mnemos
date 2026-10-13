@@ -210,10 +210,10 @@ The ledger evaluates this at the \emph{empirical} accuracy $1-P_e$ of the attack
 exhibited. It is a lower bound twice over: Fano bounds the information any decoder needs, and the
 experiment's decoder is one particular decoder, so a better one can only raise $I(X;V)$.
 
-\paragraph{The prior term $H(X)$} The submitted ledger used $H(X)=\log_2 K$. That is exact only for a
-\emph{uniform} prior; under a skewed prior $H(X)<\log_2 K$ and the $\log_2 K$ form can exceed the
-true $I(X;V)$, so it is not a valid lower bound. The ledger now records, per row, whether the prior
-is uniform \emph{by construction} or empirical:
+\paragraph{The prior term $H(X)$} The form $H(X)=\log_2 K$ is exact only for a \emph{uniform}
+prior; under a skewed prior $H(X)<\log_2 K$ and that form can exceed the true $I(X;V)$, so it is not
+a valid lower bound. The ledger therefore records, per row, whether the prior is uniform \emph{by
+construction} or empirical:
 \begin{itemize}
 \item \emph{Binary games} (E5, the refusal channel E9, query equality E15, dedup E3): $K=2$ and the
 secret is a fair challenge bit or a balanced held-out label, so $H(X)=1$ exactly.
@@ -337,7 +337,34 @@ generated from the same result files by the same code, so the two cannot disagre
 \label{supp:further}
 
 These results are argued from in the main paper, which carries their headline in prose or in the
-leakage ledger (\cref{tab:ledger}); the full tables are here.
+leakage ledger (\cref{tab:supp-ledger}); the full tables are here.
+
+\begin{table*}[t]
+\centering
+\caption{The architectural frontier. Security is stated by the strongest adversary class each design
+closes the historical channels against; performance is orders of magnitude, not a benchmark. Figures
+marked $\ast$ are reported by the cited systems for their own settings and are not re-measured here;
+unmarked figures for the Mnemos designs are from \cref{sec:eval-perf} of the main paper. The point is the boundary
+between designs, not a head-to-head: these systems assume different adversaries.}
+\label{tab:arch}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lccccccc}
+\toprule
+Design & Closes hist.\ vs & Insert & Search & Resident & Disk/op & $>$mem & Ingest \\
+\midrule
+Plaintext IVF & --- & $O(1)$ & sublinear & index & $O(1)$ & yes & yes \\
+Mnemos-P & W (not deriv.) & flush & sublin., disk & index & region & yes & yes \\
+Mnemos-M & W, derived & clock & $O(n)$, mem & idx+payload & sweep & no & yes \\
+Mnemos-M/disk & W, derived & clock & sublin., disk & posmap+part & sweep & yes & yes \\
+Write-only ORAM & W & $O(1)^\ast$ & writes only & posmap$^\ast$ & $O(1)^\ast$ & yes & yes \\
+Path ORAM slots & W, RW & $O(\log^2 n)^\ast$ & $O(\log^2 n)^\ast$ & stash$^\ast$ & $O(\log^2 n)^\ast$ & yes & yes \\
+Compass & W, RW & $O(\log)^\ast$ & oblivious$^\ast$ & client$^\ast$ & per-acc$^\ast$ & srv & yes$^\ast$ \\
+Onyx & W, RW & --- & oblivious$^\ast$ & sublin.$^\ast$ & per-acc$^\ast$ & yes$^\ast$ & --- \\
+Opal (TEE) & W, RW & $O(\log)^\ast$ & oblivious$^\ast$ & enclave$^\ast$ & per-acc$^\ast$ & yes$^\ast$ & yes$^\ast$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \begin{figure*}[t]
 \centering
@@ -387,6 +414,20 @@ resident memory, is what bounds Mnemos-M; the index leaves it unchanged.}
 \end{figure*}
 
 \input{tables/e4_drift}
+
+Two features of the curve are systematic. The advantage turns \emph{negative} at the largest gap
+(\REfourNaive, an interval below zero): the attacker commits to a partition-to-topic map fitted on
+the induced era, and once cluster geometry has drifted that map mislabels cohort H more often than
+a uniform guess. The gap-zero advantage (\REfourAware) exceeds the i.i.d.\ shuffled control
+(\REfourShuffled) because the shuffle mixes every era and dilutes the era-specific partition
+structure that same-era induction matches; the comparison that isolates drift is gap zero against
+the far eras. \Cref{tab:e4} also reports advantage over the majority-class baseline.
+
+Each interval resamples \emph{independent induction sequences}, each drawing its own cohort split,
+induction order and attacker fit. The longitudinal study reports different
+advantages at nominally similar budgets because its budget counts induced records per topic while
+this one counts turns, each a burst of $w_{\mathrm{real}}$ records; in records per topic the two
+agree.
 \input{tables/e6_stores}
 \input{tables/e3_dedup}
 \input{tables/e7_permutation}

@@ -253,8 +253,9 @@ An accepted put reveals $\pi(\mathrm{part}(x))$ and a silently refused one revea
 distinguishing event is exactly ``this topic is at capacity.'' Padded refusal (S3) takes the second
 horn and pays in lost writes; over-provisioning takes the first and pays in provisioning for the
 most frequent topic, which under skew is most of the file. \Cref{sec:eval-refusal} measures both. A
-design with only a \emph{global} bound, such as \cref{sec:mnemos-m}, escapes the proposition,
-because global occupancy is a function of the record count, which the game equalizes.
+design with only a \emph{global} bound, such as \cref{sec:mnemos-m}, escapes the proposition for a
+different reason: its disk schedule is a function of the clock alone (\cref{thm:reactive}), so a
+refused write changes nothing that is written.
 
 \subsection{Reactive Security and the Derived-Write Channel}
 \label{sec:derived-write}
@@ -269,10 +270,12 @@ flow, so this is a separate model: secure storage composed with a reactive progr
 program that, on each turn, receives an input, may search $\Pi$ and read the plaintext results, and
 then issues $\mathsf{put}$, $\mathsf{delete}$ or $\mathsf{update}$ operations. The game
 $\mathbf{G}^{\mathrm{R}}_{\Pi,\mathsf{P},\mathcal{A}}$ runs as $\mathbf{G}^{\mathrm{H}}$ through
-$\tau$; then the challenger runs $\mathsf{P}$ on inputs the adversary supplies one at a time, and
-after each turn the adversary receives $\mathcal{L}^{\mathrm{op}}$ of the operations $\mathsf{P}$
-issued and nothing else: no output of $\mathsf{P}$, no search result. $\AdvR_{\Pi,\mathsf{P},\mathcal{A}}$
-is defined as before.
+$\tau$; then the challenger runs $\mathsf{P}$ on inputs the adversary supplies one at a time, at times
+and between unlocks and locks the adversary chooses, and after each turn the adversary receives
+$\mathcal{L}^{\mathrm{op}}$ of the operations $\mathsf{P}$ issued and nothing else: no output of
+$\mathsf{P}$, no search result. $\mathsf{P}$ controls neither the clock nor the session boundaries,
+so the schedule is not itself a channel from the agent. $\AdvR_{\Pi,\mathsf{P},\mathcal{A}}$ is
+defined as before.
 
 \begin{definition}[Reactive dual-epoch security]
 \label{def:reactive}
@@ -299,41 +302,67 @@ lands in different partitions, which content leakage reveals. Mnemos-P flushes o
 by content, so it meets \cref{thm:main} and is not RDE.
 \end{proof}
 
-The hypothesis excludes exactly the stores whose disk behaviour is a function of the clock alone.
-For those the composition goes through.
+The deduplicating agent is one instance of a general fact: an agent can select between any two
+behaviours on one bit of what it retrieved, so any dependence of the leakage on what the agent does
+is a channel, and its absence is enough. Call $\Pi$ \emph{operation-oblivious} if at every turn the
+adversary's view of that turn, given its view so far, is computationally indistinguishable whatever
+operations the turn issues, none included, and whatever history produced the store.
 
-\begin{theorem}[Composition: a clock-only store is reactively secure]
+\begin{theorem}[Reactive security is operation obliviousness]
 \label{thm:reactive}
-Let $\Pi$ satisfy S1 and S2 and, in place of S3--S4, the clock conditions
+Let $\Pi$ satisfy S1 and S2 and be dual-epoch secure (\cref{def:dualepoch}).
+\begin{enumerate}
+\item[(i)] If $\Pi$ is operation-oblivious, it is RDE against every feedback agent.
+\item[(ii)] If on some store state two operation sequences $O$ and $O'$, searches included, leak at
+statistical distance $\varepsilon$, there are a feedback agent $\mathsf{P}$ and histories with
+$\AdvR_{\Pi,\mathsf{P},\mathcal{A}} \ge \varepsilon/2 - \delta - \negl(\lambda)$, where $\delta$ is the
+probability that a search misses a stored exact duplicate.
+\item[(iii)] The following clock conditions make $\Pi$ operation-oblivious, with leakage
+$\mathcal{L}_{\mathrm{clock}}$ that reveals only the unlock, lock and flush times.
 \begin{itemize}
 \item \textbf{C1 (clocked schedule).} The set of disk locations written at each flush is a function
-of the flush index alone --- a deterministic sweep of $s$ slots per flush from a start fixed at
-unlock --- and a flush occurs every $\Delta$ while unlocked whether or not anything was staged.
+of the flush index and of a start drawn uniformly at unlock --- a deterministic sweep of $\kappa$
+slots per flush --- and a flush occurs every $\Delta$ while unlocked, and once at lock, whether or
+not anything was staged.
 \item \textbf{C2 (fresh sealed writes).} Every written slot is a fresh authenticated ciphertext of
 the fixed slot length, live or free alike.
 \item \textbf{C3 (no post-unlock reads).} After the single sequential read at unlock, a
 $\mathsf{search}$ issues no disk access; ranking and payload retrieval are served from the locked
 arena.
 \end{itemize}
-Then for every feedback agent $\mathsf{P}$, $\Pi$ is reactively $\mathcal{L}_{\mathrm{clock}}$-dual-epoch
-secure, where $\mathcal{L}_{\mathrm{clock}}$ reveals only the unlock, lock and flush times.
+\end{enumerate}
 \end{theorem}
 
 \begin{proof}[Proof sketch]
-The same two hybrids make the snapshot fixed-length uniform strings. Each flush then writes the
-slot range C1's cursor names, a function of the flush index and not of anything $\mathsf{P}$ did,
-wrote or read; by C3 no search adds a disk event. The view is the clock and uniform bytes, which a
-simulator holding only $\mathcal{L}_{\mathrm{clock}}$ reproduces without $\mathsf{P}$, its inputs, or
-$b$. The supplementary material gives the full argument, including the sealed journal that carries
-staged records between flushes on the same clock.
+(i) Replace the operations of each turn, one turn at a time, by the empty sequence; each step is
+indistinguishable by obliviousness, and the final view, the snapshot and an idle schedule, is
+independent of $b$ by S1 and S2. (ii) $\mathsf{P}$ searches for its input and issues $O$ if a
+near-duplicate is returned and $O'$ otherwise; $\sigma_0$ holds the input and $\sigma_1$ does not,
+and $\mathcal{A}$ applies the optimal test for $O$ against $O'$. Dual-epoch security makes the
+search and the two store states indistinguishable on their own, so the test's advantage survives up
+to the probability $\delta$ that $\mathsf{P}$ takes the wrong branch. (iii) The two hybrids of
+\cref{thm:main} make every written byte uniform; each flush then writes the slot range C1's cursor
+names, a function of the flush index and not of anything $\mathsf{P}$ did, wrote or read, and by C3 no
+search adds a disk event. The supplementary material gives the full argument, including the sealed
+journal that carries staged records between flushes on the same clock.
 \end{proof}
+
+Part (i) is the definition read in the other direction; the content of the theorem is that nothing
+weaker suffices (ii) and that the clock achieves it (iii). Two consequences follow. Under RW a
+search's reads are part of what a turn reveals, and an agent searches about what it has just
+retrieved, so by (ii) a store whose reads depend on the query is not RDE against RW: only one that
+reads nothing after unlock, or reads obliviously, is. And the theorem is a property of the store's
+files: an agent framework that persists anything else whose writes depend on the agent's decisions,
+such as a history log recording each add or skip, reopens the channel above the store unless that
+artifact is kept in the store's journal or outside the synchronized and imaged scope.
 
 \begin{corollary}[Mnemos-M is reactively secure]
 \label{cor:m-reactive}
-The memory-resident store of \cref{sec:mnemos-m}, with its deterministic sweep flush, in-memory
-search, and clocked schedule, satisfies C1--C3 and is reactively dual-epoch secure against every
-feedback agent. Mnemos-P is not (\cref{prop:derived}), so
-$\text{RDE} \Rightarrow \text{DE}$ and $\text{DE} \not\Rightarrow \text{RDE}$.
+The memory-resident store of \cref{sec:mnemos-m} with back-pressure satisfies C1--C3 and is reactively
+dual-epoch secure against every feedback agent, for both adversary classes. Without back-pressure it meets C1
+at every flush except a lock whose backlog exceeds the journal, which reveals that it did. Mnemos-P
+is not RDE (\cref{prop:derived}), so $\text{RDE} \Rightarrow \text{DE}$ and $\text{DE} \not\Rightarrow
+\text{RDE}$.
 \end{corollary}
 
 \Cref{sec:eval-reactive} plays the reactive game against both designs and a graded series of

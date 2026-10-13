@@ -304,7 +304,7 @@ def fig_crossover() -> bool:
 def fig_architecture() -> bool:
     """A schematic, not a chart: where each design puts data and where search runs."""
     style()
-    fig, axes = plt.subplots(1, 2, figsize=(WIDE, 2.15))
+    fig, axes = plt.subplots(1, 2, figsize=(WIDE, 1.8))
     for ax, design, title in (
         (axes[0], "p", "Mnemos-P: placement by content, search on disk"),
         (axes[1], "m", "Mnemos-M: placement at random, search in memory"),
@@ -408,9 +408,121 @@ def fig_architecture() -> bool:
     return True
 
 
+# --------------------------------------------------------------------------- overview
+def fig_overview() -> bool:
+    """Figure 1, a schematic: the two cohorts, the four channels that cross tau, and the fix.
+
+    Every channel is drawn as an arrow pointing *back* across tau, because that is the finding:
+    something the adversary observes after the compromise says something about a record written
+    before it. The fix sits underneath, spanning both cohorts, in the hue of Mnemos-M.
+    """
+    style()
+    fig, ax = plt.subplots(figsize=(WIDE, 2.2))
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 6.2)
+    ax.axis("off")
+    hist, post, safe = "#0072B2", PALETTE["m"], PALETTE["p"]
+    tau = 4.1
+
+    # Cohort bands and the compromise line.
+    band = {"facecolor": hist, "alpha": 0.13, "ec": hist, "lw": 0.7}
+    ax.add_patch(Rectangle((0.1, 4.55), tau - 0.1, 1.05, **band))
+    band = {"facecolor": post, "alpha": 0.13, "ec": post, "lw": 0.7}
+    ax.add_patch(Rectangle((tau, 4.55), 9.9 - tau, 1.05, **band))
+    ax.text(
+        (0.1 + tau) / 2,
+        5.28,
+        "cohort H: written before $\\tau$",
+        ha="center",
+        fontsize=7.5,
+        color=hist,
+        weight="bold",
+    )
+    ax.text(
+        (0.1 + tau) / 2,
+        4.80,
+        "adversary holds only the stored state",
+        ha="center",
+        fontsize=6.5,
+        color=INK,
+    )
+    ax.text(
+        (tau + 9.9) / 2,
+        5.28,
+        "cohort P: written after $\\tau$",
+        ha="center",
+        fontsize=7.5,
+        color=post,
+        weight="bold",
+    )
+    ax.text(
+        (tau + 9.9) / 2,
+        4.80,
+        "adversary sees every file version and steers the agent's inputs",
+        ha="center",
+        fontsize=6.5,
+        color=INK,
+    )
+    ax.plot([tau, tau], [1.25, 5.85], color=INK, lw=1.0, ls=(0, (3, 2)))
+    ax.text(
+        tau,
+        5.92,
+        "$\\tau$: sync account or disk image compromised",
+        ha="center",
+        fontsize=6.5,
+        color=INK,
+    )
+
+    # The four channels, each an arrow from what is observed after tau back to cohort H.
+    channels = [
+        ("induced writes label content-placed partitions", "labels apply to earlier records"),
+        ("retained file versions diff to the regions written", "names an earlier record's region"),
+        ("a full partition refuses the write", "discloses the earlier load"),
+        ("a deduplicating agent skips a fact it holds", "write or no write: membership"),
+    ]
+    for i, (seen, learned) in enumerate(channels):
+        y = 4.05 - i * 0.68
+        ax.text(tau + 0.45, y, f"({i + 1}) {seen}", ha="left", va="center", fontsize=6.5, color=INK)
+        ax.add_patch(
+            FancyArrowPatch(
+                (tau + 0.35, y),
+                (tau - 0.35, y),
+                arrowstyle="-|>",
+                mutation_scale=8,
+                color=post,
+                lw=1.1,
+            )
+        )
+        ax.text(tau - 0.45, y, learned, ha="right", va="center", fontsize=6.5, color=hist)
+
+    # The fix, spanning both cohorts.
+    ax.add_patch(Rectangle((0.1, 0.12), 9.8, 0.95, facecolor=safe, alpha=0.12, ec=safe, lw=0.7))
+    ax.text(
+        5.0,
+        0.78,
+        "clock-only store: placement independent of content, search in locked memory, "
+        "a write-only-oblivious sweep on a clock",
+        ha="center",
+        fontsize=6.5,
+        color=INK,
+    )
+    ax.text(
+        5.0,
+        0.36,
+        "closes (1)-(4) against a write observer, for every self-writing agent (Theorem 2)",
+        ha="center",
+        fontsize=6.5,
+        color=safe,
+        weight="bold",
+    )
+    save(fig, "fig_overview")
+    return True
+
+
 def main() -> None:
     made, skipped = [], []
     for fn, name in (
+        (fig_overview, "fig_overview"),
         (fig_architecture, "fig_architecture"),
         (fig_budget, "fig_budget"),
         (fig_drift, "fig_drift"),

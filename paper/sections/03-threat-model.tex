@@ -98,18 +98,14 @@ Keys, process memory & none & none \\
 \end{tabular}
 \end{table}
 
-Hardware key custody (\cref{sec:mnemos-keys}) protects a disk image or synchronized copy read
-offline. It does not protect against malware running as the user, which can ask the key store to
-unwrap the master key; that adversary is out of scope for every storage-layer design.
+Hardware key custody (\cref{sec:mnemos-keys}) protects a copy read offline; malware running as the
+user can ask the key store to unwrap the master key, and is out of scope for every storage design.
 
-\subsection{Capture Granularity}
+\paragraph{Capture granularity}
 \label{sec:granularity}
-
-A synchronization client coalesces changes rather than uploading one version per flush, at an
-interval set by the client and network rather than the store. The attacks of
-\cref{sec:eval-multisnapshot} are therefore parameterized by the capture granularity $g$, the
-number of flushes between versions the adversary obtains, rather than assuming $g=1$; coarser
-capture weakens every write-channel attack against W.
+A synchronization client coalesces changes at an interval set by the client and network, not the
+store, so the attacks are parameterized by the capture granularity $g$, the number of flushes between
+versions the adversary obtains; coarser capture weakens every write-channel attack against W.
 
 \subsection{Pre-\texorpdfstring{$\tau$}{tau} State a Real System Retains}
 \label{sec:artifacts}
@@ -135,9 +131,9 @@ the operating system delivering that notification.
 The assets, in decreasing order of sensitivity, are the content of stored records, their topics, the
 temporal pattern of the agent's activity, and the existence of specific records; a record's topic,
 meaning the subject matter the agent worked on, is often as sensitive as its text and is easier to
-recover. The security goals are content confidentiality (G1), topic confidentiality for cohort P
-(G2), query privacy under observation of storage access (G3), resistance to correlation of induced
-writes (G4), and topic confidentiality for cohort H (G5), which is the focus of this paper.
+recover. The security goals are content confidentiality, topic confidentiality for cohort P, query
+privacy under observation of storage access, resistance to correlation of induced writes, and topic
+and membership confidentiality for cohort H, which is the focus of this paper.
 
 The analysis assumes secure cryptographic primitives (A1); a host uncompromised before $\tau$ (A2),
 without which cohort H does not exist and the problem reduces to that of a fully observed store;

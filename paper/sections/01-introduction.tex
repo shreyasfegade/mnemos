@@ -19,17 +19,30 @@ work models an adversary that obtains the storage layer. Encrypting the memory i
 measure, because embeddings can be inverted to recover much of the original text
 \cite{morris2023text}.
 
-This paper studies an adversary that obtains the storage layer partway through the life of such a
-store, for example through a compromised synchronization or backup account, or by imaging the
-device more than once. From the moment of compromise, $\tau$, it observes storage activity and can
-influence the agent's inputs; for entries written before $\tau$ it holds only stored state. Those
-entries might be expected to be safer for having been written before the breach. Our thesis is that
-this expectation is a security property in its own right --- \emph{historical confidentiality}, the
-analogue for stored structure of what forward secrecy is for keys --- and that it is not delivered by
-encryption, by snapshot security, or by history independence. Whether a given store provides it turns
-on a precondition we make precise, and closing the obvious channel that supplies that precondition is
-not enough, because storage, versioning, capacity and the agent's own control flow supply it by other
-routes that compose across the two epochs.
+Consider a coding agent that spent the spring helping its user prepare a confidential acquisition.
+Its memory folder is encrypted and synchronized to a cloud account, and in June that account is
+phished. From then on the attacker receives every new version of the store, and it can email the
+agent documents that the agent will read and remember. It cannot decrypt anything. What does it
+learn about March?
+
+This paper studies that adversary, which obtains the storage layer at a time $\tau$ through a
+synchronization or backup account or repeated disk imaging, and holds only stored state for the
+records written before $\tau$. Those records might be expected to be safer for having been written
+before the breach. Our thesis is that this expectation is a security property in its own right --- \emph{historical confidentiality}, the analogue for stored
+structure of what forward secrecy is for keys --- and that encryption, snapshot security and history
+independence do not deliver it. \Cref{fig:overview} summarizes the four channels by which an
+adversary reaches the earlier records, and the design that closes them.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_overview.pdf}
+\caption{Historical confidentiality at a glance. The adversary arrives at $\tau$ and observes only
+what happens after it, yet each of four channels turns a post-compromise observation into a statement
+about records written before the compromise (\cref{sec:transfer}). A store whose disk behaviour is a
+function of the clock alone closes all four against a write observer, and \cref{thm:reactive} shows
+that nothing weaker can close the fourth.}
+\label{fig:overview}
+\end{figure*}
 
 \paragraph{The attack, and its precondition}
 The attack rests on two properties of the setting. An agent's writes can be induced: an adversary
@@ -38,27 +51,25 @@ that record is ordinary agent output. And encrypted vector indexes partition the
 content, so repeated induced writes on a chosen topic reveal which partitions receive records on
 that topic. Because partitions are assigned by content rather than by time, the resulting
 partition-to-topic map describes the earlier records too. A transfer lemma makes this exact, and
-shows the two cohorts are exposed equally.
-
-The lemma has a third hypothesis, and it carries most of the weight: the adversary must learn
-\emph{which partition holds a given earlier record}. A layout whose regions grow with occupancy
-discloses that in the snapshot; one of fixed-size sealed regions does not. The paper is largely an
-account of how an adversary obtains that membership anyway.
+shows the two cohorts are exposed equally, provided the adversary learns \emph{which partition holds
+a given earlier record}. A layout whose regions grow with occupancy discloses that in the snapshot,
+and so does pgvector's \texttt{ivfflat} index under an encrypted file system; one of fixed-size
+sealed regions does not. Much of the paper is an account of how an adversary obtains that
+membership anyway.
 
 \paragraph{What actually protects, and what does not}
-Two natural intuitions need qualifying. Subject drift lowers the attack's advantage only against an
-adversary that induces with current content; one that induces with archival material on the earlier
-subject recovers much of it. And history independence is a single-snapshot notion
-\cite{naor2001anti}; snapshot-oblivious RAM exists because several snapshots differ from one
-\cite{du2022snapshot}. For content-placed layouts two retained versions diff to exactly the regions
-written between them, the write channel applied before $\tau$.
-
-Two further channels reach the earlier cohort without touching the layout. A store that bounds
-per-partition capacity and refuses an overflowing write discloses, at near-perfect accuracy, that a
-topic's load has reached capacity, and therefore what the earlier cohort contributed to it. And an
-agent that acts on what it recalls leaks through its own operations; the weakest form of this, the
-occurrence of a write, is enough, because a memory pipeline that skips a fact it already holds turns
-deduplication into a membership oracle for facts written before the compromise.
+Subject drift protects the earlier records only against an adversary that induces with current
+content: on a timestamped issue tracker the advantage falls from \REfourAware{} to \REfourNaive{}
+when the induced content is five eras newer, but rises to \REtwentysevenTenth{} when only a tenth of the
+induction budget is archival. History independence is a single-snapshot notion
+\cite{naor2001anti}, and two retained versions of a content-placed store diff to exactly the regions
+written between them; under a real backup tool the diff names an earlier record's region at
+\REnineteenPrecRatio{} times the chance rate. A store that bounds per-partition capacity and refuses
+an overflowing write discloses, at AUC \REnineSilentAUCPt, that a topic's load has reached capacity,
+and therefore what the earlier records contributed to it. And an agent leaks through its own
+operations, down to the occurrence of a write: a memory pipeline that skips a fact it already holds
+turns deduplication into a membership oracle for facts written before the compromise, which we
+measure at AUC \REeighteenAUCPt{} in the unmodified mem0 library.
 
 \paragraph{The design principle}
 \emph{Semantic indexing need not imply semantic physical placement.} The threat model already
@@ -66,32 +77,33 @@ assumes the adversary cannot read the unlocked process's memory, and in the loca
 server must hold the index, so encrypted on-disk search is a choice rather than a requirement.
 Taking that at face value yields a store whose disk layout carries no content: placement independent
 of content, search in locked memory over a logical partition index, and writes by a clocked sweep in
-the manner of write-only ORAM. It closes all three channels above, and a composition theorem shows it
-stays closed when the writer is the self-writing agent itself. Keeping headers on disk extends it
-past the memory limit with its writes still invisible to a write observer; only a read observer
-needs oblivious \emph{search}, which we price rather than claim. The partitioned design is the
-construction the dual-epoch theorem is proved for, and the point of comparison.
+the manner of write-only ORAM. It closes all four channels against a write observer, at
+\REtwentyoneSweepKiB~KiB per flush. We prove more: against a self-writing agent, a store is secure
+exactly when what it reveals is independent of what the agent does, so the clock-only schedule is
+not one sufficient design among many but the shape every secure design must have. Keeping headers on
+disk extends the store past the memory limit with its writes still invisible to a write observer;
+only a read observer needs oblivious \emph{search}, which we price rather than claim.
 
 The contributions are as follows.
 \begin{enumerate}
-\item \textbf{Historical confidentiality and its threat model.} The confidentiality of
-pre-compromise agent memory as a distinct system-level property, with a $\tau$-arrival adversary
-split into write-observing (W) and read-write (RW) classes, parameterized by version-capture
-granularity, and audited against the artifacts a real operating system retains
+\item \textbf{Historical confidentiality and its threat model:} a $\tau$-arrival adversary split
+into write-observing (W) and read-write (RW) classes, parameterized by version-capture granularity
+and audited against the artifacts a real operating system retains
 (\cref{sec:threat,sec:eval-artifacts}).
-\item \textbf{Structure transfer and the channels that supply its precondition.} The transfer
-attack and the membership condition under which it reaches the earlier cohort, evaluated on deployed
-stores under file-level encryption (reaching pgvector) and on records a language-model agent wrote;
-and three channels that supply the condition when the layout withholds it: multi-version
-reconstruction, refusals, and derived writes, the last a deduplication membership oracle present in
-the unmodified mem0 library (\cref{sec:transfer,sec:eval}).
-\item \textbf{Dual-epoch security and its relations.} An adaptive, leakage-parameterized
-definition; sufficient conditions that cover capacity overflow; separations from forward/backward
-privacy, breach resistance and history independence; and a reactive variant with a composition
-theorem proving the memory-resident design secure against a self-writing agent, which the standard
-adaptive definition cannot express (\cref{sec:dualepoch,sec:eval-game,sec:eval-reactive}).
-\item \textbf{A design space, implemented and audited.} Three designs and a larger-than-memory
-variant, a byte-level auditor that checks every operation against the bytes it writes, and
-pre-registered measurements of every channel, including the ones that stay open
-(\cref{sec:mnemos,sec:eval}).
+\item \textbf{Structure transfer and the channels that supply its precondition:} the transfer
+attack, evaluated on deployed stores under file-level encryption and on agent-written records, and
+three channels that reach the earlier cohort when the layout does not: multi-version
+reconstruction, refusals, and derived writes, the last a deduplication membership oracle in the
+unmodified mem0 library (\cref{sec:transfer,sec:eval}).
+\item \textbf{Dual-epoch security:} an adaptive, leakage-parameterized definition; sufficient
+conditions that cover overflow; separations from forward/backward privacy, breach resistance and
+history independence; and a reactive variant with an exact characterization of the stores secure
+against a self-writing agent (\cref{sec:dualepoch,sec:eval-game,sec:eval-reactive}).
+\item \textbf{A design space, implemented and audited:} three designs and a larger-than-memory
+variant, a byte-level auditor, and registered measurements of every channel, including those that
+stay open (\cref{sec:mnemos,sec:eval}).
 \end{enumerate}
+
+\Cref{sec:background,sec:threat} cover related work and the threat model, \cref{sec:transfer}
+the attacks, \cref{sec:dualepoch} the theory, \cref{sec:mnemos} the designs, \cref{sec:eval} the
+measurements, and \cref{sec:discussion} the limitations.

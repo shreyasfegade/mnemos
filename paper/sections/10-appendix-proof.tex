@@ -82,9 +82,8 @@ cohort-H record adds nothing to the view that depends on which region held it.
 function of the query, the partition table, the relabeling and fresh per-call randomness, none of
 which depends on $b$. Ranking and payload decryption occur in memory over the region images already
 read, so no further disk access is issued.
-\item \emph{Refusals.} The submitted proof closed this case with an admissibility assumption: it
-required that neither history reach capacity, so that no write was ever refused. That assumption is
-now removed, and the case is closed by S3's padded refusal instead. Consider a post-$\tau$
+\item \emph{Refusals.} No admissibility assumption is needed: neither history is required to stay
+below capacity, and the case is closed by S3's padded refusal. Consider a post-$\tau$
 $\mathsf{put}$ whose target partition is full under one history and not under the other. Under both,
 S3 requires the store to rewrite the intended region: an accepted write re-seals the region with the
 new record among its slots, and a refused write re-seals the same region unchanged. By item~2 every
@@ -151,7 +150,7 @@ distinguisher, which \cref{sec:eval-game} realizes as ablations, together with t
 the keyed relabeling is \emph{not} among the conditions and that removing it leaves the game at
 chance.
 
-\section{Proof of the Composition Theorem~\ref{thm:reactive}}
+\section{Proof of Theorem~\ref{thm:reactive}}
 \label{supp:reactive}
 
 We prove that a store satisfying S1, S2 and the clock conditions C1--C3 is reactively
@@ -189,7 +188,7 @@ inputs, and of every branch $\mathsf{P}$ took.
 \item \emph{Snapshot.} By S1 and $\mathrm{H}_2$ the snapshot is a tuple of fixed-length uniform
 strings whose count and lengths are public, identical under $b=0$ and $b=1$.
 \item \emph{Writes.} By C1 the set of disk locations a flush rewrites is the image of the flush index
-under the deterministic sweep: the $s$ slots after a cursor that advances by $s$ each flush from a
+under the deterministic sweep: the $\kappa$ slots after a cursor that advances by $\kappa$ each flush from a
 start fixed at unlock. This set is a function of the flush index alone. It does not depend on how many
 records $\mathsf{P}$ staged, on their content, or on whether $\mathsf{P}$ wrote at all --- a flush
 occurs every $\Delta$ regardless (C1). By $\mathrm{H}_2$ the bytes written are uniform. So the write
@@ -217,6 +216,40 @@ indistinguishable and
 \mathsf{Adv}^{\mathrm{ind\$}}_{\mathsf{AE}}(\lambda) \le \negl(\lambda).
 \]
 \hfill$\blacksquare$
+
+\paragraph{The lock} C1 includes one flush at lock, always. A lock is a time the adversary chose
+(\cref{def:reactive}), so its flush is a clock event like any other, and the cursor range it writes
+is the next one in the sweep. A store that flushed \emph{more} than once at lock when more records
+were staged than its journal holds would make the number of lock-time flushes a function of how much
+$\mathsf{P}$ wrote, which violates C1; this is why Mnemos-M's back-pressure, which refuses a
+$\mathsf{put}$ to the caller rather than stage beyond the journal, is the configuration
+\cref{cor:m-reactive} covers without exception.
+
+\paragraph{Part (i)} Let $\Pi$ be operation-oblivious and let $\mathsf{P}$ issue at most $q$ turns.
+Define hybrids $\mathrm{T}_0,\dots,\mathrm{T}_q$, where in $\mathrm{T}_j$ the operations of the
+first $j$ turns are replaced by the empty sequence at the same times and the remaining turns run
+$\mathsf{P}$ as in the real game. Consecutive hybrids differ in the operations of one turn, and by
+obliviousness the adversary's view of that turn, given everything before it, is indistinguishable
+under the two; the later turns are a function of that view and of $\mathsf{P}$'s state, which the
+adversary never sees. So $|\Pr[\mathrm{T}_{j-1}\Rightarrow 1] - \Pr[\mathrm{T}_j\Rightarrow 1]| \le
+\negl(\lambda)$, and in $\mathrm{T}_q$ the view is the snapshot followed by an idle schedule, both
+independent of $b$ by S1, S2 and the obliviousness of idle turns across histories. Summing, $\AdvR
+\le q\cdot\negl(\lambda)$.
+
+\paragraph{Part (ii)} Fix a store state and two operation sequences $O$, $O'$, searches included,
+whose leakage is at statistical distance $\varepsilon$, and let $T$ be the optimal test between the
+two leakage distributions, with advantage $\varepsilon$. Let $x^\star$ be a fact absent from that
+state, let $\sigma_1$ produce the state and $\sigma_0$ produce it with $x^\star$ added, both padded to
+equal length. $\mathsf{P}$, on input $x$, searches for $x$ and issues $O$ if the top result is a
+near-duplicate of $x$ and $O'$ otherwise. $\mathcal{A}$ supplies $x^\star$ and outputs $b'=0$ exactly
+when $T$ says $O$. Under $b=1$ no near-duplicate exists and $\mathsf{P}$ issues $O'$; under $b=0$ it
+issues $O$ except with the probability $\delta$ that the search misses the stored duplicate. Two
+further differences remain between the worlds: the leakage of $\mathsf{P}$'s search, and the
+difference between the two store states on which $O$ and $O'$ run. An adversary of
+\cref{def:dualepoch} can issue the same search and the same operations on either state itself, so by
+dual-epoch security both differences are indistinguishable. Hence $\Pr[b'=b] \ge \tfrac12 +
+\tfrac{\varepsilon}{2} - \delta - \negl(\lambda)$, and $\AdvR \ge \varepsilon/2 - \delta -
+\negl(\lambda)$. \Cref{prop:derived} is the case where $O$ is a write and $O'$ is nothing.
 
 \paragraph{Why Mnemos-P is excluded} The proof uses C1 and C3 exactly where \cref{prop:derived}'s
 attack strikes. Mnemos-P flushes on demand, violating C1: a flush occurs \emph{because} $\mathsf{P}$

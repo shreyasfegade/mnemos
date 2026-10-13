@@ -10,16 +10,15 @@ typically the access pattern (which encrypted records a query touches) and the s
 of work shows that such leakage can be exploited. Islam, Kuzu, and Kantarcioglu recovered queries
 from access-pattern co-occurrence \cite{islam2012access}; Cash et al. introduced the count attack
 \cite{cash2015leakage}; and Blackstone, Kamara, and Moataz reduced the auxiliary knowledge these
-attacks require \cite{blackstone2020revisiting}. Volume leakage alone suffices for database
-reconstruction \cite{kellaris2016generic,grubbs2018pump}, and query recovery can survive
-access-pattern obfuscation \cite{oya2022ihop}. Kornaropoulos, Papamanthou, and Tamassia recover
+attacks require \cite{blackstone2020revisiting}. Volume leakage alone suffices
+for reconstruction \cite{kellaris2016generic,grubbs2018pump}, and query recovery survives
+obfuscation \cite{oya2022ihop}. Kornaropoulos, Papamanthou, and Tamassia recover
 data from the leakage profile of $k$-nearest-neighbor queries \cite{kornaropoulos2019knn}, the
 query type an encrypted vector store serves. Volume-hiding constructions pad response sizes to
 remove this channel \cite{kamara2019volume,patel2019mitigating}. Xu et al. showed that
 leakage-abuse attacks remain effective against schemes that are both forward and backward private
 \cite{xu2023leakage}. Local SSE bounds how scattered a query's reads are on the client's own disk
-\cite{minaud2022dynamic}; it concerns where a query reads, not what a compromise of that disk
-reveals about earlier writes.
+\cite{minaud2022dynamic}, not what a compromise of that disk reveals about earlier writes.
 
 \subsection{Forward Privacy, Backward Privacy, and Injection}
 
@@ -39,7 +38,8 @@ here it controls only the task that causes the agent to write.
 \subsection{Snapshot Adversaries and History Independence}
 
 A snapshot adversary observes the stored state at one or more points rather than the full
-transcript. Amjad, Kamara, and Moataz define breach-resistant structured encryption, which
+transcript; Fuller et al.\ systematize it against the persistent adversary of searchable encryption
+\cite{fuller2017sok}. Amjad, Kamara, and Moataz define breach-resistant structured encryption, which
 requires that a snapshot adversary learn less than a persistent one \cite{amjad2019breach}. Du,
 Genkin, and Grubbs construct snapshot-oblivious RAMs \cite{du2022snapshot}, and Persiano and Yeo
 establish lower bounds for such constructions \cite{persiano2023limits}. Grubbs, Ristenpart, and
@@ -47,8 +47,14 @@ Shmatikov observe that real database snapshots also contain logs, caches, and ot
 leak past operations \cite{grubbs2017why}, and, attacking applications built on encrypted data,
 show that a snapshot combined with the application's own behaviour recovers far more than either
 alone \cite{grubbs2016breaking} --- the composition this paper formalizes for the storage layer.
-Below the file system an SSD's flash translation
-layer retains superseded pages after an in-place rewrite \cite{wei2011reliably}. History
+Czeskis et al.\ showed the same of encrypted and deniable file systems: the operating
+system and applications around a volume record what it holds \cite{czeskis2008defeating}, and
+deniable storage has since been designed against an adversary holding several snapshots
+\cite{peters2015defy}. Below the file system an SSD's flash translation layer retains superseded
+pages after an in-place rewrite \cite{wei2011reliably}, which is why secure deletion is hard
+\cite{reardon2013sok}. A synchronization provider is the adversary that sees the most versions,
+and end-to-end encrypted cloud storage is far from robust against a malicious one
+\cite{hofmann2024broken}; we assume its encryption holds and ask what remains. History
 independence, anticipated by Micciancio
 \cite{micciancio1997oblivious} and defined by Naor and Teague \cite{naor2001anti}, requires that a
 data structure's representation reveal nothing about the sequence of operations beyond its current
@@ -63,7 +69,7 @@ Write-only ORAM hides \emph{writes} rather than reads: HIVE \cite{blass2014hive}
 to hide write occurrence and timing for synchronized folders. That is the anchoring setting of this
 paper, and Mnemos-M's sweep is a write-only-oblivious store specialized to agent memory; what is new
 is its combination with an in-memory semantic index, the derived-write analysis, and the reactive
-composition theorem. Oblivious RAM \cite{goldreich1996software,stefanov2013path} hides all access
+characterization (\cref{thm:reactive}). Oblivious RAM \cite{goldreich1996software,stefanov2013path} hides all access
 patterns at polylogarithmic cost. Dual-epoch security differs from breach resistance in comparing two
 cohorts of data under one adversary rather than two classes of adversary (\cref{sec:relations}).
 
@@ -87,6 +93,7 @@ time at which they were written relative to a compromise.
 
 Most self-writing memories store records in plaintext, and the attacks of \cref{sec:intro}
 either target integrity or, like MEXTRA \cite{mextra2025} and membership inference against
-chat-agent memory \cite{mrmmia2026}, query the running agent, which access control addresses. A
+chat-agent memory \cite{mrmmia2026}, query the running agent, which access control addresses; membership inference against
+retrieval-augmented generation is likewise a query-side attack \cite{anderson2024rag}. A
 recent survey confirms that the storage-layer confidentiality of a self-writing memory has not been
 treated \cite{survey2026ltmsecurity}; this paper considers that adversary.

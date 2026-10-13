@@ -48,56 +48,24 @@ pattern.
 \end{minipage}
 \end{table*}
 
-\Cref{tab:crossscheme} places the designs among the alternatives, grouped by adversary class.
-Against the write observer W, a write-only oblivious index closes every channel, and the
-memory-resident design and its disk variant reach the same pattern: Mnemos-M/disk by writing on a
-clock, Mnemos-M by also removing the disk from the query path, which makes search and query equality
+\Cref{tab:crossscheme} places the designs among the alternatives. Against the write observer W, a
+write-only oblivious index closes every channel, and Mnemos-M/disk matches it by writing on a clock;
+Mnemos-M also removes the disk from the query path, which makes search and query equality
 \emph{absent} rather than oblivious. Against the read observer RW only full obliviousness closes
-search and query equality. Deployed stores other than pgvector are reported as \emph{not detected}
-at the block granularity tested, which is what \cref{sec:eval-real} measured.
-
-\begin{table*}[t]
-\centering
-\caption{The architectural frontier. Security is stated by the strongest adversary class each design
-closes the historical channels against; performance is orders of magnitude, not a benchmark. Figures
-marked $\ast$ are reported by the cited systems for their own settings and are not re-measured here;
-unmarked figures for the Mnemos designs are from \cref{sec:eval-perf}. The point is the boundary
-between designs, not a head-to-head: these systems assume different adversaries.}
-\label{tab:arch}
-\scriptsize
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{lccccccc}
-\toprule
-Design & Closes hist.\ vs & Insert & Search & Resident & Disk/op & $>$mem & Ingest \\
-\midrule
-Plaintext IVF & --- & $O(1)$ & sublinear & index & $O(1)$ & yes & yes \\
-Mnemos-P & W (not deriv.) & flush & sublin., disk & index & region & yes & yes \\
-Mnemos-M & W, derived & clock & $O(n)$, mem & idx+payload & sweep & no & yes \\
-Mnemos-M/disk & W, derived & clock & sublin., disk & posmap+part & sweep & yes & yes \\
-Write-only ORAM & W & $O(1)^\ast$ & writes only & posmap$^\ast$ & $O(1)^\ast$ & yes & yes \\
-Path ORAM slots & W, RW & $O(\log^2 n)^\ast$ & $O(\log^2 n)^\ast$ & stash$^\ast$ & $O(\log^2 n)^\ast$ & yes & yes \\
-Compass & W, RW & $O(\log)^\ast$ & oblivious$^\ast$ & client$^\ast$ & per-acc$^\ast$ & srv & yes$^\ast$ \\
-Onyx & W, RW & --- & oblivious$^\ast$ & sublin.$^\ast$ & per-acc$^\ast$ & yes$^\ast$ & --- \\
-Opal (TEE) & W, RW & $O(\log)^\ast$ & oblivious$^\ast$ & enclave$^\ast$ & per-acc$^\ast$ & yes$^\ast$ & yes$^\ast$ \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\Cref{tab:arch} draws the architectural frontier. The memory-resident designs close the historical
-channels, the derived-write channel included, against the write observer at the cost of one clocked
-sweep run, without obliviousness; the ORAM-based systems also close them against the read observer,
-at a per-access cost, and are the comparison for that stronger adversary rather than a baseline this
-work claims to beat. The gap is between W and RW: the ORAM-based rows buy read-side obliviousness
-that a write observer does not need.
+search and query equality, at a per-access cost: the ORAM-based systems (compared in the
+supplementary material) are the reference for that stronger adversary, not a baseline this work
+claims to beat, and they buy read-side obliviousness a write observer does not need.
 
 \subsection{Residual Leakage}
 
-Mnemos-P keeps an open write channel, since a real record is always written to its content region;
-query equality survives both probe mechanisms; the keyed permutation does not survive a read
-observer; version diffs are closed only across sessions; and derived writes are open. Mnemos-M's
+Mnemos-P's residuals are those of \cref{tab:crossscheme}: an open write channel, query equality,
+a permutation a read observer recovers, version diffs closed only across sessions, and derived
+writes. Mnemos-M's
 clock is visible, so an observer learns when the store was open though not whether anything was
-written. Mnemos-M is bounded by resident memory, and Mnemos-M/disk lifts that bound at the price of a
-search access pattern visible to RW. Both inherit A3: if the adversary can read process memory, a
+written; without back-pressure, a lock after a burst the sweep could not place reveals that the
+backlog exceeded the journal. The guarantees cover the store's own files: an agent framework that
+persists other state whose writes follow the agent's decisions must keep it in the store or outside
+the observed scope (\cref{thm:reactive}). Both Mnemos-M variants inherit A3: if the adversary can read process memory, a
 memory-resident index is the worst place to have put the plaintext, which is why hibernation is a
 deployment requirement. No storage-layer measure reaches copies a synchronization provider has
 already retained.
@@ -113,9 +81,8 @@ embedding path.
 
 \paragraph{Agent experiments}
 The agent results use local models of moderate size, and the induced corpus is issue text from one
-public tracker. The deduplication oracle is measured with a model deciding, with a similarity
-threshold, and in the unmodified mem0 library; other frameworks the census flags were not run end to
-end.
+public tracker. The deduplication oracle is measured end to end in mem0 only, with one 7B model
+deciding; the other frameworks the census flags, and frontier-scale models, were not run.
 
 \paragraph{Scope of the measurements}
 Performance is measured on one machine (Intel i9-14900HX, 32\,GB, NVMe, Windows~11, with WSL2 for

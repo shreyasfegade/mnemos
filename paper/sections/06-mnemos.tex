@@ -1,14 +1,14 @@
 \section{A Design Space}
 \label{sec:mnemos}
 
-\Cref{thm:main} gives conditions a layout can satisfy, \cref{prop:capacity,prop:derived} give two a
-content-placed layout cannot, and \cref{thm:reactive} gives the conditions that survive a reactive
-agent. The design principle that follows is that \emph{semantic indexing need not imply semantic
-physical placement}. The designs below sit at different points of that space; all are implemented in
-Rust, with a Python binding used only by the evaluation harness and the embedding model.
+The designs below sit at different points of the space \cref{thm:main,thm:reactive} and
+\cref{prop:capacity,prop:derived} map out. All are implemented in Rust, with a Python binding used
+only by the evaluation harness and the embedding model.
 
 \begin{itemize}
-\item \textbf{Mnemos-RS:} a record store plus a separate index, the natural padded design.
+\item \textbf{Mnemos-RS:} a preallocated record slab addressed by a pseudorandom function of each
+record's tag, beside a separate forward-private encrypted IVF index; a search fetches its results
+from the slab by position. It is the natural design from searchable encryption.
 \item \textbf{Mnemos-P:} one sealed file of $B$ equal regions, placed by content, searched on disk.
 The construction \cref{thm:main} is proved for.
 \item \textbf{Mnemos-M:} the same sealed file, placed independently of content, searched in memory,
@@ -74,26 +74,39 @@ setting no server must hold the index. Mnemos-M takes both at face value.
 decrypted into the locked arena. A search ranks the resident headers and returns resident payloads,
 so it performs \emph{no disk access}: the search, result and query-equality channels are absent
 rather than mitigated. Exhaustive ranking is linear in $n$, so Mnemos-M also keeps each record's
-nearest-centroid partition in the arena and, when configured to, ranks only the query's $k$ nearest
-partitions. The partitions are \emph{logical}: the disk layout does not change, and neither adversary
+nearest-centroid partition in the arena and, when configured to, ranks only the query's $k_{\mathrm{probe}}$
+nearest partitions. The partitions are \emph{logical}: the disk layout does not change, and neither adversary
 class observes the index. It costs recall (\cref{sec:eval-recall}) and unlock time
 (\cref{sec:eval-perf}).
 
 \paragraph{The sweep flush} Writes follow a deterministic write-only ORAM
 \cite{roche2017detwooram}. Every $\Delta$ while the store is unlocked, whether or not anything was
-written, the flush rewrites the next $k$ slots after a cursor, each as a fresh sealing: a live slot
+written, the flush rewrites the next $\kappa$ slots after a cursor, each as a fresh sealing: a live slot
 is re-encrypted, a free slot either receives a staged record or is refreshed with random bytes. A
 staged record waits in a fixed-size sealed journal, rewritten every flush, until the cursor reaches a
-free slot. The cursor starts at a random position at each unlock and advances by $k$ per flush, so
-the set of slots a flush writes is a function of the flush index alone (C1); every written unit is a
+free slot. The cursor starts at a random position at each unlock and advances by $\kappa$ per flush, so
+the set of slots a flush writes is a function of the flush index and that start (C1); every written unit is a
 fresh fixed-length ciphertext (C2); and searches touch no disk (C3). \Cref{thm:reactive} therefore
 applies. A record's position depends on the cursor and on which slots are free, never on its content,
 and the occurrence of a flush no longer implies that the agent wrote, which closes the derived-write
-channel. A staged record reaches its slot within one pass of the cursor; until then it is durable
-in the journal, and a lock flushes until at most the journal's capacity remains staged.
+channel. A staged record reaches its slot within one pass of the cursor, and until then it is durable
+in the journal.
 
-\paragraph{Capacity} There is no per-partition capacity, so \cref{prop:capacity} does not apply; the
-global bound is a function of the record count, which the game equalizes.
+\paragraph{Throughput and back-pressure} At load $\rho$ a flush passes $\kappa$ slots of which a
+fraction $1-\rho$ are free, so the sweep places about $\kappa(1-\rho)$ records per flush and sustains
+a write rate of $\kappa(1-\rho)/\Delta$; a faster agent builds a backlog. The journal holds $J$ staged
+records. By default a lock that finds more than $J$ staged flushes until $J$ remain, so the number of
+lock-time flushes, and only that, depends on the agent: over \REtwentyoneSessions{} sessions per
+setting, no session at a write rate below the placement rate reached it, and
+\REtwentyoneResidualLo\% to \REtwentyoneResidualHi\% of sessions above it did. With back-pressure a
+$\mathsf{put}$ that would stage more than $J$ records is refused to the caller, which can retry
+after the next tick; the refusal changes nothing on disk, every lock is one flush, and C1 holds
+without exception. Back-pressure is to the sweep what padded refusal is to Mnemos-P: availability
+traded for a schedule that does not depend on the agent.
+
+\paragraph{Capacity} There is no per-partition capacity, so \cref{prop:capacity} does not apply. A
+write refused at the global bound is refused to the caller and changes nothing the clocked sweep
+writes.
 
 \paragraph{Mnemos-M/disk} For stores larger than memory, headers and payloads stay on disk and the
 arena holds only the position map and each slot's logical partition, a few bytes per record. Writes are the sweep's, unchanged, so against W every write-side channel
@@ -117,6 +130,5 @@ working keys are derived from it by HKDF. Custody is paired with a guard that lo
 the operating system's suspend notification (\cref{sec:artifacts}), tested with the broadcast
 Windows sends before sleep.
 
-Every disk-visible operation emits one typed event naming the file ranges it touched. That stream is
-the transcript the attack harness consumes, so an attack cannot observe more than the storage
-adversary does, and the byte-level auditor (\cref{sec:eval-audit}) checks the stream against the disk.
+Every disk-visible operation emits one typed event naming the file ranges it touched; attacks
+consume only that stream, and the auditor (\cref{sec:eval-audit}) checks it against the disk.

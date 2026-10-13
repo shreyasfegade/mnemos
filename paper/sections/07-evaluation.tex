@@ -1,12 +1,18 @@
 \section{Evaluation}
 \label{sec:eval}
 
-The evaluation asks how far structure transfer reaches the earlier cohort in realistic settings
-(\cref{sec:eval-transfer,sec:eval-real,sec:eval-induction}), whether the conditions of
-\cref{thm:main,thm:reactive} hold in the compiled engines and which are load-bearing
-(\cref{sec:eval-game,sec:eval-reactive,sec:eval-audit}), which channels still reach cohort H
-(\cref{sec:eval-cohorth,sec:eval-rw}), and what the designs cost
-(\cref{sec:eval-perf,sec:eval-recall}).
+The evaluation answers four questions.
+\textbf{RQ1:} does structure transfer reach the earlier cohort in realistic settings, on a
+timestamped corpus, deployed stores and agent-written memory
+(\cref{sec:eval-transfer,sec:eval-real,sec:eval-induction})?
+\textbf{RQ2:} do the conditions of \cref{thm:main,thm:reactive} hold in the compiled engines, and
+which are load-bearing (\cref{sec:eval-game,sec:eval-reactive,sec:eval-audit})?
+\textbf{RQ3:} which channels still reach cohort H once the layout is sealed, and against which
+adversary class (\cref{sec:eval-cohorth,sec:eval-rw})?
+\textbf{RQ4:} what do the designs cost in time, disk volume and retrieval quality
+(\cref{sec:eval-perf,sec:eval-recall})?
+\Cref{sec:eval-artifacts} audits what the operating system retains, and \cref{sec:eval-ledger}
+puts every channel on one scale.
 
 \paragraph{Setup}
 Records are embedded with \texttt{bge-base-en-v1.5} \cite{xiao2024cpack}. Corpora are D2, eight
@@ -17,10 +23,15 @@ untruncated, for an adversary that guesses wherever it has no label. Intervals a
 experiment's independent units: bootstrap from twenty units, Student-$t$ below; the supplementary
 material names the unit and its count for every experiment and specifies the learned attacker.
 Attacks read only the engine's emitted event stream, which is the storage adversary's view, and
-every number in the text is generated from the stored results. Outcomes registered before a run are
-marked as such, including four that failed (\cref{sec:eval-induction}, the composed attack of
+every number in the text is generated from the stored results. An outcome marked
+\emph{registered} was written into the artifact's verifier, with the check that tests it, before the
+run, and since the artifact was placed under version control the commit order dates each such
+prediction; four registered predictions failed and are reported (\cref{sec:eval-induction}, the composed attack of
 \cref{sec:eval-multisnapshot}, the price of S4 in \cref{sec:eval-recall}, and query equality at
-$s = 4$ in the supplementary material).
+$s = 4$ in the supplementary material). Advantages are not comparable across experiments: they
+differ in corpus, in taxonomy (chance from one in four to one in twelve), and in whether the budget
+counts induced records or agent turns, and each subsection states its own. The supplementary
+material indexes every experiment by number.
 
 \subsection{Structure Transfer, and What Drift Is Worth}
 \label{sec:eval-transfer}
@@ -40,23 +51,17 @@ advantage drift appears to remove.}
 \label{fig:drift}
 \end{figure}
 
-On the timestamped \texttt{kubernetes} corpus, a chronological split lowers the advantage on the
-earlier cohort substantially, which is the protection drift is supposed to give. \Cref{fig:drift}
-shows what that leaves open: for a public tracker the adversary can induce with archival content,
+On the timestamped \texttt{kubernetes} corpus, inducing with content five eras newer than cohort H
+lowers the advantage on it from \REfourAware{} to \REfourNaive, which is the protection drift is
+supposed to give. \Cref{fig:drift} shows what that leaves open: for a public tracker the adversary can induce with archival content,
 and the advantage depends on the time gap between cohort H and the induced content. Drift protects
 early records against an adversary that induces with current material, and considerably less
-against one that does not. Little archival knowledge is needed (registered experiment E27): with a
+against one that does not. Little archival knowledge is needed (registered): with a
 tenth of each topic's induction budget drawn from cohort H's era and the rest current, the advantage
 moves from \REtwentysevenZero{} to \REtwentysevenTenth, and with a quarter to
 \REtwentysevenQuarter, against \REtwentysevenFull{} for a fully archival adversary. The coarse-taxonomy arm has chance one in four rather than one in twelve.
-
-Two features of the curve are systematic. The advantage turns \emph{negative} at the largest gap
-(\REfourNaive, an interval below zero): the attacker commits to a partition-to-topic map fitted on
-the induced era, and once cluster geometry has drifted that map mislabels cohort H more often than
-a uniform guess. The gap-zero advantage (\REfourAware) exceeds the i.i.d.\ shuffled control
-(\REfourShuffled) because the shuffle mixes every era and dilutes the era-specific partition
-structure that same-era induction matches; the comparison that isolates drift is gap zero against
-the far eras. The supplementary material also reports advantage over the majority-class baseline.
+At the largest gap the advantage is below zero, because a map fitted on the induced era
+mislabels a drifted cohort more often than a guess (supplementary material).
 
 \subsection{Deployed Stores, and Time-Placed Controls}
 \label{sec:eval-real}
@@ -80,8 +85,11 @@ holds a record at the observer's granularity.
 PostgreSQL's \texttt{pgvector} with an \texttt{ivfflat} index, built on the cohort and inserted into
 afterward through real SQL with a checkpoint after each write, in the same \texttt{gocryptfs}
 volume, assigns an insert to its nearest list and writes that list's pages. The attack reaches
-cohort H: held-out \advhist{} is \REsixteenPgAdv{} over \REsixteenPgSeeds{} seeds against chance
-\REsixteenPgChance, the interval above zero (registered before the run). It is weaker than the
+cohort H: held-out accuracy on it is \REsixteenPgAcc{} against chance \REsixteenPgChance, an
+advantage of \REsixteenPgAdv{} over \REsixteenPgSeeds{} seeds, the interval above zero (registered
+before the run). A checkpoint after every write is the finest capture granularity; coarser
+checkpoints merge writes as coarser version capture does (\cref{sec:granularity}), and three seeds
+make the interval wide. It is weaker than the
 growing layout, because write-ahead-log and heap churn blur list pages at 4\,KiB, but it is a
 deployed, content-placed store whose placement transfers to the pre-compromise cohort. Structure
 transfer is therefore neither universal nor hypothetical: most deployed stores tested do not
@@ -109,14 +117,8 @@ ticket, and the agent spends \REtwentyeightSecLo{} to \REtwentyeightSecHi~s on i
 On the growing layout the advantage clears zero at the smallest budget tested,
 \REtwentyeightGrowOneMsgs{} messages over ten topics (about \REtwentyeightGrowOneMin~min of agent
 time); on Mnemos-P a single-record attack needs \REtwentyeightPOneMsgs{} messages, and a burst of two
-clears zero at \REtwentyeightPTwoMsgs, though at a small advantage (descriptive analysis E28 of
-the E2 logs).
-
-Each interval resamples \emph{independent induction sequences}, each drawing its own cohort split,
-induction order and attacker fit. The longitudinal study (supplementary material) reports different
-advantages at nominally similar budgets because its budget counts induced records per topic while
-this one counts turns, each a burst of $w_{\mathrm{real}}$ records; in records per topic the two
-agree.
+clears zero at \REtwentyeightPTwoMsgs, though at a small advantage (a descriptive analysis of the
+same runs).
 
 The deduplication oracle of \cref{sec:attack-derived} observes only \emph{whether a write happened}
 after the adversary supplies a document. With a similarity threshold deciding, the oracle is
@@ -220,7 +222,7 @@ Version diffs supply that membership. The region holding a pre-$\tau$ record is 
 every granularity tested; granularity sets how precisely it is named, down to the $1/B$ null when the
 diff covers the whole file. Re-encrypting the whole file at a session boundary makes a
 cross-session diff total and drives the precision to exactly the null. A real backup tool keeps
-versions the attack can use (registered experiment E19): backing Mnemos-P up with restic after every
+versions the attack can use (registered): backing Mnemos-P up with restic after every
 flush and restoring each snapshot through restic's own interface gives precision
 \REnineteenPrecPOne{} against the $1/64$ null, and \REnineteenPrecPFour{} at one snapshot per four
 flushes. An adversary holding the encrypted repository without its key sees only how much each
@@ -243,7 +245,7 @@ An adversary that induces writes into a region and watches whether it is rewritt
 \REnineSilentAUC; padded refusal closes it, \REninePaddedAUC. Under a skewed corpus the partitioned
 design refuses its first write at \REnineUtilP\% of nominal capacity, while Mnemos-M, with only a
 global bound, reaches \REnineUtilM\%. Sweeping $B \in \{64,128,256\}$, $C \in \{16,32,64\}$ and the
-Zipf skew of the topic workload (registered experiment E23), Mnemos-P's first refusal comes at
+Zipf skew of the topic workload (registered), Mnemos-P's first refusal comes at
 \REtwentythreePWorst\% to \REtwentythreePBest\% of nominal capacity, earlier as $B$ grows and as the
 skew rises (\REtwentythreePSkewLow\% to \REtwentythreePSkewHigh\% from Zipf 0.8 to 1.2), because the
 first partition to fill is the most frequent topic's; Mnemos-M's never comes before
@@ -273,7 +275,7 @@ queries and scored on the rest, the shipped randomized superset defeats a test f
 read sets (Youden's $J = \REfifteenExactStwo$) but not a threshold on their overlap,
 $J = \REfifteenThreshStwo$, because repeated searches share every genuine probe. Grouped probing
 leaks pairwise equality at group granularity, $J = \REfifteenThreshGrouped$. Sweeping each knob
-(registered experiment E22, 20 stores per point) traces the frontier. The spread leaks
+(registered, 20 stores per point) traces the frontier. The spread leaks
 $J = \REtwentytwoSpreadOne$ at $s = 1$, $\REtwentytwoSpreadFour$ at $s = 4$ and
 $\REtwentytwoSpreadEight$ at $s = 8$, eight times the genuine reads; grouping leaks
 $\REtwentytwoGroupTwo$ at group size 2 and $\REtwentytwoGroupThirtyTwo$ at 32
@@ -317,29 +319,25 @@ $500$~ms clock. The sweep flush, in the manner of write-only
 ORAM~\cite{roche2017detwooram,aviv2017oblivisync,blass2014hive}, rewrites the next fixed run of slots
 after a cursor plus a fixed-size sealed journal that holds staged records until the cursor reaches a
 free slot. It writes \REtwentyoneSweepKiB~KiB per flush whether the flush carries a record or not,
-and at $\Delta = 10$~s, \REtwentyoneSweepGBDay~GB a day: roughly \REtwentyoneRatio${\times}$ less, and
-about \REtwentyoneDriveYears{} years of continuous operation against a $600$~TBW rating. Locking
+and at $\Delta = 10$~s, \REtwentyoneSweepGBDay~GB a day, roughly \REtwentyoneRatio${\times}$ less. Locking
 Mnemos-M rewrites nothing extra; locking Mnemos-P rewrites its whole file,
 \REtwentyonePLockMiB~MiB, which a synchronization client uploads in full each session. A
-chunking backup erases part of the sweep's advantage in upload volume: restic stores whole chunks of
-about a megabyte, so a snapshot of Mnemos-M adds \REnineteenAddedMOne~KiB for \REnineteenRewrittenMOne~KiB
-rewritten, and of Mnemos-P \REnineteenAddedPOne~KiB for \REnineteenRewrittenPOne~KiB (E19).
+chunking backup erodes the sweep's upload advantage: a restic snapshot of Mnemos-M adds
+\REnineteenAddedMOne~KiB for \REnineteenRewrittenMOne~KiB rewritten, and of Mnemos-P
+\REnineteenAddedPOne~KiB for \REnineteenRewrittenPOne~KiB.
 
 \paragraph{Above the memory limit}
-Against the write observer W that anchors the threat model, the partitioned design is not the
-right tool above the memory limit. Mnemos-M/disk (\cref{sec:mnemos-m}) keeps only the position map
-and logical index in memory and leaves headers and payloads on disk, written only by the sweep, so
-its writes remain a function of the clock and every write-side channel stays closed against W at
-any size. At $10^5$ records (registered experiment E25) it holds \REtwentyfiveDiskRAM~MB resident
+Against W the partitioned design is not the right tool above the memory limit: Mnemos-M/disk's
+writes remain the sweep's, so every write-side channel stays closed at any size. At $10^5$ records
+(registered) it holds \REtwentyfiveDiskRAM~MB resident
 against Mnemos-M's \REtwentyfiveMemRAM~MB, searches in \REtwentyfiveDiskSearch~ms against
 Mnemos-P's \REtwentyfivePSearch~ms, writes a sparse record in \REtwentyfiveDiskPut~ms against
 \REtwentyfivePPut~ms, and pays \REtwentyfiveDiskUnlock~s at unlock to read every header. Resident
 memory and unlock time are linear in $n$, so the measurement extrapolates to a few megabytes and
-about a minute and a half at $10^6$; we did not measure beyond $10^5$. A read observer RW sees its search access pattern, which only oblivious search closes;
-\cref{sec:background} compares that cost against recent disk-oblivious ANN and private-memory
-systems~\cite{rathee2026onyx,kaviani2026opal,zhu2025compass}. The partitioned design remains the
-construction \cref{thm:main} is proved for and the point of comparison, not the recommended
-deployment.
+about a minute and a half at $10^6$; we did not measure beyond $10^5$. A read observer sees its
+search access pattern, which only oblivious search closes
+\cite{rathee2026onyx,kaviani2026opal,zhu2025compass}. The partitioned design remains the
+construction \cref{thm:main} is proved for, not the recommended deployment.
 
 \subsection{Retrieval Quality}
 \label{sec:eval-recall}
@@ -352,18 +350,17 @@ nDCG@10 on any domain, and fixed probing up to \REelevenProbeCostMax. Mnemos-M's
 scoring the same eight partitions as Mnemos-P at $s = 2$, gains \REelevenIvfGainMin{} to
 \REelevenIvfGainMax{} on every domain, since all eight are the query's nearest where half of
 Mnemos-P's are cover. Both findings hold with a second, independently trained embedding model,
-\texttt{nomic-embed-text} (registered experiment E26): int8 costs \REtwentysixSciQuant{} on
+\texttt{nomic-embed-text} (registered): int8 costs \REtwentysixSciQuant{} on
 SciFact and \REtwentysixNfQuant{} on NFCorpus, and the in-memory index scores \REtwentysixSciMIvf{}
 and \REtwentysixNfMIvf{} against Mnemos-P's \REtwentysixSciP{} and \REtwentysixNfP.
 
-Grouped probing, the one mechanism that resists permutation recovery against a read observer, is
-also the one that costs retrieval: reading a whole disjoint group per query drops nDCG@10 from
-\REelevenGroupedSScifact{} to \REelevenGroupedScifact{} on SciFact and from \REelevenGroupedSFiqa{}
-to \REelevenGroupedFiqa{} on FiQA against the $s=2$ spread. That price is why the memory-resident
-design, which removes the read channel by keeping search off the disk, is the one we recommend.
+Grouped probing, the one mechanism that resists permutation recovery, costs retrieval: nDCG@10
+falls from \REelevenGroupedSScifact{} to \REelevenGroupedScifact{} on SciFact and from
+\REelevenGroupedSFiqa{} to \REelevenGroupedFiqa{} on FiQA against the $s=2$ spread, which is why we
+recommend the design that keeps search off the disk.
 
-Condition S4 has a price of its own, and it is paid in capacity rather than ranking (registered
-experiment E24, whose prediction of a gain under 0.15 failed). A public table, trained on a
+Condition S4 has a price of its own, and it is paid in capacity rather than ranking (registered; the
+prediction of a gain under 0.15 failed). A public table, trained on a
 different corpus, ranks SciFact about as well as one trained on SciFact itself (plaintext IVF
 \REtwentyfourIvfPub{} against \REtwentyfourIvfOwn), but it puts \REtwentyfourShare\% of the corpus
 in one partition, so Mnemos-P refuses \REtwentyfourRefusedPub{} documents while indexing and scores
@@ -374,26 +371,21 @@ retrained in memory without a disk write.
 \subsection{Operating-System Artifacts}
 \label{sec:eval-artifacts}
 
-The audit of \cref{sec:artifacts} is run, not asserted. On the evaluation machine it recovers
+The audit of \cref{sec:artifacts} is run, not asserted: on the evaluation machine it recovers
 change-journal records naming the store's files with timestamps, enumerates shadow copies and
-synchronized trees, reports the hibernation file, and verifies that after a lock both sealed engines
-refuse to search. We grade each artifact on a five-rung ladder: it exists; it contains data relevant
-to the store; the adversary can obtain it; it is exploitable for the historical attack; it suffices
-alone. The change journal reaches rung~2: it records when the files changed, not a region diff.
-Shadow copies and file-history snapshots reach rung~4, as full prior versions that give the
-multi-version channel at the snapshot schedule's granularity. Retained flash pages reach rung~4 for
-Mnemos-P, whose whole-region rewrites land at fixed offsets, and rung~1 for Mnemos-M. The
-hibernation image is the one rung-5 artifact, against key custody rather than the layout, and is
-handled as a deployment requirement. The study is Windows-specific (USN journal, VSS, CNG); the
-Linux counterparts, filesystem journals, LVM or Btrfs snapshots and swap, occupy the same rungs but
-are not measured.
+synchronized trees, reports the hibernation file, and verifies that a locked engine refuses to
+search. Graded on a ladder (exists; relevant; obtainable; exploitable for the historical attack;
+sufficient alone), the change journal reaches rung~2, since it dates writes but gives no region
+diff; shadow copies and file-history snapshots reach rung~4, giving the multi-version channel at the
+snapshot schedule's granularity; retained flash pages reach rung~4 for Mnemos-P, whose rewrites land
+at fixed offsets, and rung~1 for Mnemos-M; and the hibernation image, against key custody rather
+than the layout, is the one rung-5 artifact. The study is Windows-specific; the Linux counterparts
+occupy the same rungs but are not measured.
 
 \subsection{Where the Information Goes}
 \label{sec:eval-ledger}
 
-\input{tables/ledger}
-
-\Cref{tab:ledger} puts the channels on one axis. Where an experiment recorded a held-out accuracy,
+The supplementary material puts every channel on one axis in a leakage ledger. Where an experiment recorded a held-out accuracy,
 Fano's inequality with the secret's empirical entropy turns it into a lower bound on the mutual
 information between the secret and the adversary's view; an AUC is reported as an AUC and is not
 converted. At a spread of one, permutation recovery carries at least \RLedgerPermBits{} of the

@@ -61,19 +61,14 @@ layout does not. The rest of this section is an inventory of channels that suppl
 \subsection{Deployed Stores, and Time-Placed Controls}
 \label{sec:transfer-general}
 
-The growing-region layout is not particular to a research prototype: widely deployed vector stores
-place records by content and persist that placement in files whose changed byte ranges a
-size-preserving encryption layer such as \texttt{gocryptfs} or Cryptomator does not hide. FAISS
-writes each inverted list contiguously, Chroma updates HNSW node and neighbor-list files
-incrementally, and LanceDB stores IVF-PQ lists in a columnar dataset.
-
-Placing by content is necessary for the attack but not sufficient, and the difference is what
-\cref{sec:eval-real} measures. Transfer additionally needs the layout to disclose \emph{which}
-partition holds a given stored record, at the granularity the adversary observes: a store that
-rewrites its whole index on every save discloses nothing at block granularity, and the blocks a
-graph-index insert touches depend on graph structure and insertion order as much as on content.
-Stores that place by arrival time, such as an unindexed LanceDB table or a sqlite-vec table without
-a partition key, are the cleanest test of the premise, and serve as negative controls.
+Deployed vector stores place records by content (FAISS and pgvector's \texttt{ivfflat} by inverted
+list, Chroma by HNSW neighbourhood, LanceDB by IVF-PQ list) and persist that placement in files whose
+changed byte ranges a size-preserving encryption layer such as \texttt{gocryptfs} or Cryptomator does
+not hide. Placing by content is necessary for the attack but not sufficient: the layout must also
+disclose \emph{which} partition holds a stored record at the observer's granularity, which a store
+that rewrites its whole index on every save does not, and a graph index only through structure and
+insertion order. Stores that place by arrival time, such as an unindexed LanceDB table, serve as
+negative controls; \cref{sec:eval-real} measures all of them.
 
 \subsection{The Refusal Channel}
 \label{sec:attack-refusal}
@@ -92,7 +87,9 @@ measures the padded refusal that closes it.
 what the agent does leaks cohort H to a feedback agent. The occurrence half admits a concrete
 attack. Deduplication as a membership side channel is not itself new: Harnik, Pinkas, and
 Shulman-Peleg showed that cross-user deduplication in cloud storage lets one user learn whether
-another has already stored a file \cite{harnik2010side}. What is new here is the instantiation in
+another has already stored a file \cite{harnik2010side}, a leak message-locked encryption accepts by
+design \cite{bellare2013mle}; shared prompt caches in language-model serving leak cached prompts in
+the same way \cite{gu2025auditing}. What is new here is the instantiation in
 self-writing agent memory, where the adversary supplies the ``file'' as a document for the agent to
 remember, the deduplication decision is made by the agent's own extraction pipeline, and the
 disclosure is dated relative to a compromise.
@@ -111,7 +108,8 @@ the content is already stored: mem0 passes the most similar existing memories to
 call and then drops any extracted fact whose hash is already present, so a known fact never
 reaches the vector store; CrewAI asks a model for a consolidation plan whose \emph{insert} flag
 decides whether a record is written; LangMem's memory manager patches existing memories and
-creates only novel ones; and Graphiti deduplicates extracted entities against the graph before
+creates only novel ones; and Graphiti, the engine of Zep \cite{rasmussen2025zep}, deduplicates
+extracted entities against the graph before
 writing them. The supplementary material lists each framework, its version and default store, and
 the file and line at which the mechanism was found; a framework is recorded as vulnerable only
 where the mechanism was located in its source.

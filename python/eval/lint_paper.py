@@ -112,6 +112,16 @@ REVISION = [
         ),
         "narrates a correction to a claim the reader never saw",
     ),
+    (
+        # "The submitted proof closed this case with an admissibility assumption ... That
+        # assumption is now removed" sat in the supplement's proof and passed every rule above.
+        re.compile(
+            r"\bthe\s+submitted\s+(?:proof|ledger|version|paper|manuscript|table|analysis|draft)\b"
+            r"|\bis\s+now\s+removed\b",
+            re.I,
+        ),
+        "narrates the submission history",
+    ),
 ]
 
 
