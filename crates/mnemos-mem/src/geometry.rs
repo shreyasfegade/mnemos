@@ -49,6 +49,9 @@ pub struct MGeometry {
     pub sweep_slots: u32,
     /// Staged records the sealed journal holds under the sweep.
     pub journal_slots: u32,
+    /// `m.backlog = "refuse"`: a `put` that would stage more than `journal_slots` records is
+    /// refused to the caller, so a lock is always one flush (C1 without exception).
+    pub backlog_refuse: bool,
     /// Whether headers are decrypted at unlock and held resident. `false` is Mnemos-M/disk.
     pub header_resident: bool,
 }
@@ -111,6 +114,11 @@ impl MGeometry {
         if sweep && u64::from(m.sweep_slots) > slots {
             return bad("sweep_slots cannot exceed the number of slots");
         }
+        let backlog_refuse = match m.backlog.as_str() {
+            "drain" => false,
+            "refuse" => true,
+            other => return bad(&format!("unknown backlog {other:?}")),
+        };
         let header_resident = match m.header_residency.as_str() {
             "memory" => true,
             "disk" => false,
@@ -136,6 +144,7 @@ impl MGeometry {
             sweep,
             sweep_slots: m.sweep_slots,
             journal_slots: m.journal_slots,
+            backlog_refuse,
             header_resident,
         })
     }

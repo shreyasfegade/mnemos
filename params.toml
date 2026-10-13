@@ -146,6 +146,12 @@ durable             = true
 flush_mode          = "sweep"
 sweep_slots         = 8
 journal_slots       = 4
+# What the sweep does when the agent stages faster than the cursor finds free slots. "drain": keep
+# accepting, and drain the excess with extra flushes at lock -- the one place the schedule is not
+# clock-only (E21: no session reaches it at a sustainable write rate). "refuse": back-pressure; a
+# put beyond `journal_slots` staged records is refused to the caller, so a lock is always one
+# flush and C1 holds without exception. The harnesses bulk-load, so the default stays "drain".
+backlog             = "drain"
 # "memory": headers resident (Mnemos-M). "disk": Mnemos-M/disk, for stores larger than memory;
 # needs search = "ivf", payload_residency = "disk".
 header_residency    = "memory"

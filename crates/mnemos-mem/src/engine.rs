@@ -106,6 +106,9 @@ pub struct MStats {
     pub manifest_bytes_written: u64,
     /// `put` calls refused because the **whole store** was full.
     pub refused: u64,
+    /// `put` calls refused under `m.backlog = "refuse"` because the journal was full. Visible to
+    /// the caller only: a refused put stages nothing and so changes nothing any flush writes.
+    pub backpressured: u64,
     /// Tombstoned records physically removed.
     pub purged: u64,
     /// Regions read, which happens only at unlock.
@@ -457,6 +460,9 @@ impl EngineM {
 
     /// The sweep's lock: one flush, always, so that locking is not itself evidence of a write,
     /// then more only while the backlog exceeds what the journal can hold.
+    ///
+    /// Under `m.backlog = "refuse"` the backlog never exceeds the journal, so the loop never runs
+    /// and a lock is exactly one flush.
     ///
     /// The second clause is the sweep's one residual: it runs only when the agent staged records
     /// faster than the cursor found free slots for them, and then the number of extra flushes at
@@ -1013,6 +1019,13 @@ impl SearchableMemory for EngineM {
                 return Err(Error::CapacityExceeded {
                     live: geo.slots() as u64,
                     n_max: geo.slots() as u64,
+                });
+            }
+            if geo.backlog_refuse && self.staged.len() >= geo.journal_slots as usize {
+                self.stats.backpressured += 1;
+                return Err(Error::CapacityExceeded {
+                    live: self.staged.len() as u64,
+                    n_max: u64::from(geo.journal_slots),
                 });
             }
             UNPLACED
@@ -1573,7 +1586,10 @@ mod tests {
             content_placement: true,
             ..Ablation::default()
         };
-        let mut e = engine(dir.path(), params(16, 16, 8), abl);
+        // The content-placement ablation is defined for the `regions` flush only.
+        let mut p = params(16, 16, 8);
+        p.m.flush_mode = "regions".into();
+        let mut e = engine(dir.path(), p, abl);
         let mut seen = std::collections::HashSet::new();
         for i in 0..8 {
             let id = e.put(&format!("same {i}"), "{}", &unit(0, 8)).unwrap();
@@ -1590,7 +1606,10 @@ mod tests {
     #[test]
     fn a_flush_with_nothing_staged_still_writes() {
         let dir = tempfile::tempdir().unwrap();
-        let mut e = engine(dir.path(), params(8, 8, 8), Ablation::default());
+        // The w + 1 region rewrite is the `regions` flush; the shipped sweep has its own audit.
+        let mut p = params(8, 8, 8);
+        p.m.flush_mode = "regions".into();
+        let mut e = engine(dir.path(), p, Ablation::default());
         let before = e.stats();
         e.flush().unwrap();
         let after = e.stats();

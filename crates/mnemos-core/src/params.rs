@@ -92,6 +92,16 @@ pub struct MParams {
     pub sweep_slots: u32,
     /// Staged records the sealed journal can hold under `flush_mode = "sweep"`.
     pub journal_slots: u32,
+    /// What the sweep does when the agent stages faster than the cursor finds free slots.
+    ///
+    /// `"drain"`: `put` keeps accepting, and a lock flushes extra times until at most
+    /// `journal_slots` records remain staged. The number of lock-time flushes then depends on the
+    /// backlog, which is the sweep's one departure from a clock-only schedule (C1). E21 measures
+    /// how often a session reaches it. `"refuse"`: `put` returns `CapacityExceeded` to the caller
+    /// once `journal_slots` records are staged, so the backlog never exceeds the journal and a
+    /// lock is always exactly one flush; the refusal is visible to the caller and to nothing on
+    /// disk. This is back-pressure, the sweep's analogue of Mnemos-P's padded refusal.
+    pub backlog: String,
     /// `"memory"`: every header is decrypted at unlock and searched in the locked arena.
     /// `"disk"`: only a position map and each slot's logical partition are resident, and a search
     /// reads the headers of its probed partitions' records by position. The write pattern is
@@ -114,6 +124,7 @@ impl Default for MParams {
             flush_mode: "regions".into(),
             sweep_slots: 8,
             journal_slots: 4,
+            backlog: "drain".into(),
             header_residency: "memory".into(),
         }
     }

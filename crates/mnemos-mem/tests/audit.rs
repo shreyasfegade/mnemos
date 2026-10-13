@@ -36,6 +36,9 @@ fn params() -> Params {
     p.m.durable = false;
     p.m.tombstone_capacity = 8;
     p.m.flush_ms = 3_600_000;
+    // The tests before the sweep section audit the `regions` flush; `params.toml` ships the sweep,
+    // which `params_sweep` selects explicitly.
+    p.m.flush_mode = "regions".into();
     p
 }
 
@@ -642,6 +645,56 @@ fn locking_a_sweep_store_writes_the_same_whether_or_not_anything_was_staged() {
         "lock reveals whether the agent wrote: {shapes:?}"
     );
     assert_eq!(shapes[0].0, 1, "lock performs exactly one flush");
+}
+
+/// Flushes a lock performs after staging `real` records, under the given backlog policy.
+fn lock_flushes(real: usize, backlog: &str) -> (usize, u64) {
+    let dir = tempfile::tempdir().unwrap();
+    let mut p = params_sweep();
+    p.m.backlog = backlog.into();
+    let (mut e, sink) = store_with(dir.path(), Ablation::default(), p);
+    e.flush().unwrap();
+    let _ = sink.drain();
+    for i in 0..real {
+        let _ = e.put(&format!("r{i}"), "{}", &unit(i));
+    }
+    let backpressured = e.stats().backpressured;
+    e.close().unwrap();
+    let flushes = sink
+        .drain()
+        .iter()
+        .filter(|ev| matches!(ev, LeakEvent::EpochFlush { .. }))
+        .count();
+    (flushes, backpressured)
+}
+
+#[test]
+fn drain_backlog_beyond_the_journal_makes_the_lock_flush_more() {
+    // Negative control for C1: under the default policy a backlog larger than the journal is
+    // drained at lock, so the number of lock-time flushes reveals that the agent wrote a lot.
+    let (idle, _) = lock_flushes(0, "drain");
+    let (busy, _) = lock_flushes(4 * J as usize, "drain");
+    assert_eq!(idle, 1);
+    assert!(busy > 1, "a backlog of {} drained in one flush", 4 * J);
+}
+
+#[test]
+fn refuse_backlog_keeps_the_lock_at_one_flush_whatever_was_written() {
+    // Under back-pressure the backlog never exceeds the journal, so the lock is one flush.
+    let n = 4 * J as usize;
+    let (idle, idle_bp) = lock_flushes(0, "refuse");
+    let (busy, busy_bp) = lock_flushes(n, "refuse");
+    assert_eq!(
+        (idle, busy),
+        (1, 1),
+        "lock flush count depends on the backlog"
+    );
+    assert_eq!(idle_bp, 0);
+    assert_eq!(
+        busy_bp,
+        (n - J as usize) as u64,
+        "puts beyond the journal were not refused"
+    );
 }
 
 #[test]

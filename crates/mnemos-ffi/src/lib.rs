@@ -652,6 +652,7 @@ impl PyEngineM {
         d.set_item("region_bytes_written", st.region_bytes_written)?;
         d.set_item("manifest_bytes_written", st.manifest_bytes_written)?;
         d.set_item("refused", st.refused)?;
+        d.set_item("backpressured", st.backpressured)?;
         d.set_item("purged", st.purged)?;
         d.set_item("region_reads", st.region_reads)?;
         d.set_item("resident_bytes", st.resident_bytes)?;
