@@ -52,6 +52,11 @@ def main() -> None:
         files.add(tex)
         included(tex, files)
     files.add(PAPER / "refs.bib")
+    if "ANONYMIZED" in (PAPER / "repo.tex").read_text(encoding="utf-8"):
+        print(
+            "WARNING: paper/repo.tex still holds the placeholder repository URL; the paper's "
+            "Availability section and the response letter both quote it. Set the real URL there."
+        )
 
     newest_source = max(f.stat().st_mtime for f in files)
     for root in ROOTS:

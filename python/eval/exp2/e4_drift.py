@@ -112,8 +112,10 @@ def attack(
     sH = X.score(lab_, part[H], topics[H], n_topics)
     # The advantage is taken from the adversary that guesses where it has no label; see
     # estimators.score. The abstaining accuracy is kept so the difference stays visible.
+    pred = lab_[part[H]]
     return {
         "adv_H": sH["accuracy_guess"] - chance,
+        "adv_H_bal": X.balanced_guess_accuracy(pred, topics[H], n_topics) - chance,
         "acc_H": sH["accuracy_guess"],
         "acc_H_abstaining": sH["accuracy"],
         "coverage_H": sH["coverage"],
@@ -170,6 +172,7 @@ def run(texts, topics, names, coarse: bool):
     for gap in range(BINS):
         pool = archive if gap == 0 else era[gap]
         per_seed = []
+        per_seed_bal: list[float] = []
         for ks in KMEANS_SEEDS:
             km = KMeans(n_clusters=N_BUCKETS, random_state=ks, n_init=1).fit(vecs)
             cents = km.cluster_centers_ / np.linalg.norm(km.cluster_centers_, axis=1, keepdims=True)
@@ -185,13 +188,18 @@ def run(texts, topics, names, coarse: bool):
                 np.random.default_rng(1000 * gap + ks),
             )
             per_seed.append(r["adv_H"])
+            per_seed_bal.append(r["adv_H_bal"])
         m, lo, hi = lab.boot_ci(per_seed)
+        bm, blo, bhi = lab.boot_ci(per_seed_bal)
         curve.append(
             {
                 "gap_eras": gap,
                 "adv_H": m,
                 "lo": lo,
                 "hi": hi,
+                "adv_H_bal": bm,
+                "lo_bal": blo,
+                "hi_bal": bhi,
                 "n_induce_pool": len(pool),
                 "chance": 1.0 / n_topics,
                 "adversary": "historically aware"
@@ -253,7 +261,9 @@ def main() -> None:
         ct, cn = coarsen(topics, names)
         results["coarse"].update(cohort_prior(ct, H, len(cn)))
         OUT.write_text(json.dumps(results, indent=1), encoding="utf-8")
-        print("fine", results["fine"]["majority_rate"], "coarse", results["coarse"]["majority_rate"])
+        print(
+            "majority rates:", results["fine"]["majority_rate"], results["coarse"]["majority_rate"]
+        )
         return
 
     texts, topics, names, _ = load(args.corpus)

@@ -118,9 +118,34 @@ def collect() -> dict[str, str | None]:
         aware = e4f["curve"][0]
         shift = e4f["chance"] - e4f["majority_rate"]
         out["REfourMajority"] = f(e4f["majority_rate"], 2)
-        out["REfourAwareMajority"] = ci(aware["adv_H"] + shift, aware["lo"] + shift, aware["hi"] + shift)
+        out["REfourAwareMajority"] = ci(
+            aware["adv_H"] + shift, aware["lo"] + shift, aware["hi"] + shift
+        )
     else:
         out["REfourMajority"] = out["REfourAwareMajority"] = None
+    # Balanced accuracy (mean per-topic recall), which the skewed prior cannot raise; post-hoc.
+    if e4f and "adv_H_bal" in e4f["curve"][0]:
+        a, z = e4f["curve"][0], e4f["curve"][-1]
+        out["REfourAwareBal"] = ci(a["adv_H_bal"], a["lo_bal"], a["hi_bal"])
+        out["REfourNaiveBal"] = ci(z["adv_H_bal"], z["lo_bal"], z["hi_bal"])
+    else:
+        out["REfourAwareBal"] = out["REfourNaiveBal"] = None
+    e1 = load("e1_longitudinal.json")
+    g1 = [
+        r for r in (e1 or {}).get("rows", []) if r["design"] == "growing" and r["adversary"] == "W"
+    ]
+    if g1 and "adv_H_bal" in g1[-1]:
+        t = max(g1, key=lambda r: r["budget"])
+        out["REoneGrowBal"] = ci(t["adv_H_bal"], t["lo_bal"], t["hi_bal"])
+    else:
+        out["REoneGrowBal"] = None
+    e2 = load("e2_agent_attack.json")
+    g2 = [r for r in (e2 or {}).get("rows", []) if r["layout"] == "growing"]
+    if g2 and "adv_H_bal" in g2[-1]:
+        t = max(g2, key=lambda r: (r["w_real"], r["budget_turns_per_topic"]))
+        out["REtwoGrowBal"] = ci(t["adv_H_bal"], t["lo_bal"], t["hi_bal"])
+    else:
+        out["REtwoGrowBal"] = None
 
     # --- E6: deployed stores -------------------------------------------------------------------
     e6 = load("e6_stores.json")

@@ -541,6 +541,11 @@ def flatten(root: str, fields: bool) -> tuple[str, Source]:
         body = body.replace("\\bibliography{refs}", s.bibliography(PAPER / "main.bbl"))
     body = s.refs_pass(body)
     body = s.normalise(body)
+    # pandoc does not expand a macro inside \url{}, so the repository URL is substituted here
+    repo_tex = (PAPER / "repo.tex").read_text("utf-8")
+    repo = re.search(r"\\newcommand\{\\RepoURL\}\{([^}]*)\}", repo_tex)
+    if repo:
+        body = body.replace("\\RepoURL", repo.group(1))
     numbers = (PAPER / "tables" / "numbers.tex").read_text(encoding="utf-8")
     if "[not run]" in numbers:
         sys.exit("numbers.tex has unmeasured values; run the experiments first")
@@ -1703,8 +1708,8 @@ class Builder:
         para("TableText", "Normal", size=8, align=LEFT, line=9.6, first=0, hyphen=False)
         para("FloatEnd", "Normal", size=1, line=1, exact=True)
         para("TableNote", "Normal", size=8, align=J, line=9.6, first=0, before=3)
-        para("Reference", "Normal", size=8, align=J, line=9.4)
-        para("Biography", "Normal", face=SANS_FONT, size=8, before=24, line=9.6)
+        para("Reference", "Normal", size=8, align=J, line=9.0, after=0.8)
+        para("Biography", "Normal", face=SANS_FONT, size=8, before=14, line=9.6)
         para("RunningHead", "Normal", face=SANS_FONT, size=7, align=LEFT, hyphen=False)
         para("PageFoot", "Normal", align=CTR)
         para("PointHead", "Normal", bold=True, align=LEFT, before=7, after=1, keep=True)
@@ -1721,6 +1726,10 @@ class Builder:
             tabs.append(el("tab", val="left", leader="underscore", pos=(TEXT_W // 2 - 5) * TW))
             tabs.append(el("tab", val="right", leader="underscore", pos=(TEXT_W - 150) * TW))
             sp.append(tabs)
+        # LaTeX sets the reference list with microtype's tighter fit; a slight condensing keeps
+        # Word's entries on as many lines as LaTeX's
+        ref_rpr = d.styles["Reference"].element.get_or_add_rPr()
+        ref_rpr.append(el("spacing", val=-3))
         for name, face, size in (("Verbatim Char", MONO_FONT, None), ("Hyperlink", None, None)):
             try:
                 s = d.styles[name]

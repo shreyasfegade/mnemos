@@ -195,9 +195,11 @@ def run_growing(vecs, topics, n_topics, cents, H, P, budget, rng) -> dict:
     hits = sum(1 for i in H if labels.get(int(part[i])) == int(topics[i]))
     unlabelled = sum(1 for i in H if int(part[i]) not in labels)
     acc = X.guess_accuracy(hits, unlabelled, len(H), n_topics)
+    pred = [labels.get(int(part[i]), -1) for i in H]
     return {
         "acc_H": acc,
         "adv_H": acc - 1.0 / n_topics,
+        "adv_H_bal": X.balanced_guess_accuracy(pred, topics[H], n_topics) - 1.0 / n_topics,
         "regions_labelled": len(labels),
         "coverage_H": 1 - unlabelled / max(len(H), 1),
         "membership": "disclosed by the snapshot",
@@ -309,9 +311,13 @@ def run_engine(kind, vecs, topics, n_topics, cents, H, P, budget, adversary, rng
         # labels. The adversary does not have it -- a sealed layout does not disclose it, which is
         # the third hypothesis of the transfer lemma -- so these rows state what the labels would
         # be worth to an adversary that obtained membership elsewhere (E8: version diffs).
+        bal = X.balanced_guess_accuracy(
+            [labels.get(region, -1) for region, _ in pairs], [t for _, t in pairs], n_topics
+        )
         return {
             "acc_H": acc,
             "adv_H": acc - 1.0 / n_topics,
+            "adv_H_bal": bal - 1.0 / n_topics,
             "regions_labelled": len(labels),
             "scored": scored,
             "membership": "supplied by the harness",
@@ -404,6 +410,7 @@ def main() -> None:
             if design == "rs" and not rs_supported:
                 continue
             advs = []
+            bals = []
             r: dict = {}
             for tr in range(args.trials):
                 rng = np.random.default_rng(5000 + tr)
@@ -414,7 +421,9 @@ def main() -> None:
                         design, vecs, topics, n_topics, cents, H, P, budget, adversary, rng
                     )
                 advs.append(r["adv_H"])
+                bals.append(r["adv_H_bal"])
             m, lo, hi = lab.boot_ci(advs)
+            bm, blo, bhi = lab.boot_ci(bals)
             row = {
                 "design": design,
                 "adversary": adversary,
@@ -422,6 +431,11 @@ def main() -> None:
                 "adv_H": m,
                 "lo": lo,
                 "hi": hi,
+                # advantage in balanced accuracy (mean per-topic recall), which the topic prior
+                # alone cannot raise; see estimators.balanced_guess_accuracy
+                "adv_H_bal": bm,
+                "lo_bal": blo,
+                "hi_bal": bhi,
                 "trials": args.trials,
                 "membership": r.get("membership"),
                 "permutation_recovery": r.get("permutation_recovery"),

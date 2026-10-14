@@ -148,6 +148,21 @@ def score(
     return out
 
 
+def balanced_guess_accuracy(pred, truth, n_topics: int) -> float:
+    """Mean per-topic recall, for the adversary that guesses uniformly where it has no label
+    (``pred`` < 0). Unlike accuracy, it does not reward the topic prior: an adversary that always
+    names cohort H's most frequent topic scores exactly 1/K however skewed the prior is, so an
+    advantage here is information about individual records, not about the topic mix."""
+    pred, truth = np.asarray(pred), np.asarray(truth)
+    recalls = []
+    for c in np.unique(truth):
+        mask = truth == c
+        hits = int((pred[mask] == c).sum())
+        unlabelled = int((pred[mask] < 0).sum())
+        recalls.append((hits + unlabelled / n_topics) / int(mask.sum()))
+    return float(np.mean(recalls)) if recalls else 0.0
+
+
 def guess_accuracy(n_hits: int, n_unlabelled: int, n: int, n_topics: int) -> float:
     """``accuracy_guess`` for harnesses that count hits themselves: see :func:`score`."""
     return (n_hits + n_unlabelled / n_topics) / n if n else 0.0

@@ -319,7 +319,8 @@ Refusal behaviour & AUC [95\\% CI] & Rate, full & Rate, open & Gap \\\\
         f"""\\begin{{table}}[t]
 \\centering
 \\caption{{Capacity under a skewed write trace: when each design first refuses. The partitioned
-design leaves the admissible regime of \\cref{{thm:main}} long before the store is full.}}
+design begins refusing writes, and so leaves the non-overflowing regime of \\cref{{lem:slot}}, long
+before the store is full; \\cref{{thm:main}} still holds there, through padded refusal.}}
 \\label{{tab:e9cap}}
 \\small
 \\begin{{tabular}}{{lrrr}}
@@ -491,12 +492,27 @@ def t_e4() -> None:
     # accuracy = adv_H + chance, so the margin over that guess is adv_H + chance - majority.
     fine = d["fine"]
     shift = fine["chance"] - fine["majority_rate"]
+    # Balanced accuracy (mean per-topic recall) is the measure the prior cannot raise: an adversary
+    # that always guesses the most frequent topic scores exactly 1/K on it.
+    bal = all("adv_H_bal" in c for c in fine["curve"])
     rows = []
     for c in fine["curve"]:
-        rows.append(
-            f"{c['gap_eras']} & {c['adversary']} & {ci(c['adv_H'], c['lo'], c['hi'])} & "
-            f"{ci(c['adv_H'] + shift, c['lo'] + shift, c['hi'] + shift)} \\\\"
-        )
+        cells = [
+            str(c["gap_eras"]),
+            c["adversary"],
+            ci(c["adv_H"], c["lo"], c["hi"]),
+            ci(c["adv_H"] + shift, c["lo"] + shift, c["hi"] + shift),
+        ]
+        if bal:
+            cells.append(ci(c["adv_H_bal"], c["lo_bal"], c["hi_bal"]))
+        rows.append(" & ".join(cells) + " \\\\")
+    bal_note = (
+        " The last column is the advantage in balanced accuracy (mean per-topic recall), which"
+        " knowing the prior cannot raise."
+        if bal
+        else ""
+    )
+    bal_head = " & Balanced [95\\% CI]" if bal else ""
     sc = d["shuffled_control"]
     body = "\n".join(rows)
     w(
@@ -508,13 +524,13 @@ adversary induces ({d["corpus"]}, {d["fine"]["n_topics"]} topics, chance
 {d["fine"]["chance"]:.3f}). Gap 0 is an adversary inducing with archival content from cohort H's own
 era; the largest gap is one inducing with current content. The i.i.d.\\ control is
 {ci(sc["adv_H"], sc["lo"], sc["hi"])}. Cohort H's topic prior is skewed: its most frequent topic is
-{fine["majority_rate"]:.3f} of its records. The last column is accuracy over an adversary that knows
-that prior and always guesses the most frequent topic.}}
+{fine["majority_rate"]:.3f} of its records. \\emph{{Over majority}} is accuracy over an adversary
+that knows that prior and always guesses the most frequent topic.{bal_note}}}
 \\label{{tab:e4}}
 \\small
-\\begin{{tabular}}{{llrr}}
+\\begin{{tabular}}{{llrr{"r" if bal else ""}}}
 \\toprule
-Gap (eras) & Adversary & \\advhist{{}} [95\\% CI] & Over majority [95\\% CI] \\\\
+Gap (eras) & Adversary & \\advhist{{}} [95\\% CI] & Over majority [95\\% CI]{bal_head} \\\\
 \\midrule
 {body}
 \\bottomrule
@@ -850,7 +866,10 @@ LEDGER_CAPTION = (
     r"decoding-accuracy bound (the supplement derives the conversion). A test "
     r"bounds leakage from below, so for a \emph{not detected} channel the informative number "
     r"is the last column: the smallest effect, in the experiment's own unit, it had 80\% power to "
-    r"detect."
+    r"detect. Where cohort H's topic prior is skewed (the drift study and the agent-written "
+    r"streams), a leak is judged on balanced accuracy, the mean per-topic recall, which knowing "
+    r"the prior cannot raise; the Fano bound, computed from raw accuracy and the prior's empirical "
+    r"entropy, is then conservative and can be zero for a channel that leaks."
 )
 
 

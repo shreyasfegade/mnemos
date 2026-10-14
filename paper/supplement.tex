@@ -459,12 +459,16 @@ the induced era, and once cluster geometry has drifted that map mislabels cohort
 a uniform guess. The gap-zero advantage (\REfourAware) exceeds the i.i.d.\ shuffled control
 (\REfourShuffled) because the shuffle mixes every era and dilutes the era-specific partition
 structure that same-era induction matches; the comparison that isolates drift is gap zero against
-the far eras. \Cref{tab:e4} also reports accuracy over the majority-class baseline. Cohort H on
-this corpus is skewed, its most frequent topic being \REfourMajority{} of its records, and an
-adversary that knows that prior and always guesses that topic is matched but not beaten by the fully
-archival adversary (margin \REfourAwareMajority) and beaten by every other. The drift study therefore
-measures how drift erodes the transfer; on this corpus it does not show an archival adversary that
-recovers more than the topic prior.
+the far eras. Cohort H on this corpus is skewed, its most frequent topic being \REfourMajority{} of
+its records, so \cref{tab:e4} reports two further measures. Over an adversary that knows the prior
+and always guesses that topic, the fully archival adversary's raw accuracy is only level
+(\REfourAwareMajority). Raw accuracy is the wrong yardstick here, because an adversary can make
+correct record-by-record guesses and still score below always naming the commonest topic.
+Balanced accuracy, the mean per-topic recall, is the right one: the prior alone scores exactly
+chance on it, and the archival adversary's advantage is \REfourAwareBal, the current-content one's
+\REfourNaiveBal. The labels therefore carry information about individual records beyond the topic
+mix, and drift erodes it. This measure was added after the runs, on the same induction sequences,
+and was not registered.
 
 \input{tables/e6_stores}
 \input{tables/e3_dedup}

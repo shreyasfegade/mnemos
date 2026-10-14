@@ -44,6 +44,8 @@ from __future__ import annotations
 import json
 import math
 
+import numpy as np
+
 from eval.lab import corpus as C
 
 R = C.repo_root() / "python" / "eval" / "results"
@@ -253,13 +255,22 @@ def from_e4(out: list[dict]) -> None:
         if hx is not None
         else "uniform (assumed; corpus skew not recorded)"
     )
-    # Cohort H's topic prior on this corpus is skewed. Where its majority rate is recorded, a leak is
-    # judged against an adversary that knows the prior and always guesses its most frequent topic,
-    # not against 1/K: beating 1/K by exactly what the prior gives is not information about cohort H.
+    # Cohort H's topic prior on this corpus is skewed, so beating 1/K in accuracy can be the prior
+    # alone. A leak is judged on balanced accuracy (mean per-topic recall), which the prior cannot
+    # raise; failing that, against an adversary that always guesses the most frequent topic.
     shift = ch - d["fine"].get("majority_rate", ch)
     for c in d["fine"]["curve"]:
         if c["gap_eras"] not in (0, max(x["gap_eras"] for x in d["fine"]["curve"])):
             continue
+        if "adv_H_bal" in c:
+            metric, v, lo, hi = "balanced advantage", c["adv_H_bal"], c["lo_bal"], c["hi_bal"]
+        elif shift:
+            metric, v, lo, hi = (
+                "accuracy over majority",
+                *(c[x] + shift for x in ("adv_H", "lo", "hi")),
+            )
+        else:
+            metric, v, lo, hi = "advantage", c["adv_H"], c["lo"], c["hi"]
         out.append(
             row(
                 f"structure transfer, {c['adversary']} adversary",
@@ -270,14 +281,109 @@ def from_e4(out: list[dict]) -> None:
                 k,
                 ch + c["adv_H"],
                 ch + c["lo"],
-                "advantage" if shift == 0 else "accuracy over majority",
-                c["adv_H"] + shift,
-                c["lo"] + shift,
-                c["hi"] + shift,
+                metric,
+                v,
+                lo,
+                hi,
                 0.0,
                 f"Fano (K={k}) on topic accuracy = chance + advantage",
                 h_x=hx,
                 prior=prior,
+            )
+        )
+
+
+def entropy_bits(labels) -> float:
+    counts = np.bincount(np.asarray(labels))
+    p = counts[counts > 0] / counts.sum()
+    return float(-(p * np.log2(p)).sum())
+
+
+def from_e16(out: list[dict]) -> None:
+    """pgvector under gocryptfs: cohort H is a random draw from a corpus whose topics are balanced
+    (D2, eight BEIR domains), so the advantage over 1/K is not a prior effect."""
+    d = load("e16_real_layouts.json")
+    labels_file = R.parent / "e8" / "data" / "labels.npy"
+    if not d or not labels_file.exists():
+        return
+    hx = entropy_bits(np.load(labels_file))
+    for s in d["stores"]:
+        k = round(1 / s["chance"])
+        out.append(
+            row(
+                f"structure transfer, deployed store: {s['store']}",
+                s["store"],
+                "W",
+                "E16",
+                "one cohort-H record's topic",
+                k,
+                s["chance"] + s["adv_hist"],
+                s["chance"] + s["adv_hist_lo"],
+                "advantage",
+                s["adv_hist"],
+                s["adv_hist_lo"],
+                s.get("adv_hist_hi"),
+                0.0,
+                f"Fano (K={k}) on topic accuracy = chance + advantage",
+                h_x=hx,
+                prior="empirical topic entropy (balanced corpus)",
+            )
+        )
+
+
+def from_agent_streams(out: list[dict]) -> None:
+    """The agent-written streams on the growing layout, at the largest budget measured. Their
+    topic priors are skewed, so a leak is judged on balanced accuracy (mean per-topic recall),
+    which the prior alone cannot raise; the Fano bound still uses raw accuracy and the empirical
+    entropy, so it stays a valid lower bound."""
+    from eval.exp2 import e1_longitudinal as e1m
+    from eval.exp2 import e2_agent_attack as e2m
+
+    for name, exp, key, extra in (
+        ("e1_longitudinal.json", "E1", "design", {"adversary": "W"}),
+        ("e2_agent_attack.json", "E2", "layout", {}),
+    ):
+        d = load(name)
+        if not d:
+            continue
+        rows = [
+            r
+            for r in d["rows"]
+            if r.get(key) == "growing"
+            and "adv_H_bal" in r
+            and all(r.get(a) == b for a, b in extra.items())
+        ]
+        if not rows:
+            continue
+        budget = "budget" if exp == "E1" else "budget_turns_per_topic"
+        top = max(rows, key=lambda r: (r[budget], r.get("w_real", 1)))
+        if exp == "E1":
+            _t, topics, _n, month_idx, _s = e1m.load_stream()
+            n_months = int(month_idx.max()) + 1
+            hx = entropy_bits(topics[month_idx < round(n_months * 0.5)])
+        else:
+            hx = entropy_bits(e2m.load_memories(None)[1])
+        k = d["n_topics"]
+        ch = d["chance"]
+        burst = f", bursts of {top['w_real']}" if "w_real" in top else ""
+        out.append(
+            row(
+                f"structure transfer, agent-written memories ({exp}{burst})",
+                "growing layout",
+                "W",
+                exp,
+                "one cohort-H record's topic",
+                k,
+                ch + top["adv_H"],
+                ch + top["lo"],
+                "balanced advantage",
+                top["adv_H_bal"],
+                top["lo_bal"],
+                top["hi_bal"],
+                0.0,
+                f"Fano (K={k}) on topic accuracy; leak judged on balanced accuracy",
+                h_x=hx,
+                prior="empirical topic entropy (skewed)",
             )
         )
 
@@ -516,7 +622,18 @@ def from_e3(out: list[dict]) -> None:
 
 def main() -> None:
     out: list[dict] = []
-    for f in (from_e4, from_e5, from_e6, from_e7, from_e8, from_e9, from_query_equality, from_e3):
+    for f in (
+        from_e4,
+        from_agent_streams,
+        from_e5,
+        from_e6,
+        from_e16,
+        from_e7,
+        from_e8,
+        from_e9,
+        from_query_equality,
+        from_e3,
+    ):
         f(out)
     OUT.write_text(json.dumps({"rows": out}, indent=1), encoding="utf-8")
 

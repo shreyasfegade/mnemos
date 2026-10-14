@@ -4,22 +4,22 @@
 adversary induces (github, 12 topics, chance
 0.083). Gap 0 is an adversary inducing with archival content from cohort H's own
 era; the largest gap is one inducing with current content. The i.i.d.\ control is
-0.368\,[0.358, 0.379]. Cohort H's topic prior is skewed: its most frequent topic is
-0.504 of its records. The last column is accuracy over an adversary that knows
-that prior and always guesses the most frequent topic.}
+0.368\,[0.351, 0.386]. Cohort H's topic prior is skewed: its most frequent topic is
+0.504 of its records. \emph{Over majority} is accuracy over an adversary
+that knows that prior and always guesses the most frequent topic. The last column is the advantage in balanced accuracy (mean per-topic recall), which knowing the prior cannot raise.}
 \label{tab:e4}
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{llrr}
+\begin{tabular}{llrrr}
 \toprule
-Gap (eras) & Adversary & \advhist{} [95\% CI] & Over majority [95\% CI] \\
+Gap (eras) & Adversary & \advhist{} [95\% CI] & Over majority [95\% CI] & Balanced [95\% CI] \\
 \midrule
-0 & historically aware & 0.424\,[0.405, 0.443] & 0.004\,[-0.015, 0.023] \\
-1 & intermediate & 0.246\,[0.220, 0.275] & -0.174\,[-0.200, -0.145] \\
-2 & intermediate & 0.036\,[0.024, 0.046] & -0.384\,[-0.396, -0.374] \\
-3 & intermediate & -0.017\,[-0.027, -0.009] & -0.437\,[-0.448, -0.429] \\
-4 & intermediate & -0.029\,[-0.034, -0.023] & -0.449\,[-0.455, -0.443] \\
-5 & naive (current content) & -0.022\,[-0.026, -0.019] & -0.442\,[-0.446, -0.439] \\
+0 & historically aware & 0.424\,[0.394, 0.454] & 0.004\,[-0.026, 0.033] & 0.217\,[0.151, 0.283] \\
+1 & intermediate & 0.246\,[0.200, 0.291] & -0.174\,[-0.220, -0.129] & 0.426\,[0.371, 0.480] \\
+2 & intermediate & 0.036\,[0.018, 0.054] & -0.384\,[-0.402, -0.367] & 0.343\,[0.298, 0.388] \\
+3 & intermediate & -0.017\,[-0.032, -0.003] & -0.437\,[-0.452, -0.423] & 0.225\,[0.132, 0.318] \\
+4 & intermediate & -0.029\,[-0.038, -0.020] & -0.449\,[-0.458, -0.440] & 0.124\,[0.028, 0.220] \\
+5 & naive (current content) & -0.022\,[-0.027, -0.017] & -0.442\,[-0.447, -0.437] & 0.055\,[0.027, 0.082] \\
 \bottomrule
 \end{tabular}
 \end{table*}

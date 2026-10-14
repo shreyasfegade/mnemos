@@ -279,7 +279,15 @@ def run_attack(vecs, topics, n_topics, cents, budget: int, w_real: int, trial: i
         # The adversary guesses where it has no label (estimators.score explains why).
         acc = X.guess_accuracy(hits, unlabelled, len(H), n_topics)
         chance = 1.0 / n_topics
-        return {"acc_H": acc, "adv_H": acc - chance, "regions_labelled": len(labels)}
+        bal = X.balanced_guess_accuracy(
+            [labels.get(int(r), -1) for r in gt_region], topics[H], n_topics
+        )
+        return {
+            "acc_H": acc,
+            "adv_H": acc - chance,
+            "adv_H_bal": bal - chance,
+            "regions_labelled": len(labels),
+        }
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -317,7 +325,13 @@ def run_growing(vecs, topics, n_topics, cents, budget: int, w_real: int, trial: 
     hits = sum(1 for i in H if labels.get(int(part[i])) == int(topics[i]))
     unlabelled = sum(1 for i in H if int(part[i]) not in labels)
     acc = X.guess_accuracy(hits, unlabelled, len(H), n_topics)
-    return {"acc_H": acc, "adv_H": acc - 1.0 / n_topics, "regions_labelled": len(labels)}
+    bal = X.balanced_guess_accuracy([labels.get(int(part[i]), -1) for i in H], topics[H], n_topics)
+    return {
+        "acc_H": acc,
+        "adv_H": acc - 1.0 / n_topics,
+        "adv_H_bal": bal - 1.0 / n_topics,
+        "regions_labelled": len(labels),
+    }
 
 
 def main() -> None:
@@ -358,11 +372,12 @@ def main() -> None:
     for layout, fn in (("growing", run_growing), ("p", run_attack)):
         for w_real in W_REALS:
             for budget in BUDGETS:
-                advs = [
-                    fn(vecs, topics, n_topics, cents, budget, w_real, tr)["adv_H"]
+                runs = [
+                    fn(vecs, topics, n_topics, cents, budget, w_real, tr)
                     for tr in range(args.trials)
                 ]
-                m, lo, hi = lab.boot_ci(advs)
+                m, lo, hi = lab.boot_ci([r["adv_H"] for r in runs])
+                bm, blo, bhi = lab.boot_ci([r["adv_H_bal"] for r in runs])
                 row = {
                     "layout": layout,
                     "w_real": w_real,
@@ -370,6 +385,10 @@ def main() -> None:
                     "adv_H": m,
                     "lo": lo,
                     "hi": hi,
+                    # balanced accuracy (mean per-topic recall), which the prior cannot raise
+                    "adv_H_bal": bm,
+                    "lo_bal": blo,
+                    "hi_bal": bhi,
                     "trials": args.trials,
                     "resample_unit": "independent induction sequence (own cohort split + order)",
                 }

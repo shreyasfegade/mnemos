@@ -45,8 +45,9 @@ intersection oracle is retained only as an upper bound.
 \caption{What subject drift is actually worth. The horizontal axis is the time gap between cohort H
 and the content the adversary induces with; bands are 95\% Student-$t$ intervals over five
 $k$-means seeds. An adversary that supplies archival content from cohort H's own era recovers the
-advantage drift appears to remove, but no more than guessing cohort H's most frequent topic gives
-(dotted line).}
+advantage drift appears to remove; in raw accuracy that matches always guessing cohort H's most
+frequent topic (dotted line), and in balanced accuracy it is well above chance (supplementary
+material).}
 \label{fig:drift}
 \end{figure}
 
@@ -61,9 +62,10 @@ moves from \REtwentysevenZero{} to \REtwentysevenTenth, and with a quarter to
 \REtwentysevenQuarter, against \REtwentysevenFull{} for a fully archival adversary. The coarse-taxonomy arm has chance one in four rather than one in twelve.
 At the largest gap the advantage is below zero, because a map fitted on the induced era
 mislabels a drifted cohort more often than a guess (supplementary material). Cohort H here is
-skewed (its commonest topic is \REfourMajority{} of it), and over always guessing that topic even the
-archival adversary's margin is \REfourAwareMajority: drift erodes the transfer, but no adversary on
-this corpus beats the prior.
+skewed (its commonest topic is \REfourMajority{} of it), so raw accuracy flatters any adversary that
+leans on the prior. Balanced accuracy, the mean per-topic recall, does not: in it the archival
+adversary's advantage is \REfourAwareBal{} and the current-content one's \REfourNaiveBal{} (not
+registered), so the labels carry information about individual records, and drift erodes it.
 
 \subsection{Deployed Stores, and Time-Placed Controls}
 \label{sec:eval-real}

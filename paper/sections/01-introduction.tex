@@ -58,10 +58,10 @@ sealed regions does not. Much of the paper is an account of how an adversary obt
 membership anyway.
 
 \paragraph{What actually protects, and what does not}
-Subject drift erodes the transfer: on a timestamped issue tracker the advantage over a uniform
-guess falls from \REfourAware{} to \REfourNaive{} when the induced content is five eras newer, although
-on that corpus even the archival adversary does no better than one that knows the earlier records'
-topic prior. History independence is a single-snapshot notion
+Subject drift erodes the transfer but does not stop it: on a timestamped issue tracker, in balanced
+accuracy (which the corpus's skewed topic mix cannot inflate), the advantage falls from
+\REfourAwareBal{} to \REfourNaiveBal{} when the induced content is five eras newer. History
+independence is a single-snapshot notion
 \cite{naor2001anti}, and two retained versions of a content-placed store diff to exactly the regions
 written between them; under a real backup tool the diff names an earlier record's region at
 \REnineteenPrecRatio{} times the chance rate. A store that bounds per-partition capacity and refuses

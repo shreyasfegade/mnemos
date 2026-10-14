@@ -1,6 +1,6 @@
 \begin{table*}[t]
 \centering
-\caption{Every channel in one unit. \emph{Bits} is a Fano lower bound on the mutual information between the secret and what the adversary observes, per observation of the unit the channel is about (a record's topic, a region's partition, one game instance), taken at the lower end of the experiment's 95\% interval so that it holds at the experiment's confidence; $^\ast$ marks a result with no interval, for which only the point bound exists, and $^\dagger$ a channel measured only by AUC, which is a ranking statistic and carries no decoding-accuracy bound (the supplement derives the conversion). A test bounds leakage from below, so for a \emph{not detected} channel the informative number is the last column: the smallest effect, in the experiment's own unit, it had 80\% power to detect. Every measured channel, including every ablation.}
+\caption{Every channel in one unit. \emph{Bits} is a Fano lower bound on the mutual information between the secret and what the adversary observes, per observation of the unit the channel is about (a record's topic, a region's partition, one game instance), taken at the lower end of the experiment's 95\% interval so that it holds at the experiment's confidence; $^\ast$ marks a result with no interval, for which only the point bound exists, and $^\dagger$ a channel measured only by AUC, which is a ranking statistic and carries no decoding-accuracy bound (the supplement derives the conversion). A test bounds leakage from below, so for a \emph{not detected} channel the informative number is the last column: the smallest effect, in the experiment's own unit, it had 80\% power to detect. Where cohort H's topic prior is skewed (the drift study and the agent-written streams), a leak is judged on balanced accuracy, the mean per-topic recall, which knowing the prior cannot raise; the Fano bound, computed from raw accuracy and the prior's empirical entropy, is then conservative and can be zero for a channel that leaks. Every measured channel, including every ablation.}
 \label{tab:supp-ledger}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -8,8 +8,10 @@
 \toprule
 Channel & Design & Class & Status & Bits $\geq$ & Detectable $\geq$ \\
 \midrule
-structure transfer, historically aware adversary & growing layout & W & not det. & 0.000 & 0.027 (accuracy over majority) \\
-structure transfer, naive (current content) adversary & growing layout & W & not det. & 0.000 & 0.004 (accuracy over majority) \\
+structure transfer, historically aware adversary & growing layout & W & \textbf{leaks} & 0.000 & -- \\
+structure transfer, naive (current content) adversary & growing layout & W & \textbf{leaks} & 0.000 & -- \\
+structure transfer, agent-written memories (E1) & growing layout & W & \textbf{leaks} & 0.000 & -- \\
+structure transfer, agent-written memories (E2, bursts of 4) & growing layout & W & \textbf{leaks} & 0.000 & -- \\
 snapshot + post-$\tau$ writes (the game) & Mnemos-P & W & not det. & 0.002 & 0.052 (AUC) \\
 game, S1 removed (growing regions) & Mnemos-P ablation & W & \textbf{leaks} & 1.000 & -- \\
 game, S2 removed (unsealed slots) & Mnemos-P ablation & W & \textbf{leaks} & 0.784 & -- \\
@@ -27,6 +29,7 @@ structure transfer, deployed store: faiss & faiss & W & not det. & 0.000 & undet
 structure transfer, deployed store: lancedb & lancedb & W & not det. & 0.000 & undetermined \\
 structure transfer, deployed store: lancedb\_indexed & lancedb\_indexed & W & not det. & 0.000 & undetermined \\
 structure transfer, deployed store: sqlitevec & sqlitevec & W & not det. & 0.000 & 0.005 (advantage) \\
+structure transfer, deployed store: pgvector & pgvector & W & \textbf{leaks} & 0.048 & -- \\
 permutation recovery (spread\_s1) & Mnemos-P & RW & \textbf{leaks} & 4.905 & -- \\
 permutation recovery (spread\_s2) & Mnemos-P & RW & \textbf{leaks} & 1.827 & -- \\
 permutation recovery (grouped) & Mnemos-P & RW & \textbf{leaks} & 0.000 & -- \\
