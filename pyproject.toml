@@ -31,6 +31,11 @@ eval = [
 mcp = [
     "mcp>=1.0",             # the Stage 4 agent integration
 ]
+paper = [
+    "pypandoc_binary>=1.13",  # LaTeX -> Word (eval.make_docx)
+    "python-docx>=1.1",       # the Word layout pass
+    "pymupdf>=1.24",          # reads float positions and page text from the built PDFs
+]
 
 [build-system]
 requires = ["setuptools>=70", "wheel"]
