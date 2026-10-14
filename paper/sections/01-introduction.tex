@@ -69,7 +69,8 @@ an overflowing write discloses, at AUC \REnineSilentAUCPt, that a topic's load h
 and therefore what the earlier records contributed to it. And an agent leaks through its own
 operations, down to the occurrence of a write: a memory pipeline that skips a fact it already holds
 turns deduplication into a membership oracle for facts written before the compromise, which we
-measure at AUC \REeighteenAUCPt{} in the unmodified mem0 library.
+measure at AUC \REtwentynineQdrantPt{} in the unmodified mem0 library; it is open exactly when the
+deciding model restates a stored fact verbatim, as our characterization predicts.
 
 \paragraph{The design principle}
 \emph{Semantic indexing need not imply semantic physical placement.} The threat model already
@@ -78,7 +79,8 @@ server must hold the index, so encrypted on-disk search is a choice rather than 
 Taking that at face value yields a store whose disk layout carries no content: placement independent
 of content, search in locked memory over a logical partition index, and writes by a clocked sweep in
 the manner of write-only ORAM. It closes all four channels against a write observer, at
-\REtwentyoneSweepKiB~KiB per flush. We prove more: against a self-writing agent, a store is secure
+\REtwentyoneSweepKiB~KiB per flush; placed under the unmodified mem0 library it takes the
+membership oracle from AUC \REtwentynineQdrantPt{} to \REtwentynineMStorePt. We prove more: against a self-writing agent, a store is secure
 exactly when what it reveals is independent of what the agent does, so the clock-only schedule is
 not one sufficient design among many but the shape every secure design must have. Keeping headers on
 disk extends the store past the memory limit with its writes still invisible to a write observer;
@@ -93,8 +95,8 @@ and audited against the artifacts a real operating system retains
 \item \textbf{Structure transfer and the channels that supply its precondition:} the transfer
 attack, evaluated on deployed stores under file-level encryption and on agent-written records, and
 three channels that reach the earlier cohort when the layout does not: multi-version
-reconstruction, refusals, and derived writes, the last a deduplication membership oracle in the
-unmodified mem0 library (\cref{sec:transfer,sec:eval}).
+reconstruction, refusals, and derived writes, the last a deduplication membership oracle
+measured in unmodified libraries under four models (\cref{sec:transfer,sec:eval}).
 \item \textbf{Dual-epoch security:} an adaptive, leakage-parameterized definition; sufficient
 conditions that cover overflow; separations from forward/backward privacy, breach resistance and
 history independence; and a reactive variant with an exact characterization of the stores secure

@@ -455,6 +455,63 @@ def collect() -> dict[str, str | None]:
         out[f"REtwentyeight{tag}Msgs"] = big(r and r["adversary_messages"])
         out[f"REtwentyeight{tag}Min"] = f(r and r["agent_minutes_slowest_model"], 0)
 
+    # --- E29: unmodified mem0 on each backend --------------------------------------------------
+    arms = (load("e29_mem0_mnemos.json") or {}).get("arms", {})
+    for arm, tag in (
+        ("qdrant", "Qdrant"),
+        ("m_store", "MStore"),
+        ("m_all", "MAll"),
+        ("p_store", "PStore"),
+    ):
+        a = arms.get(arm)
+        out[f"REtwentynine{tag}"] = ci_of(a, ("auc_blocks", "lo_blocks", "hi_blocks"), 2)
+        out[f"REtwentynine{tag}Pt"] = f(a and a["auc_blocks"], 2)
+        out[f"REtwentynine{tag}Mem"] = f(a and a["member_blocks"], 0)
+        out[f"REtwentynine{tag}Non"] = f(a and a["nonmember_blocks"], 0)
+    q = arms.get("qdrant")
+    out["REtwentyninePerClass"] = str(q["probes_each"]) if q else None
+    out["REtwentynineWindow"] = f(q and q["window_s"], 0)
+
+    # --- E30: LangMem end to end ---------------------------------------------------------------
+    e30 = load("e30_langmem.json")
+    out["REthirtyAUC"] = ci(e30["auc_any"], e30["lo_any"], e30["hi_any"], 2) if e30 else None
+    out["REthirtyMemberWrite"] = f(e30 and e30["member_write_rate"], 2)
+    out["REthirtyNonmemberWrite"] = f(e30 and e30["nonmember_write_rate"], 2)
+
+    # --- E31: the decision under four models, and sequential re-probing ------------------------
+    models = (load("e31_amplify.json") or {}).get("models", {})
+    for m, tag in (
+        ("qwen2.5:7b-instruct", "Qwen"),
+        ("llama3.1:8b", "Llama"),
+        ("mistral:7b-instruct", "Mistral"),
+        ("gemma2:9b", "Gemma"),
+    ):
+        r = models.get(m)
+        out[f"REthirtyone{tag}"] = ci_of(r, ("auc_k1", "lo_k1", "hi_k1"), 2)
+        out[f"REthirtyone{tag}Mem"] = f(r and r["member_write_first"], 2)
+        out[f"REthirtyone{tag}Non"] = f(r and r["nonmember_write_first"], 2)
+    qw = models.get("qwen2.5:7b-instruct")
+    out["REthirtyoneQwenKThree"] = f(qw and qw["auc_k"], 3)
+    out["REthirtyoneQwenKOne"] = f(qw and qw["auc_k1"], 3)
+
+    # --- E32: pgvector at capture granularities -------------------------------------------------
+    rows32 = {
+        r["checkpoint_every"]: r for r in (load("e32_pg_granularity.json") or {}).get("rows", [])
+    }
+    for g, tag in ((1, "One"), (4, "Four"), (16, "Sixteen")):
+        out[f"REthirtytwo{tag}"] = ci_of(
+            rows32.get(g), ("adv_hist", "adv_hist_lo", "adv_hist_hi"), 3
+        )
+    out["REthirtytwoSeeds"] = str(rows32[1]["seeds"]) if 1 in rows32 else None
+
+    # --- E33: Syncthing's version history -------------------------------------------------------
+    runs33 = (load("e33_syncthing.json") or {}).get("runs", {})
+    for pace, tag in (("agent-paced", "Agent"), ("fast", "Fast")):
+        r = runs33.get(pace)
+        out[f"REthirtythree{tag}Flushes"] = f(r and r["mean_flushes_per_version"], 1)
+        out[f"REthirtythree{tag}Ratio"] = f(r and r["precision"] / r["null_precision"], 1)
+        out[f"REthirtythree{tag}Exposure"] = f(r and r["exposure"], 2)
+
     # --- Point values for the abstract and introduction, where an interval would not fit -----
     out["REsixteenPgAcc"] = f(pg and pg["adv_hist"] + pg["chance"], 3)
     out["REsixteenPgAdvPt"] = signed(pg and pg["adv_hist"], 2)

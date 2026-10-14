@@ -112,7 +112,9 @@ creates only novel ones; and Graphiti, the engine of Zep \cite{rasmussen2025zep}
 extracted entities against the graph before
 writing them. The supplementary material lists each framework, its version and default store, and
 the file and line at which the mechanism was found; a framework is recorded as vulnerable only
-where the mechanism was located in its source.
+where the mechanism was located in its source. A mechanism in the source is necessary, not
+sufficient: the write must also depend on membership when the pipeline runs, which
+\cref{sec:eval-reactive} measures for mem0 and LangMem under several models.
 
 \subsection{Multiple Versions}
 \label{sec:attack-multisnapshot}

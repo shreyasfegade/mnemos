@@ -234,6 +234,7 @@ def plan(jobs: int, syncthing_min: float) -> list[Stage]:
         Stage("ledger", "final", py("eval.exp2.ledger"), 0.2, 10),
         Stage("tables", "final", py("eval.exp2.make_tables"), 0.2, 10),
         Stage("numbers", "final", py("eval.exp2.numbers"), 0.1, 5),
+        Stage("registered", "final", py("eval.exp2.registered_table"), 0.1, 5),
         Stage("figures", "final", py("eval.exp2.make_figures"), 0.5, 10),
         Stage("verify", "final", py("eval.exp2.verify"), 0.1, 5, optional=True),
         Stage("lint", "final", py("eval.lint_paper"), 0.1, 5, optional=True),

@@ -915,8 +915,10 @@ def t_census() -> None:
                 r"--no-deps}, " + d["date"] + r"). \emph{Yes} is recorded only where the "
                 r"mechanism was located at the cited file; anything not located is \emph{none "
                 r"found} or \emph{not verified}, never inferred from documentation. Where it is "
-                r"yes, the precondition of \cref{prop:derived} holds and the deduplication oracle "
-                r"of \cref{sec:attack-derived} applies to the framework as shipped."
+                r"yes, the source satisfies the precondition of \cref{prop:derived}. Whether the "
+                r"oracle opens when the pipeline runs depends on the deciding model: run end to "
+                r"end it is open in mem0 with \texttt{qwen2.5} and closed in LangMem, which "
+                r"re-stores the memories it retrieves on every call (\cref{tab:frameworks})."
             ),
         ),
     )

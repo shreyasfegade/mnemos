@@ -81,8 +81,9 @@ embedding path.
 
 \paragraph{Agent experiments}
 The agent results use local models of moderate size, and the induced corpus is issue text from one
-public tracker. The deduplication oracle is measured end to end in mem0 only, with one 7B model
-deciding; the other frameworks the census flags, and frontier-scale models, were not run.
+public tracker. The deduplication oracle is measured end to end in mem0 and LangMem with four
+local models of 7--9B parameters; hosted frontier models and the remaining frameworks the census
+flags were not run, and whether a given model opens the oracle has to be measured, not assumed.
 
 \paragraph{Scope of the measurements}
 Performance is measured on one machine (Intel i9-14900HX, 32\,GB, NVMe, Windows~11, with WSL2 for

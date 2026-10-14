@@ -329,6 +329,21 @@ The main paper tabulates the rows its arguments rest on. The tables here give ev
 generated from the same result files by the same code, so the two cannot disagree.
 
 \input{tables/supp_ledger_full}
+\input{tables/supp_registered}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_budget.pdf}
+\caption{Exposure of the pre-compromise cohort against the adversary's induction budget, on a
+timestamped stream compromised at a month boundary, for the write observer (left) and the
+read-write observer (right); bands are 95\% intervals over twenty trials. The growing layout's
+snapshot discloses which region holds each earlier record. For the sealed designs the harness
+supplies that membership, so their curves are what the labels would be worth to an adversary that
+obtained it elsewhere, for instance from version diffs. Mnemos-RS is measured for the write
+observer, since its read-side channel is result-dependent reads. The supplementary material
+tabulates every point.}
+\label{fig:budget}
+\end{figure*}
 \input{tables/e1_longitudinal}
 \input{tables/supp_e2_full}
 \input{tables/supp_e10_full}

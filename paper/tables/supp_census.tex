@@ -1,6 +1,6 @@
 \begin{table*}[t]
 \centering
-\caption{Whether a write reaches storage depends on whether the content is already stored, read from each framework's shipped source (\texttt{pip download --no-deps}, 2026-09-27). \emph{Yes} is recorded only where the mechanism was located at the cited file; anything not located is \emph{none found} or \emph{not verified}, never inferred from documentation. Where it is yes, the precondition of \cref{prop:derived} holds and the deduplication oracle of \cref{sec:attack-derived} applies to the framework as shipped.}
+\caption{Whether a write reaches storage depends on whether the content is already stored, read from each framework's shipped source (\texttt{pip download --no-deps}, 2026-09-27). \emph{Yes} is recorded only where the mechanism was located at the cited file; anything not located is \emph{none found} or \emph{not verified}, never inferred from documentation. Where it is yes, the source satisfies the precondition of \cref{prop:derived}. Whether the oracle opens when the pipeline runs depends on the deciding model: run end to end it is open in mem0 with \texttt{qwen2.5} and closed in LangMem, which re-stores the memories it retrieves on every call (\cref{tab:frameworks}).}
 \label{tab:supp-census}
 \small
 \setlength{\tabcolsep}{4pt}

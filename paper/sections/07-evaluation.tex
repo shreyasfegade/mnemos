@@ -26,9 +26,8 @@ Attacks read only the engine's emitted event stream, which is the storage advers
 every number in the text is generated from the stored results. An outcome marked
 \emph{registered} was written into the artifact's verifier, with the check that tests it, before the
 run, and since the artifact was placed under version control the commit order dates each such
-prediction; four registered predictions failed and are reported (\cref{sec:eval-induction}, the composed attack of
-\cref{sec:eval-multisnapshot}, the price of S4 in \cref{sec:eval-recall}, and query equality at
-$s = 4$ in the supplementary material). Advantages are not comparable across experiments: they
+prediction. A registered prediction that failed is reported with its numbers where it bears on
+a claim, and every registered outcome is tabulated in the supplementary material. Advantages are not comparable across experiments: they
 differ in corpus, in taxonomy (chance from one in four to one in twelve), and in whether the budget
 counts induced records or agent turns, and each subsection states its own. The supplementary
 material indexes every experiment by number.
@@ -87,11 +86,14 @@ afterward through real SQL with a checkpoint after each write, in the same \text
 volume, assigns an insert to its nearest list and writes that list's pages. The attack reaches
 cohort H: held-out accuracy on it is \REsixteenPgAcc{} against chance \REsixteenPgChance, an
 advantage of \REsixteenPgAdv{} over \REsixteenPgSeeds{} seeds, the interval above zero (registered
-before the run). A checkpoint after every write is the finest capture granularity; coarser
-checkpoints merge writes as coarser version capture does (\cref{sec:granularity}), and three seeds
-make the interval wide. It is weaker than the
-growing layout, because write-ahead-log and heap churn blur list pages at 4\,KiB, but it is a
-deployed, content-placed store whose placement transfers to the pre-compromise cohort. Structure
+before the run). It is weaker than the growing layout, because write-ahead-log and heap churn
+blur list pages at 4\,KiB, but it is a deployed, content-placed store whose placement transfers to
+the pre-compromise cohort. A checkpoint after every write is the finest capture an adversary can
+hope for. Capturing one version per $g$ writes instead (registered, \REthirtytwoSeeds{} seeds per
+point, twice the induction budget), the advantage is \REthirtytwoOne{} at $g = 1$ and still
+\REthirtytwoFour{} at $g = 4$; at $g = 16$ every version mixes all eight topics, the estimator labels
+no block, and the advantage is exactly zero. Coarse capture is a real defence against this attack,
+and \cref{sec:eval-multisnapshot} measures what a real synchronization client provides. Structure
 transfer is therefore neither universal nor hypothetical: most deployed stores tested do not
 expose a content-disclosing layout at block granularity, and one widely used store does.
 
@@ -99,10 +101,8 @@ expose a content-disclosing layout at block granularity, and one widely used sto
 \label{sec:eval-induction}
 \label{sec:eval-dedup}
 
-\input{tables/e2_agent}
-
-\Cref{tab:e2} runs the attack against memories a local model authored from adversary-supplied
-issues, and sweeps the burst size: a writing turn yields several memories on one subject within
+The attack runs equally against memories a local model authored from adversary-supplied
+issues (supplementary material), across burst sizes: a writing turn yields several memories on one subject within
 milliseconds, so a realistic flush carries a small same-topic burst. The growing layout is the
 positive control: labels learned from these memories transfer to the earlier cohort at every budget,
 so agent-written text keeps the structure the attack needs. Against Mnemos-P the harness supplies
@@ -112,30 +112,16 @@ burst multiplies the signal against the fixed cover: at four records per turn th
 \REtwoBurstRatio{} times the single-record value, peaking at $+\REtwoBurstMax$. We registered that
 the padded design would stay within 0.05 of chance throughout; it does not.
 
-The attack is cheap in the adversary's currency. An induced turn is one supplied document or
-ticket, and the agent spends \REtwentyeightSecLo{} to \REtwentyeightSecHi~s on it with these models.
-On the growing layout the advantage clears zero at the smallest budget tested,
-\REtwentyeightGrowOneMsgs{} messages over ten topics (about \REtwentyeightGrowOneMin~min of agent
-time); on Mnemos-P a single-record attack needs \REtwentyeightPOneMsgs{} messages, and a burst of two
-clears zero at \REtwentyeightPTwoMsgs, though at a small advantage (a descriptive analysis of the
-same runs).
+The attack is cheap: on the growing layout the advantage clears zero at
+\REtwentyeightGrowOneMsgs{} supplied messages over ten topics, about \REtwentyeightGrowOneMin~min of
+agent time.
 
 The deduplication oracle of \cref{sec:attack-derived} observes only \emph{whether a write happened}
 after the adversary supplies a document. With a similarity threshold deciding, the oracle is
-perfect. With a model deciding, as in mem0's pipeline, it is noisy but open:
-\texttt{\REthreeModel} writes \REthreeLlmWriteMember{} of facts the store already holds against
-\REthreeLlmWriteNonmember{} of new ones, an AUC of \REthreePLlmAUC{} against Mnemos-P, and the
-clocked flush takes the same arm to \REthreeMLlmAUC.
-
-\paragraph{The unmodified mem0 library}
-We ran \textbf{mem0 2.2.1} with a local on-disk Qdrant collection and \texttt{\REeighteenModel}
-making the add/skip decision, the adversary seeing only whether the collection's data files changed.
-A fact already stored produces a vector-store write on \REeighteenMemberWrite{} of probes against
-\REeighteenNonmemberWrite{} for a novel one, an AUC of \REeighteenAUC, stronger than our
-mem0-style pipeline because mem0's extraction canonicalizes a repeated fact into a form its store
-already holds. Since \texttt{gocryptfs} mirrors these files block for block, whether a write occurs
-is the same signal with or without the encryption layer. The oracle is present in a widely used
-library as shipped.
+perfect; with a model deciding, as in mem0's pipeline, \texttt{\REthreeModel} writes
+\REthreeLlmWriteMember{} of facts the store already holds against \REthreeLlmWriteNonmember{} of new
+ones, an AUC of \REthreePLlmAUC{} against Mnemos-P. \Cref{sec:eval-reactive} measures the oracle in
+unmodified libraries, and its closure.
 
 \subsection{The Dual-Epoch Game}
 \label{sec:eval-game}
@@ -173,6 +159,58 @@ fact's region. Mnemos-P, dual-epoch secure by \cref{thm:main}, is fully distingu
 \REtwentyPShipped. This is the empirical form of $\mathrm{DE}\nRightarrow\mathrm{RDE}$, and the
 reason the positive result for Mnemos-M is \cref{thm:reactive} rather than a row of \cref{tab:e5}.
 
+\begin{table}[t]
+\centering
+\caption{The deduplication oracle in unmodified libraries. \emph{Top}: who decides. mem0 2.2.1 on
+its shipped Qdrant store with four local models making the add/skip decision, and LangMem 0.0.30's
+store manager; columns give the rate at which a probe wrote for a fact already stored (member) and a
+novel one (non-member). \emph{Bottom}: what the store reveals. mem0 with \texttt{qwen2.5}, its
+vector store replaced through mem0's own interface; columns give the mean 4\,KiB blocks changed in a
+fixed \REtwentynineWindow~s window. AUC is for ``non-member'', oriented in advance, with a bootstrap
+interval over \REtwentyninePerClass{} probes per class.}
+\label{tab:frameworks}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+Library, store & Deciding model & Member & Non-mem. & AUC [95\% CI] \\
+\midrule
+mem0, Qdrant & \texttt{qwen2.5:7b} & \REthirtyoneQwenMem & \REthirtyoneQwenNon & \REthirtyoneQwen \\
+mem0, Qdrant & \texttt{llama3.1:8b} & \REthirtyoneLlamaMem & \REthirtyoneLlamaNon & \REthirtyoneLlama \\
+mem0, Qdrant & \texttt{mistral:7b} & \REthirtyoneMistralMem & \REthirtyoneMistralNon & \REthirtyoneMistral \\
+mem0, Qdrant & \texttt{gemma2:9b} & \REthirtyoneGemmaMem & \REthirtyoneGemmaNon & \REthirtyoneGemma \\
+LangMem, file store & \texttt{qwen2.5:7b} & \REthirtyMemberWrite & \REthirtyNonmemberWrite & \REthirtyAUC \\
+\midrule
+mem0, Qdrant & \texttt{qwen2.5:7b} & \REtwentynineQdrantMem & \REtwentynineQdrantNon & \REtwentynineQdrant \\
+mem0, Mnemos-P & \texttt{qwen2.5:7b} & \REtwentyninePStoreMem & \REtwentyninePStoreNon & \REtwentyninePStore \\
+mem0, Mnemos-M & \texttt{qwen2.5:7b} & \REtwentynineMStoreMem & \REtwentynineMStoreNon & \REtwentynineMStore \\
+\quad + history file & \texttt{qwen2.5:7b} & \REtwentynineMAllMem & \REtwentynineMAllNon & \REtwentynineMAll \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{In unmodified libraries}
+\Cref{tab:frameworks} plays the same game with real agent-memory libraries, unmodified, the adversary
+supplying a fact and observing only the storage directory (registered). Whether the oracle exists is
+a question about the writer, as \cref{thm:reactive} says it must be. mem0 drops an extracted fact
+whose hash it already holds, so the oracle is open exactly when the deciding model restates a stored
+fact in the words it was stored in: \texttt{qwen2.5} and \texttt{mistral} do so on about half of
+member probes and the oracle is open, \texttt{gemma2} on about a quarter and it is open less widely,
+and \texttt{llama3.1} rewords nearly every one, a write occurs either way, and the oracle is closed.
+In all four, the oracle's strength follows the gap between the member and non-member write rates. LangMem's manager re-stores the memories it retrieves and patches on every call, so it
+too writes regardless of membership. Re-probing a quiet fact with paraphrases adds nothing for
+\texttt{qwen2.5} (AUC \REthirtyoneQwenKOne{} to \REthirtyoneQwenKThree): a paraphrase is a new
+string to mem0's hash check, so it writes whether or not the fact is held.
+
+The store is the other half of the system, and the bottom rows replace only mem0's vector store,
+through its own \texttt{VectorStoreBase} interface. Shipped mem0 leaks membership at
+\REtwentynineQdrant. Mnemos-P, dual-epoch secure, still leaks at \REtwentyninePStore, because it
+flushes when mem0 writes. Mnemos-M, unmodified mem0 above it, sits at chance, \REtwentynineMStore:
+its sweep changes the same number of blocks whether or not mem0 inserted anything. The scope
+condition of \cref{thm:reactive} is visible too: an adversary that also sees mem0's own SQLite
+history file, which mem0 appends to on every insertion, regains part of the signal,
+\REtwentynineMAll, so a deployment keeps that file in the store or outside the synchronized scope.
+
 \subsection{The Byte-Level Auditor}
 \label{sec:eval-audit}
 
@@ -195,24 +233,10 @@ distinguished it.
 
 \Cref{thm:main} closes the snapshot channel. Three channels reach cohort H anyway.
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_budget.pdf}
-\caption{Exposure of the pre-compromise cohort against the adversary's induction budget, on a
-timestamped stream compromised at a month boundary, for the write observer (left) and the
-read-write observer (right); bands are 95\% intervals over twenty trials. The growing layout's
-snapshot discloses which region holds each earlier record. For the sealed designs the harness
-supplies that membership, so their curves are what the labels would be worth to an adversary that
-obtained it elsewhere, for instance from version diffs. Mnemos-RS is measured for the write
-observer, since its read-side channel is result-dependent reads. The supplementary material
-tabulates every point.}
-\label{fig:budget}
-\end{figure*}
-
 \paragraph{The write channel}
 Frequency analysis labels regions with the topics of \emph{post-compromise} writes. Against a
 growing layout the labels transfer to the earlier cohort; against a sealed layout they apply to a
-cohort-H record only if another channel supplies its region (\cref{fig:budget}). The two adversary
+cohort-H record only if another channel supplies its region (supplementary material). The two adversary
 classes separate here too: against Mnemos-P a read observer recovers the keyed permutation from
 probe co-occurrence (\cref{sec:eval-permutation}) and labels partitions from public text with no
 induced writes, and a write observer does neither. Against Mnemos-M neither learns anything.
@@ -227,13 +251,21 @@ flush and restoring each snapshot through restic's own interface gives precision
 \REnineteenPrecPOne{} against the $1/64$ null, and \REnineteenPrecPFour{} at one snapshot per four
 flushes. An adversary holding the encrypted repository without its key sees only how much each
 snapshot added; for Mnemos-M that is exactly \REnineteenMBlobs{} new chunk per snapshot, a constant.
+A synchronization client chooses its own schedule (registered): with two Syncthing 2.1.5 instances,
+staggered versioning on the receiving side and an agent writing every 30~s, the client retained one
+version per \REthirtythreeAgentFlushes{} flushes, and the diff of the retained versions around a
+record named its region at \REthirtythreeAgentRatio{} times the null rate, the region among the
+candidates every time. At one write every 5~s the client keeps one version per
+\REthirtythreeFastFlushes{} flushes and the ratio falls to \REthirtythreeFastRatio: the client's
+schedule relative to the agent's sets the capture granularity of \cref{sec:granularity}.
 
 \paragraph{The composed attack}
 We ran the full chain, version diffs to membership, induced writes to labels, composed to a cohort-H
 topic, on Mnemos-P at $g \in \{1, 2, 4, 16\}$. The registered prediction, that the composition
 would reach cohort H, \emph{failed}. On agent memories the induced-label map does not localize
 topics on the sealed, padded layout: even an oracle handed each cohort-H record's exact region scores
-\REseventeenOracle, consistent with the Mnemos-P rows of \cref{tab:e2}, and the composed attack,
+\REseventeenOracle, consistent with the Mnemos-P rows of the agent-written attack, and the
+composed attack,
 choosing among the \REseventeenCandOne{} candidate regions a $g=1$ diff names, scores
 \REseventeenComposedOne. The multi-version channel is real, but on this corpus it does not compose
 into topic recovery, because the label map it would feed is weak on the partitioned design.

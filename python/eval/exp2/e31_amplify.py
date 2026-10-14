@@ -141,7 +141,7 @@ def main() -> None:
         rng.shuffle(probes)
         rows = []
         for n, (f, is_member) in enumerate(probes):
-            seq = [f, *para[f][: args.k - 1]]
+            seq = [f, *para.get(f, [])[: args.k - 1]]
             outcomes = []
             for text in seq:
                 before = view.snapshot()

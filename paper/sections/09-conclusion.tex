@@ -10,7 +10,8 @@ pgvector under a stacked encrypted file system, meets it.
 
 Fixed-size sealed regions close the snapshot channel, overflow included, and three channels reach
 the earlier cohort anyway: retained versions, refusals, and the agent's own operations, down to the
-occurrence of a write, which makes deduplication a membership oracle in a widely used library. Against
+occurrence of a write, which makes deduplication a membership oracle in a widely used library
+whenever its model writes conditionally. Against
 a self-writing agent a store is secure exactly when what it reveals is independent of what the agent
 does. A store whose disk behaviour is a function of the clock alone meets that condition: placement independent of content, search in locked memory over a logical index, and a
 clocked write-only-oblivious sweep, at \REtwentyoneSweepKiB~KiB per flush. Keeping headers on disk

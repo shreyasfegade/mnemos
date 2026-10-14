@@ -1,0 +1,37 @@
+\begin{table*}[t]
+\centering
+\caption{Every prediction registered for the pre-submission experiments, committed before its run,
+with the measured value. A failed prediction is kept; the verifier's range for it is widened only
+to the claim that survives, and its note records the original prediction and the numbers.}
+\label{tab:supp-registered}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{0.52\textwidth}p{0.22\textwidth}rl}
+\toprule
+Check & Registered & Measured & Outcome \\
+\midrule
+E16x pgvector adv\_hist lower, 20 seeds & [0, 1] & 0.094 & held \\
+E16x pgvector adv\_hist, 20 seeds & [0.05, 0.3] & 0.118 & held \\
+E32 pgvector adv\_hist lower, g=1 & [0, 1] & 0.155 & held \\
+E32 pgvector adv\_hist lower, g=4 & [0, 1] & 0.043 & held \\
+E32 pgvector adv\_hist, g=16 minus g=1 & [-1, 0] & -0.187 & held \\
+E29 mem0 on Qdrant: oracle AUC & [0.65, 1] & 0.830 & held \\
+E29 mem0 on Mnemos-M, store observed: oracle AUC & [0.4, 0.6] & 0.467 & held \\
+E29 mem0 on Mnemos-M, store observed: AUC upper & [0.5, 1] & 0.562 & held \\
+E29 mem0 on Mnemos-M, store and history observed: oracle AUC & [0.65, 1] & 0.629 & \textbf{failed} \\
+E29 mem0 on Mnemos-P, store observed: oracle AUC & [0.65, 1] & 0.693 & held \\
+E30 LangMem oracle AUC & [0.6, 1] & 0.500 & \textbf{failed} \\
+E30 LangMem oracle AUC, bytes appended & [0.6, 1] & 0.462 & \textbf{failed} \\
+E30 LangMem non-member minus member write rate & [0.05, 1] & 0.000 & \textbf{failed} \\
+E31 llama3.1:8b single-probe oracle AUC & [0.6, 1] & 0.475 & \textbf{failed} \\
+E31 qwen2.5 AUC gain, sequential k=3 over one probe & [0, 1] & 0.003 & held \\
+E31x additional models measured & [2, 2] & 2.000 & held \\
+E31x models whose oracle matches their write-rate gap & [1, 1] & 1.000 & held \\
+E33 agent-paced: flushes per retained Syncthing version & [0.9, 3] & 3.050 & \textbf{failed} \\
+E33 agent-paced: version-diff precision over the 1/B null & [3, 64] & 4.659 & held \\
+E33 agent-paced: exposure of a record's region & [0.9, 1] & 1.000 & held \\
+E33 fast: flushes per retained Syncthing version & [5, 30] & 13.880 & held \\
+E33 fast: version-diff precision over the 1/B null & [1, 2] & 1.443 & held \\
+\bottomrule
+\end{tabular}
+\end{table*}
