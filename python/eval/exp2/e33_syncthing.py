@@ -192,6 +192,18 @@ class Node:
                 self.proc.kill()
 
 
+def retry(fn, attempts: int = 200, wait: float = 0.05):
+    """Call ``fn`` until it stops failing with a sharing violation (about ten seconds at most)."""
+    for i in range(attempts):
+        try:
+            return fn()
+        except OSError:
+            if i == attempts - 1:
+                raise
+            time.sleep(wait)
+    return None
+
+
 def region_digests(raw: bytes, slot_len: int, header: int = 64) -> list[bytes]:
     rl = CAP * slot_len
     return [hashlib.sha1(raw[header + r * rl : header + (r + 1) * rl]).digest() for r in range(B)]
@@ -266,10 +278,12 @@ def main() -> None:
                 eng.put("r", v, "{}")
             except Exception:
                 continue
-            eng.flush()
+            # Syncthing opens the file without write sharing while it hashes it, and on Windows the
+            # flush then fails with "Access is denied". The application would retry; so do we.
+            retry(eng.flush)
             flushes += 1
             records.append((flushes, reg))
-            flush_hash[hashlib.sha1(part.read_bytes()).hexdigest()] = flushes
+            flush_hash[hashlib.sha1(retry(part.read_bytes)).hexdigest()] = flushes
         with contextlib.suppress(Exception):
             eng.close()
         # Mnemos-P re-encrypts the whole file at lock; that final state is one more version.
