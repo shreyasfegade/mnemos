@@ -27,10 +27,9 @@ every number in the text is generated from the stored results. An outcome marked
 \emph{registered} was written into the artifact's verifier, with the check that tests it, before the
 run, and since the artifact was placed under version control the commit order dates each such
 prediction. A registered prediction that failed is reported with its numbers where it bears on
-a claim, and every registered outcome is tabulated in the supplementary material. Advantages are not comparable across experiments: they
-differ in corpus, in taxonomy (chance from one in four to one in twelve), and in whether the budget
-counts induced records or agent turns, and each subsection states its own. The supplementary
-material indexes every experiment by number.
+a claim, and every registered outcome is tabulated in the supplementary material. Advantages are
+not comparable across experiments, which differ in corpus, chance rate and budget unit; each
+subsection states its own.
 
 \subsection{Structure Transfer, and What Drift Is Worth}
 \label{sec:eval-transfer}
@@ -46,7 +45,8 @@ intersection oracle is retained only as an upper bound.
 \caption{What subject drift is actually worth. The horizontal axis is the time gap between cohort H
 and the content the adversary induces with; bands are 95\% Student-$t$ intervals over five
 $k$-means seeds. An adversary that supplies archival content from cohort H's own era recovers the
-advantage drift appears to remove.}
+advantage drift appears to remove, but no more than guessing cohort H's most frequent topic gives
+(dotted line).}
 \label{fig:drift}
 \end{figure}
 
@@ -60,7 +60,10 @@ tenth of each topic's induction budget drawn from cohort H's era and the rest cu
 moves from \REtwentysevenZero{} to \REtwentysevenTenth, and with a quarter to
 \REtwentysevenQuarter, against \REtwentysevenFull{} for a fully archival adversary. The coarse-taxonomy arm has chance one in four rather than one in twelve.
 At the largest gap the advantage is below zero, because a map fitted on the induced era
-mislabels a drifted cohort more often than a guess (supplementary material).
+mislabels a drifted cohort more often than a guess (supplementary material). Cohort H here is
+skewed (its commonest topic is \REfourMajority{} of it), and over always guessing that topic even the
+archival adversary's margin is \REfourAwareMajority: drift erodes the transfer, but no adversary on
+this corpus beats the prior.
 
 \subsection{Deployed Stores, and Time-Placed Controls}
 \label{sec:eval-real}
@@ -248,7 +251,7 @@ diff covers the whole file. Re-encrypting the whole file at a session boundary m
 cross-session diff total and drives the precision to exactly the null. A real backup tool keeps
 versions the attack can use (registered): backing Mnemos-P up with restic after every
 flush and restoring each snapshot through restic's own interface gives precision
-\REnineteenPrecPOne{} against the $1/64$ null, and \REnineteenPrecPFour{} at one snapshot per four
+\REnineteenPrecPOne{} against the $1/64$ null (\REnineteenPrecRatio{} times the null rate), and \REnineteenPrecPFour{} at one snapshot per four
 flushes. An adversary holding the encrypted repository without its key sees only how much each
 snapshot added; for Mnemos-M that is exactly \REnineteenMBlobs{} new chunk per snapshot, a constant.
 A synchronization client chooses its own schedule (registered): with two Syncthing 2.1.5 instances,
@@ -302,18 +305,18 @@ issues \RSearchReadsP{} such reads and names \RDeleteNamedP{} regions; Mnemos-M'
 touch the disk.
 
 \paragraph{Query equality}
-Over \REfifteenRepeats{} independent stores, with the adversary's overlap threshold fixed on half the
-queries and scored on the rest, the shipped randomized superset defeats a test for exact equality of
-read sets (Youden's $J = \REfifteenExactStwo$) but not a threshold on their overlap,
-$J = \REfifteenThreshStwo$, because repeated searches share every genuine probe. Grouped probing
-leaks pairwise equality at group granularity, $J = \REfifteenThreshGrouped$. Sweeping each knob
-(registered, 20 stores per point) traces the frontier. The spread leaks
-$J = \REtwentytwoSpreadOne$ at $s = 1$, $\REtwentytwoSpreadFour$ at $s = 4$ and
-$\REtwentytwoSpreadEight$ at $s = 8$, eight times the genuine reads; grouping leaks
-$\REtwentytwoGroupTwo$ at group size 2 and $\REtwentytwoGroupThirtyTwo$ at 32
-(\REtwentytwoGroupAmpThirtyTwo$\times$ the reads). Neither dominates: at twice the reads grouping
-leaks less ($\REtwentytwoGroupEight$ against $\REtwentytwoSpreadTwo$), from four times upward the
-spread does, and no point reaches chance. Closing the channel requires oblivious access.
+We measure it over \REfifteenRepeats{} independent stores, fixing the adversary's overlap
+threshold on half the queries and scoring it on the rest. The shipped randomized superset defeats a
+test for exact equality of read sets (Youden's $J = \REfifteenExactStwo$). It does not defeat a
+threshold on their overlap ($J = \REfifteenThreshStwo$), because repeated searches share every
+genuine probe. Grouped probing leaks pairwise equality at group granularity
+($J = \REfifteenThreshGrouped$). Sweeping each knob traces the frontier (registered, 20 stores per
+point). The spread leaks $J = \REtwentytwoSpreadOne$ at $s = 1$, $\REtwentytwoSpreadFour$ at $s = 4$
+and $\REtwentytwoSpreadEight$ at $s = 8$, where it issues eight times the genuine reads. Grouping
+leaks $\REtwentytwoGroupTwo$ at group size 2 and $\REtwentytwoGroupThirtyTwo$ at 32, which costs
+\REtwentytwoGroupAmpThirtyTwo$\times$ the reads. Neither dominates. At twice the reads grouping
+leaks less ($\REtwentytwoGroupEight$ against $\REtwentytwoSpreadTwo$); from four times upward the
+spread leaks less. No point reaches chance, so closing the channel requires oblivious access.
 
 \paragraph{Permutation recovery}
 Genuine probes are the nearest partitions to a query, so regions read together are geometric
@@ -330,19 +333,20 @@ against a read observer.
 \label{sec:eval-perf}
 
 We measure the three designs against the in-tree Rust plaintext IVF, which shares
-\texttt{QuantVec} and the partitioner with the encrypted engines, at five sizes, with writes timed
-in the sparse regime where an agent writing seconds apart pays a whole flush per record (the
-supplementary material plots every measure against $n$). Exhaustive in-memory ranking is
-\REtenSpeedupSmall{} times faster than the partitioned design at \REtenNSmall{} records and
-\REtenSpeedupLarge{} times as fast at \REtenNLarge, crossing it between \REtenCrossLo{} and
-\REtenCrossHi{} records, because it is linear in $n$. Probing logical partitions in memory removes the inversion without reopening the write
-channel: at eight partitions scored per query, Mnemos-M with its in-memory index is
-\REtenIvfSpeedupMin{} to \REtenIvfSpeedupMax{} times faster than Mnemos-P, \REtenIvfSearchLarge~ms
-against \REtenPSearchLarge~ms at the largest size, because it reads and decrypts nothing. It pays at
-unlock, \REtenUnlockIvfLarge~s against \REtenUnlockMLarge~s at \REtenNLarge{} records, and in
-resident memory, \REtenResidentLarge~MB. A sparse write costs \REtenPutMLarge~ms against
-\REtenPutPLarge~ms. The supplementary material tabulates every size and prices fetching results
-once reads are visible (by position, by full scan, and Path ORAM as a stated model).
+\texttt{QuantVec} and the partitioner with the encrypted engines, at five sizes. Writes are timed
+in the sparse regime, where an agent writing seconds apart pays a whole flush per record; the
+supplementary material plots every measure against $n$. Exhaustive in-memory ranking is
+\REtenSpeedupSmall{} times faster than the partitioned design at \REtenNSmall{} records but only
+\REtenSpeedupLarge{} times as fast at \REtenNLarge. Because it is linear in $n$, it crosses the
+partitioned design between \REtenCrossLo{} and \REtenCrossHi{} records. Probing logical partitions
+in memory removes this inversion without reopening the write channel. At eight partitions scored
+per query, Mnemos-M with its in-memory index is \REtenIvfSpeedupMin{} to \REtenIvfSpeedupMax{}
+times faster than Mnemos-P (\REtenIvfSearchLarge~ms against \REtenPSearchLarge~ms at the largest
+size), because it reads and decrypts nothing. It pays instead at unlock (\REtenUnlockIvfLarge~s
+against \REtenUnlockMLarge~s at \REtenNLarge{} records) and in resident memory
+(\REtenResidentLarge~MB). A sparse write costs \REtenPutMLarge~ms against \REtenPutPLarge~ms. The
+supplementary material tabulates every size. It also prices fetching results once reads are
+visible: by position, by full scan, and with Path ORAM as a stated model.
 
 \paragraph{What the clocked flush writes}
 A clocked flush is paid whether or not the agent wrote. Rewriting $w+1$ whole regions each tick is
@@ -362,9 +366,9 @@ chunking backup erodes the sweep's upload advantage: a restic snapshot of Mnemos
 Against W the partitioned design is not the right tool above the memory limit: Mnemos-M/disk's
 writes remain the sweep's, so every write-side channel stays closed at any size. At $10^5$ records
 (registered) it holds \REtwentyfiveDiskRAM~MB resident
-against Mnemos-M's \REtwentyfiveMemRAM~MB, searches in \REtwentyfiveDiskSearch~ms against
-Mnemos-P's \REtwentyfivePSearch~ms, writes a sparse record in \REtwentyfiveDiskPut~ms against
-\REtwentyfivePPut~ms, and pays \REtwentyfiveDiskUnlock~s at unlock to read every header. Resident
+against Mnemos-M's \REtwentyfiveMemRAM~MB. It searches in \REtwentyfiveDiskSearch~ms against
+Mnemos-P's \REtwentyfivePSearch~ms and writes a sparse record in \REtwentyfiveDiskPut~ms against
+\REtwentyfivePPut~ms. It pays \REtwentyfiveDiskUnlock~s at unlock to read every header. Resident
 memory and unlock time are linear in $n$, so the measurement extrapolates to a few megabytes and
 about a minute and a half at $10^6$; we did not measure beyond $10^5$. A read observer sees its
 search access pattern, which only oblivious search closes

@@ -282,25 +282,27 @@ E2 & induction sequence (split, order, fit) & 20 & bootstrap \\
 E3 & probe & 80/class & bootstrap, AUC \\
 E4 & centroid seed (table, store) & 5/gap & Student-$t$ \\
 E5 & game instance & 1{,}000/bit & bootstrap, AUC \\
-E6 & seed (store build) & 3 & Student-$t$ \\
+E6 & seed (store build) & \REsixSeeds/store & Student-$t$ \\
 E7 & store & 20 & bootstrap \\
 E8 & trial (store, versions) & 20 & bootstrap \\
 E9 & trial (store) & 20 & bootstrap \\
 E15 & store (query split) & 20 & bootstrap \\
-E16 & seed (PostgreSQL cluster) & 3 & Student-$t$ \\
+E16 & seed (PostgreSQL cluster) & \REsixteenPgSeeds & bootstrap \\
 E17 & trial (store, versions) & 20 & bootstrap \\
 E18 & probe & 30/class & bootstrap, AUC \\
 E20 & probe & 400 & bootstrap, AUC \\
 E21 & session & 40 & descriptive \\
 E22 & store & 20/point & bootstrap \\
 E23 & grid point & 1 & descriptive \\
+E32 & seed (PostgreSQL cluster) & \REthirtytwoSeeds/$g$ & Student-$t$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The two experiments with three units (E6, E16) are the deployed-store measurements, where one unit
-is a full store build under a stacked encrypted file system. Their intervals are correspondingly
-wide, and a null there is reported as ``not detected'' with its interval, not as a closed channel.
+In the deployed-store measurements (E6, E16, E32) one unit is a full store build under a stacked
+encrypted file system: \REsixSeeds{} builds per store in E6, \REsixteenPgSeeds{} PostgreSQL
+clusters for pgvector in E16, and \REthirtytwoSeeds{} per capture granularity in E32. A null there
+is reported as ``not detected'' with its interval, not as a closed channel.
 
 \paragraph{The learned attacker} The dual-epoch game (E5) uses one learned distinguisher, fixed
 before any arm was run: scikit-learn's
@@ -325,8 +327,21 @@ arm is at chance even under that selection.
 \section{Full Results}
 \label{supp:full}
 
-The main paper tabulates the rows its arguments rest on. The tables here give every row, and are
-generated from the same result files by the same code, so the two cannot disagree.
+The main paper tabulates the rows its arguments rest on. The tables in this section and the next
+give every row, and are generated from the same result files by the same code, so the two cannot
+disagree. \Cref{tab:supp-ledger} is the leakage ledger with every channel in one unit, and
+\cref{tab:supp-registered} lists every prediction registered for this revision with its outcome; a
+failed prediction is kept and marked. \Cref{fig:budget} and \cref{tab:e1} give the attack on a
+timestamped stream at every induction budget (main paper, \cref{sec:eval-transfer}).
+\Cref{tab:supp-e2} gives the attack on memories a local model actually wrote at every budget (main
+paper, \cref{sec:eval-induction}); each of its intervals resamples \emph{independent induction
+sequences}, each drawing its own cohort split,
+induction order and attacker fit. The longitudinal study reports different
+advantages at nominally similar budgets because its budget counts induced records per topic while
+this one counts turns, each a burst of $w_{\mathrm{real}}$ records; in records per topic the two
+agree.
+\Cref{tab:supp-e10} gives the cost of every design at every size measured (main
+paper, \cref{sec:eval-perf}).
 
 \input{tables/supp_ledger_full}
 \input{tables/supp_registered}
@@ -352,7 +367,15 @@ tabulates every point.}
 \label{supp:further}
 
 These results are argued from in the main paper, which carries their headline in prose or in the
-leakage ledger (\cref{tab:supp-ledger}); the full tables are here.
+leakage ledger (\cref{tab:supp-ledger}); the full tables are here. \Cref{tab:arch} places the designs
+on the architectural frontier and \cref{tab:notation} collects the notation. \Cref{fig:threat} draws
+the $\tau$-arrival adversary and \cref{fig:crossover} the cost measures against $n$. \Cref{tab:e4} is
+the drift study, discussed below. \Cref{tab:e6} gives the deployed vector stores under an encrypted
+file system, \cref{tab:e3} deduplication membership inference, \cref{tab:e7} recovery of the keyed
+permutation from search traffic, and \cref{tab:e8} what a sequence of file versions reveals.
+\Cref{tab:e9,tab:e9cap} give the refusal channel and capacity under a skewed trace, \cref{tab:e11}
+retrieval quality on the full corpora, and \cref{tab:e12} the cost of fetching payloads once reads
+are visible.
 
 \begin{table*}[t]
 \centering
@@ -436,13 +459,13 @@ the induced era, and once cluster geometry has drifted that map mislabels cohort
 a uniform guess. The gap-zero advantage (\REfourAware) exceeds the i.i.d.\ shuffled control
 (\REfourShuffled) because the shuffle mixes every era and dilutes the era-specific partition
 structure that same-era induction matches; the comparison that isolates drift is gap zero against
-the far eras. \Cref{tab:e4} also reports advantage over the majority-class baseline.
+the far eras. \Cref{tab:e4} also reports accuracy over the majority-class baseline. Cohort H on
+this corpus is skewed, its most frequent topic being \REfourMajority{} of its records, and an
+adversary that knows that prior and always guesses that topic is matched but not beaten by the fully
+archival adversary (margin \REfourAwareMajority) and beaten by every other. The drift study therefore
+measures how drift erodes the transfer; on this corpus it does not show an archival adversary that
+recovers more than the topic prior.
 
-Each interval resamples \emph{independent induction sequences}, each drawing its own cohort split,
-induction order and attacker fit. The longitudinal study reports different
-advantages at nominally similar budgets because its budget counts induced records per topic while
-this one counts turns, each a burst of $w_{\mathrm{real}}$ records; in records per topic the two
-agree.
 \input{tables/e6_stores}
 \input{tables/e3_dedup}
 \input{tables/e7_permutation}

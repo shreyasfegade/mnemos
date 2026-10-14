@@ -104,15 +104,11 @@ a flush happens either way and the channel is closed. \Cref{sec:eval-dedup} meas
 
 The precondition holds beyond our prototype. Reading the shipped source of nine
 open-source agent-memory frameworks, four make whether a write reaches storage depend on whether
-the content is already stored: mem0 passes the most similar existing memories to its extraction
-call and then drops any extracted fact whose hash is already present, so a known fact never
-reaches the vector store; CrewAI asks a model for a consolidation plan whose \emph{insert} flag
-decides whether a record is written; LangMem's memory manager patches existing memories and
-creates only novel ones; and Graphiti, the engine of Zep \cite{rasmussen2025zep}, deduplicates
-extracted entities against the graph before
-writing them. The supplementary material lists each framework, its version and default store, and
-the file and line at which the mechanism was found; a framework is recorded as vulnerable only
-where the mechanism was located in its source. A mechanism in the source is necessary, not
+the content is already stored: mem0 drops an extracted fact whose hash is already present, CrewAI
+writes a record only if a model's consolidation plan says \emph{insert}, LangMem's manager creates
+only novel memories, and Graphiti, the engine of Zep \cite{rasmussen2025zep}, deduplicates entities
+against the graph. The supplementary material gives each framework's version and the file and line
+of the mechanism. A mechanism in the source is necessary, not
 sufficient: the write must also depend on membership when the pipeline runs, which
 \cref{sec:eval-reactive} measures for mem0 and LangMem under several models.
 

@@ -63,7 +63,10 @@ a permutation a read observer recovers, version diffs closed only across session
 writes. Mnemos-M's
 clock is visible, so an observer learns when the store was open though not whether anything was
 written; without back-pressure, a lock after a burst the sweep could not place reveals that the
-backlog exceeded the journal. The guarantees cover the store's own files: an agent framework that
+backlog exceeded the journal. Back-pressure removes that from the disk, not from the agent: a
+refused $\mathsf{put}$ waits a tick, so an adversary who induces more than $J$ writes and can time
+the agent's reply learns that the journal was full. C1 hides activity from a storage observer
+($\mathcal{L}_{\mathrm{clock}}$); against a timing observer $J$ must exceed the largest per-turn burst. The guarantees cover the store's own files: an agent framework that
 persists other state whose writes follow the agent's decisions must keep it in the store or outside
 the observed scope (\cref{thm:reactive}). Both Mnemos-M variants inherit A3: if the adversary can read process memory, a
 memory-resident index is the worst place to have put the plaintext, which is why hibernation is a
@@ -77,7 +80,9 @@ The analysis depends on A2, a clean host before $\tau$, and A3, that the adversa
 process memory. Decrypted results and the embedding computation reside in process memory; the locked
 region holds plaintext during an operation, and for the memory-resident design for the whole
 session, but the Python embedder sits outside it, so plaintext embeddings may reach swap on the
-embedding path.
+embedding path. Embeddings invert to text and an imaging adversary obtains the pagefile
+(\cref{sec:eval-artifacts}), so a deployment against it should run embedding inference inside the
+locked arena (a quantized model from Rust or ONNX) or require encrypted or disabled swap.
 
 \paragraph{Agent experiments}
 The agent results use local models of moderate size, and the induced corpus is issue text from one
@@ -88,7 +93,8 @@ flags were not run, and whether a given model opens the oracle has to be measure
 \paragraph{Scope of the measurements}
 Performance is measured on one machine (Intel i9-14900HX, 32\,GB, NVMe, Windows~11, with WSL2 for
 the stacked encrypted file system). The deployed-store experiments use local instances holding public
-data under one encryption layer, over three store builds each, and their per-store conclusions
+data under one encryption layer, over \REsixSeeds{} store builds per store (\REsixteenPgSeeds{} for
+pgvector), and their per-store conclusions
 depend on library versions. The version-granularity parameter is swept rather than measured against
 a provider's retention policy. Performance is measured to $10^5$ records, and retrieval with a second
 embedding model on two domains only. Key custody is implemented for Windows only.

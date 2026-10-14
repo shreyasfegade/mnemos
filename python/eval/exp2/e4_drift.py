@@ -121,25 +121,49 @@ def attack(
     }
 
 
+def coarsen(topics, names):
+    coarse_names = sorted(set(COARSE.values()))
+    cidx = {c: i for i, c in enumerate(coarse_names)}
+    return np.array([cidx[COARSE[names[t]]] for t in topics]), coarse_names
+
+
+def cohort_h(n: int):
+    """Cohort H: the first half of the oldest of ``BINS`` equal-count eras."""
+    edges = [round(i * n / BINS) for i in range(BINS + 1)]
+    oldest = np.arange(edges[0], edges[1])
+    return oldest[: len(oldest) // 2]
+
+
+def cohort_prior(topics, H, n_topics) -> dict:
+    """Cohort H's topic prior: its empirical entropy, so the leakage ledger's Fano bound uses the
+    true H(X) rather than log2 K, and its majority-class rate, so advantage
+    can be reported over the skewed baseline and not only over 1/K."""
+    import math
+
+    counts = np.bincount(np.asarray(topics)[H], minlength=n_topics)
+    tot = counts.sum()
+    return {
+        "majority_rate": float(counts.max() / tot) if tot else 1.0 / n_topics,
+        "label_entropy_bits": -sum((c / tot) * math.log2(c / tot) for c in counts if c > 0)
+        if tot
+        else 0.0,
+    }
+
+
 def run(texts, topics, names, coarse: bool):
     n_topics = len(names)
     vecs = embed_cached(texts)
     n = len(texts)
 
     if coarse:
-        coarse_names = sorted(set(COARSE.values()))
-        cidx = {c: i for i, c in enumerate(coarse_names)}
-        topics = np.array([cidx[COARSE[names[t]]] for t in topics])
-        names = coarse_names
-        n_topics = len(coarse_names)
+        topics, names = coarsen(topics, names)
+        n_topics = len(names)
 
     # Equal-count eras over the (already chronological) corpus.
     edges = [round(i * n / BINS) for i in range(BINS + 1)]
     era = [np.arange(edges[i], edges[i + 1]) for i in range(BINS)]
-    oldest = era[0]
-    half = len(oldest) // 2
-    H = oldest[:half]  # cohort H: stored, never induced
-    archive = oldest[half:]  # same era, available to the adversary, never stored
+    H = cohort_h(n)  # cohort H: stored, never induced
+    archive = era[0][len(H) :]  # same era, available to the adversary, never stored
     organic = era[-1]  # what the agent is writing now, the null distribution
 
     curve = []
@@ -180,23 +204,11 @@ def run(texts, topics, names, coarse: bool):
             f"{hi:+.3f}]",
             flush=True,
         )
-    # Empirical entropy of the cohort-H topic prior, so the leakage ledger's Fano bound uses the
-    # true H(X) rather than log2 K (which holds only for a uniform prior). a reader.
-    import math
-
-    counts = np.bincount(np.asarray(topics)[H], minlength=n_topics)
-    tot = counts.sum()
-    label_entropy = -sum((c / tot) * math.log2(c / tot) for c in counts if c > 0) if tot else 0.0
-    # Majority-class rate, so advantage can be reported over the skewed baseline, not only 1/K
-    #. A design whose chance rate is the majority class rather than uniform does
-    # not get credit for beating an artificially low 1/K.
-    majority_rate = float(counts.max() / tot) if tot else 1.0 / n_topics
     return {
         "n_topics": n_topics,
         "chance": 1.0 / n_topics,
-        "majority_rate": majority_rate,
+        **cohort_prior(topics, H, n_topics),
         "n_records": n,
-        "label_entropy_bits": label_entropy,
         "curve": curve,
     }
 
@@ -225,8 +237,24 @@ def shuffled_control(texts, topics, names):
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--corpus", default="github")
+    ap.add_argument(
+        "--backfill-prior",
+        action="store_true",
+        help="add cohort H's majority rate and entropy to an existing result without rerunning: "
+        "both depend only on the corpus and the era split, not on any attack",
+    )
     args = ap.parse_args()
     t0 = time.time()
+    if args.backfill_prior:
+        texts, topics, names, _ = load(args.corpus)
+        results = json.loads(OUT.read_text(encoding="utf-8"))
+        H = cohort_h(len(texts))
+        results["fine"].update(cohort_prior(topics, H, len(names)))
+        ct, cn = coarsen(topics, names)
+        results["coarse"].update(cohort_prior(ct, H, len(cn)))
+        OUT.write_text(json.dumps(results, indent=1), encoding="utf-8")
+        print("fine", results["fine"]["majority_rate"], "coarse", results["coarse"]["majority_rate"])
+        return
 
     texts, topics, names, _ = load(args.corpus)
     print(f"{args.corpus}: {len(texts)} records, {len(names)} topics, {BINS} eras", flush=True)

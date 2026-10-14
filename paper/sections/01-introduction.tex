@@ -58,10 +58,10 @@ sealed regions does not. Much of the paper is an account of how an adversary obt
 membership anyway.
 
 \paragraph{What actually protects, and what does not}
-Subject drift protects the earlier records only against an adversary that induces with current
-content: on a timestamped issue tracker the advantage falls from \REfourAware{} to \REfourNaive{}
-when the induced content is five eras newer, but rises to \REtwentysevenTenth{} when only a tenth of the
-induction budget is archival. History independence is a single-snapshot notion
+Subject drift erodes the transfer: on a timestamped issue tracker the advantage over a uniform
+guess falls from \REfourAware{} to \REfourNaive{} when the induced content is five eras newer, although
+on that corpus even the archival adversary does no better than one that knows the earlier records'
+topic prior. History independence is a single-snapshot notion
 \cite{naor2001anti}, and two retained versions of a content-placed store diff to exactly the regions
 written between them; under a real backup tool the diff names an earlier record's region at
 \REnineteenPrecRatio{} times the chance rate. A store that bounds per-partition capacity and refuses
@@ -73,10 +73,9 @@ measure at AUC \REtwentynineQdrantPt{} in the unmodified mem0 library; it is ope
 deciding model restates a stored fact verbatim, as our characterization predicts.
 
 \paragraph{The design principle}
-\emph{Semantic indexing need not imply semantic physical placement.} The threat model already
-assumes the adversary cannot read the unlocked process's memory, and in the local setting no remote
-server must hold the index, so encrypted on-disk search is a choice rather than a requirement.
-Taking that at face value yields a store whose disk layout carries no content: placement independent
+\emph{Semantic indexing need not imply semantic physical placement.} The adversary cannot read the
+unlocked process's memory and no remote server need hold the index, so encrypted on-disk search is a
+choice, not a requirement. Dropping it yields a store whose disk layout carries no content: placement independent
 of content, search in locked memory over a logical partition index, and writes by a clocked sweep in
 the manner of write-only ORAM. It closes all four channels against a write observer, at
 \REtwentyoneSweepKiB~KiB per flush; placed under the unmodified mem0 library it takes the

@@ -253,6 +253,10 @@ def from_e4(out: list[dict]) -> None:
         if hx is not None
         else "uniform (assumed; corpus skew not recorded)"
     )
+    # Cohort H's topic prior on this corpus is skewed. Where its majority rate is recorded, a leak is
+    # judged against an adversary that knows the prior and always guesses its most frequent topic,
+    # not against 1/K: beating 1/K by exactly what the prior gives is not information about cohort H.
+    shift = ch - d["fine"].get("majority_rate", ch)
     for c in d["fine"]["curve"]:
         if c["gap_eras"] not in (0, max(x["gap_eras"] for x in d["fine"]["curve"])):
             continue
@@ -266,10 +270,10 @@ def from_e4(out: list[dict]) -> None:
                 k,
                 ch + c["adv_H"],
                 ch + c["lo"],
-                "advantage",
-                c["adv_H"],
-                c["lo"],
-                c["hi"],
+                "advantage" if shift == 0 else "accuracy over majority",
+                c["adv_H"] + shift,
+                c["lo"] + shift,
+                c["hi"] + shift,
                 0.0,
                 f"Fano (K={k}) on topic accuracy = chance + advantage",
                 h_x=hx,

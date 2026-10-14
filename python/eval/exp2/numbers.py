@@ -110,6 +110,17 @@ def collect() -> dict[str, str | None]:
     out["REfourNaive"] = signed(verified.get("E4 adv_H, naive (current content)"), 2)
     out["REfourAware"] = signed(verified.get("E4 adv_H, historically aware"), 2)
     out["REfourShuffled"] = signed(verified.get("E4 adv_H, i.i.d. control"), 2)
+    # Cohort H's prior is skewed; the margin of the archival adversary over one that always guesses
+    # cohort H's most frequent topic (accuracy = adv_H + chance).
+    e4 = load("e4_drift.json")
+    e4f = e4 and e4["fine"]
+    if e4f and "majority_rate" in e4f:
+        aware = e4f["curve"][0]
+        shift = e4f["chance"] - e4f["majority_rate"]
+        out["REfourMajority"] = f(e4f["majority_rate"], 2)
+        out["REfourAwareMajority"] = ci(aware["adv_H"] + shift, aware["lo"] + shift, aware["hi"] + shift)
+    else:
+        out["REfourMajority"] = out["REfourAwareMajority"] = None
 
     # --- E6: deployed stores -------------------------------------------------------------------
     e6 = load("e6_stores.json")

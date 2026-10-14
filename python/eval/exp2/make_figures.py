@@ -179,6 +179,20 @@ def fig_drift() -> bool:
             zorder=3,
         )
     ax.axhline(0.0, color=MUTED, linewidth=0.7, zorder=2)
+    # What knowing cohort H's (skewed) topic prior alone is worth, fine taxonomy: always guessing
+    # its most frequent topic, as an advantage over 1/K.
+    if "majority_rate" in d["fine"]:
+        prior = d["fine"]["majority_rate"] - d["fine"]["chance"]
+        ax.axhline(prior, color="#0072B2", linewidth=0.8, linestyle=(0, (1, 1.5)), zorder=2)
+        ax.annotate(
+            "prior only (fine)",
+            xy=(5.0, prior),
+            xytext=(5.0, prior + 0.012),
+            fontsize=6.5,
+            color=INK,
+            ha="right",
+            va="bottom",
+        )
     # Label the two ends, which are the claim; not every point. Both annotations are placed in
     # empty regions with a leader to their point, rather than on top of a series.
     fine = d["fine"]["curve"]

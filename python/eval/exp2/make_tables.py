@@ -486,9 +486,17 @@ def t_e4() -> None:
     if not d:
         w("e4_drift.tex", pending("tab:e4", "Drift, and an adversary that knows the past."))
         return
+    # Advantage over the majority class as well as over 1/K: cohort H's topic
+    # prior is skewed, and an adversary that knows it can always guess the most frequent topic.
+    # accuracy = adv_H + chance, so the margin over that guess is adv_H + chance - majority.
+    fine = d["fine"]
+    shift = fine["chance"] - fine["majority_rate"]
     rows = []
-    for c in d["fine"]["curve"]:
-        rows.append(f"{c['gap_eras']} & {c['adversary']} & {ci(c['adv_H'], c['lo'], c['hi'])} \\\\")
+    for c in fine["curve"]:
+        rows.append(
+            f"{c['gap_eras']} & {c['adversary']} & {ci(c['adv_H'], c['lo'], c['hi'])} & "
+            f"{ci(c['adv_H'] + shift, c['lo'] + shift, c['hi'] + shift)} \\\\"
+        )
     sc = d["shuffled_control"]
     body = "\n".join(rows)
     w(
@@ -499,12 +507,14 @@ def t_e4() -> None:
 adversary induces ({d["corpus"]}, {d["fine"]["n_topics"]} topics, chance
 {d["fine"]["chance"]:.3f}). Gap 0 is an adversary inducing with archival content from cohort H's own
 era; the largest gap is one inducing with current content. The i.i.d.\\ control is
-{ci(sc["adv_H"], sc["lo"], sc["hi"])}.}}
+{ci(sc["adv_H"], sc["lo"], sc["hi"])}. Cohort H's topic prior is skewed: its most frequent topic is
+{fine["majority_rate"]:.3f} of its records. The last column is accuracy over an adversary that knows
+that prior and always guesses the most frequent topic.}}
 \\label{{tab:e4}}
 \\small
-\\begin{{tabular}}{{llr}}
+\\begin{{tabular}}{{llrr}}
 \\toprule
-Gap (eras) & Adversary & \\advhist{{}} [95\\% CI] \\\\
+Gap (eras) & Adversary & \\advhist{{}} [95\\% CI] & Over majority [95\\% CI] \\\\
 \\midrule
 {body}
 \\bottomrule
