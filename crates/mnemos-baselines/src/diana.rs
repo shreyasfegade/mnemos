@@ -13,7 +13,7 @@
 //!
 //! ### Why "Diana instead of Sophos" is not a fix
 //!
-//! This is the point of carrying both baselines. A reviewer's natural first response to Sophos
+//! This is the point of carrying both baselines. A reader's natural first response to Sophos
 //! alone is "use Diana, it has no explicit counter". It does have one — the counter moved from
 //! being the token to being the leaf index, and stayed on disk either way.
 //!

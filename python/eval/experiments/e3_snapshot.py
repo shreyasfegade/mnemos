@@ -3,14 +3,14 @@
 The experiment the whole project turns on, and the one that gates it twice:
 
     GATE G2 (2026-09-09)  A3 must reach Adv_hist >= 0.50 on Sophos AND Diana at 25% aux.
-                          If not, the finding is weaker than claimed -> the specification s10.2.
+                          If not, the finding is weaker than claimed.
 
     GATE G4 (2026-10-14)  A3 must stay at Adv_hist <= 0.05 against Mnemos at 50% aux.
                           If not, history independence is not doing its job.
 
 G2 comes first on purpose. It runs against **baselines only**, before a single line of Mnemos
-exists. If forward-private snapshots turn out not to leak the way ``THREAT-MODEL.md`` s3.2
-claims, that is a five-week saving rather than a November catastrophe.
+exists. If forward-private snapshots turn out not to leak the way the paper's threat model
+claims, that is worth knowing before anything is built on it.
 
 Grid
 ----
@@ -25,7 +25,7 @@ Reporting
 Report **all three schemes at all three aux fractions**, including any configuration where
 Mnemos does worse than hoped. Figure 1's persuasive power comes from the gap between two
 honestly-drawn curves; a curve with points removed persuades nobody who checks, and the people
-who check are the reviewers.
+who check are the readers.
 """
 
 from __future__ import annotations
@@ -49,10 +49,8 @@ GATE_G4_MNEMOS_MAX = 0.05
 def check_gates(results: list[a3_snapshot.AttackResult]) -> dict[str, bool]:
     """Evaluate G2 and G4 against the measured results.
 
-    Returns a verdict per gate rather than raising: a failed gate is a decision point in
-    ``the specification`` s10, not a crash. The correct response to G2 failing is to take fallback
-    s10.2 with five weeks in hand -- which only works if the failure is reported clearly
-    instead of aborting the run.
+    Returns a verdict per gate rather than raising: a failed gate is a decision point,
+    not a crash, which only works if the failure is reported clearly instead of aborting the run.
     """
 
     def by(scheme, aux):
@@ -91,7 +89,7 @@ def main(out: Path) -> None:
         print(f"{gate}: {'PASS' if passed else 'FAIL'}")
     if not verdict["G2_baselines_leak"]:
         print("\nG2 FAILED — the snapshot finding is weaker than claimed.")
-        print("Take the fallback in the specification s10.2 now, while there is time to.")
+        print("The snapshot finding is weaker than claimed; see the fallback design.")
 
 
 if __name__ == "__main__":

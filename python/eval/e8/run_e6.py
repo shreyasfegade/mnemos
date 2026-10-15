@@ -1,4 +1,4 @@
-"""E6: structure transfer against deployed vector stores, redone to 
+"""E6: structure transfer against deployed vector stores.
 
 What was wrong before
 =====================

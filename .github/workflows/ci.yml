@@ -10,7 +10,7 @@ env:
   RUST_BACKTRACE: 1
   # CI runners have no TPM, so the software keystore is the only option here. Both gates are
   # set explicitly and loudly: the compile feature below, and this env var. Any result
-  # produced in this configuration is NOT a security result — see docs/adr/0005.
+  # produced in this configuration is NOT a security result — see the paper, Section 6.4.
   MNEMOS_I_ACCEPT_INSECURE: "1"
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows first: it is the primary key-custody path (ADR-0005) and the development
+        # Windows first: it is the primary key-custody path and the development
         # machine, so a Windows-only break must not hide behind a green Linux run.
         os: [windows-latest, ubuntu-latest]
     steps:

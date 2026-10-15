@@ -8,8 +8,7 @@
 //! 2. **It is the honest latency comparison people actually care about.** "Why not just encrypt
 //!    the whole store and decrypt on read?" has a numeric answer, and it is O(n) per query.
 //!
-//! v1 of the spec called this the Stage 0 baseline. The vet's reframing promoted the
-//! *forward-private* baselines to that role, because breaking a strawman proves nothing about
+//! The *forward-private* baselines are the ones the attack is measured against, because breaking a strawman proves nothing about
 //! forward privacy — but this one still earns its place for the two reasons above.
 //!
 //! ## What it leaks that Mnemos does not

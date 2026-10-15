@@ -1,0 +1,57 @@
+{
+ "experiment": "E32",
+ "store": "pgvector",
+ "rows": [
+  {
+   "checkpoint_every": 1,
+   "seeds": 10,
+   "chance": 0.125,
+   "n_hist": 150,
+   "budget_per_topic": 40,
+   "induced_versions": 320.0,
+   "adv_hist": 0.18666666666666668,
+   "adv_hist_lo": 0.15455789370628184,
+   "adv_hist_hi": 0.2187754396270515,
+   "acc_hist": 0.31166666666666665,
+   "localisation_heldout": 0.25312500000000004,
+   "localisation_lo": 0.23255524936742955,
+   "localisation_hi": 0.27369475063257054,
+   "coverage_hist": 0.8640000000000001,
+   "seconds_per_run": 88.41566359996796
+  },
+  {
+   "checkpoint_every": 4,
+   "seeds": 10,
+   "chance": 0.125,
+   "n_hist": 150,
+   "budget_per_topic": 40,
+   "induced_versions": 80.0,
+   "adv_hist": 0.06733333333333333,
+   "adv_hist_lo": 0.0425322559562267,
+   "adv_hist_hi": 0.09213441071043996,
+   "acc_hist": 0.19233333333333333,
+   "localisation_heldout": 0.5475,
+   "localisation_lo": 0.47623805978836825,
+   "localisation_hi": 0.6187619402116318,
+   "coverage_hist": 0.8,
+   "seconds_per_run": 47.39361984729767
+  },
+  {
+   "checkpoint_every": 16,
+   "seeds": 10,
+   "chance": 0.125,
+   "n_hist": 150,
+   "budget_per_topic": 40,
+   "induced_versions": 20.0,
+   "adv_hist": 0.0,
+   "adv_hist_lo": 0.0,
+   "adv_hist_hi": 0.0,
+   "acc_hist": 0.125,
+   "localisation_heldout": 0.0,
+   "localisation_lo": 0.0,
+   "localisation_hi": 0.0,
+   "coverage_hist": 0.0,
+   "seconds_per_run": 37.18493499755859
+  }
+ ]
+}

@@ -18,7 +18,7 @@ use zeroize::{Zeroize, ZeroizeOnDrop};
 /// Stable, random 128-bit identity for a stored memory.
 ///
 /// Random — **not** a hash of content, and **not** a counter. A counter would encode insertion
-/// order, which is exactly the artifact `docs/adr/0003` exists to remove.
+/// order, which is exactly the artifact history independence exists to remove.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct MemoryId(pub [u8; 16]);
 
@@ -74,7 +74,7 @@ impl std::fmt::Debug for Tag {
 /// Physical slot index within a slab. `PRF(K_idx, tag) mod slot_count`, Robin Hood on collision.
 ///
 /// A function of *identity*, never of *arrival time*. This is the mechanism of history
-/// independence (`docs/adr/0003-history-independence-first-class.md`).
+/// independence (paper, Section 5).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct SlotAddr(pub u64);
 
@@ -210,7 +210,7 @@ impl std::fmt::Debug for QuantVec {
 ///
 /// `ZeroizeOnDrop` so the plaintext leaves the locked arena's lifetime cleanly. The FFI layer
 /// copies out of this into Python — at which point the residency guarantee ends, deliberately
-/// and as documented in `ARCHITECTURE.md` §6.3.
+/// and as documented in the paper (Section 6)
 #[derive(Clone, Zeroize, ZeroizeOnDrop)]
 pub struct Memory {
     /// The stored text.

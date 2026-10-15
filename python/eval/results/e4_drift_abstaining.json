@@ -1,0 +1,137 @@
+{
+ "experiment": "E4",
+ "corpus": "github",
+ "n_buckets": 128,
+ "bins": 6,
+ "budget_per_topic": 100,
+ "w": 16,
+ "shuffled_control": {
+  "adv_H": 0.3641931684334512,
+  "lo": 0.353356890459364,
+  "hi": 0.37514723203769146,
+  "chance": 0.08333333333333333
+ },
+ "fine": {
+  "n_topics": 12,
+  "chance": 0.08333333333333333,
+  "n_records": 6792,
+  "curve": [
+   {
+    "gap_eras": 0,
+    "adv_H": 0.40959952885747936,
+    "lo": 0.39157832744405185,
+    "hi": 0.42762073027090697,
+    "n_induce_pool": 566,
+    "chance": 0.08333333333333333,
+    "adversary": "historically aware"
+   },
+   {
+    "gap_eras": 1,
+    "adv_H": 0.23751472320376915,
+    "lo": 0.2095995288574794,
+    "hi": 0.2686101295641932,
+    "n_induce_pool": 1132,
+    "chance": 0.08333333333333333,
+    "adversary": "intermediate"
+   },
+   {
+    "gap_eras": 2,
+    "adv_H": 0.013133097762073031,
+    "lo": 0.0014723203769140213,
+    "hi": 0.02338044758539459,
+    "n_induce_pool": 1132,
+    "chance": 0.08333333333333333,
+    "adversary": "intermediate"
+   },
+   {
+    "gap_eras": 3,
+    "adv_H": -0.043050647820965834,
+    "lo": -0.05365135453474675,
+    "hi": -0.03351001177856301,
+    "n_induce_pool": 1132,
+    "chance": 0.08333333333333333,
+    "adversary": "intermediate"
+   },
+   {
+    "gap_eras": 4,
+    "adv_H": -0.05647820965842167,
+    "lo": -0.06566548881036513,
+    "hi": -0.047290930506478215,
+    "n_induce_pool": 1132,
+    "chance": 0.08333333333333333,
+    "adversary": "intermediate"
+   },
+   {
+    "gap_eras": 5,
+    "adv_H": -0.0688457008244994,
+    "lo": -0.07131919905771494,
+    "hi": -0.06672555948174322,
+    "n_induce_pool": 1132,
+    "chance": 0.08333333333333333,
+    "adversary": "naive (current content)"
+   }
+  ]
+ },
+ "coarse": {
+  "n_topics": 4,
+  "chance": 0.25,
+  "n_records": 6792,
+  "curve": [
+   {
+    "gap_eras": 0,
+    "adv_H": 0.25530035335689044,
+    "lo": 0.22491166077738517,
+    "hi": 0.2828621908127208,
+    "n_induce_pool": 566,
+    "chance": 0.25,
+    "adversary": "historically aware"
+   },
+   {
+    "gap_eras": 1,
+    "adv_H": 0.13939929328621908,
+    "lo": 0.11996466431095407,
+    "hi": 0.15671378091872792,
+    "n_induce_pool": 1132,
+    "chance": 0.25,
+    "adversary": "intermediate"
+   },
+   {
+    "gap_eras": 2,
+    "adv_H": -0.10229681978798588,
+    "lo": -0.12632508833922262,
+    "hi": -0.07862190812720848,
+    "n_induce_pool": 1132,
+    "chance": 0.25,
+    "adversary": "intermediate"
+   },
+   {
+    "gap_eras": 3,
+    "adv_H": -0.13374558303886924,
+    "lo": -0.14929328621908128,
+    "hi": -0.11395759717314488,
+    "n_induce_pool": 1132,
+    "chance": 0.25,
+    "adversary": "intermediate"
+   },
+   {
+    "gap_eras": 4,
+    "adv_H": -0.13197879858657244,
+    "lo": -0.1471731448763251,
+    "hi": -0.1146643109540636,
+    "n_induce_pool": 1132,
+    "chance": 0.25,
+    "adversary": "intermediate"
+   },
+   {
+    "gap_eras": 5,
+    "adv_H": -0.16342756183745583,
+    "lo": -0.17120141342756184,
+    "hi": -0.15247349823321554,
+    "n_induce_pool": 1132,
+    "chance": 0.25,
+    "adversary": "naive (current content)"
+   }
+  ]
+ },
+ "recovery_fraction": 1.1048551611587107
+}

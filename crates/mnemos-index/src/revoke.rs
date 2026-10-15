@@ -1,4 +1,4 @@
-//! Type-II backward privacy: deletion tokens. See ADR-0004.
+//! Type-II backward privacy: deletion tokens.
 //!
 //! Type-II means a search on a partition reveals *when* deletions occurred there, but not
 //! *which* insertion each deletion cancelled. The mechanism is a per-partition list of
@@ -108,7 +108,7 @@ impl RevocationList {
     ///
     /// The slot is chosen by the tag rather than by "next free", for the same reason the slab
     /// chooses slots by tag: a first-free policy orders records by arrival, which is precisely
-    /// the history dependence `docs/adr/0003` removes.
+    /// the history dependence that history independence removes.
     ///
     /// # Errors
     /// I/O failures, or capacity exhaustion before compaction reclaims space.

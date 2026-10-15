@@ -1,4 +1,4 @@
-//! The key hierarchy. See `ARCHITECTURE.md` §4 for the diagram.
+//! The key hierarchy. See the paper (Section 6) for the diagram.
 //!
 //! ```text
 //!   RK (hardware, non-exportable)

@@ -1,0 +1,32 @@
+{
+ "experiment": "E5_E6",
+ "buckets": 64,
+ "e5": [
+  {
+   "engine": "v1",
+   "result_dependent_reads": 2000,
+   "distinct_positions_labelled": 292,
+   "note": "v2 emits no result-dependent read, so cohort-H positions are never linked to a query topic"
+  },
+  {
+   "engine": "v2",
+   "result_dependent_reads": 0,
+   "distinct_positions_labelled": 0,
+   "note": "v2 emits no result-dependent read, so cohort-H positions are never linked to a query topic"
+  }
+ ],
+ "e6": [
+  {
+   "engine": "v1",
+   "deletions": 100,
+   "deletions_that_named_a_region_immediately": 99,
+   "fraction": 0.99
+  },
+  {
+   "engine": "v2",
+   "deletions": 100,
+   "deletions_that_named_a_region_immediately": 0,
+   "fraction": 0.0
+  }
+ ]
+}

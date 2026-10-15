@@ -1,0 +1,27 @@
+{
+  "corpus": "newsgroups",
+  "count": 16619,
+  "sha256": "0d39a134a4c90c871a5f9b73b7265d19a1fa865b4ef7257e41e92effeaba87bc",
+  "topics": {
+    "soc.religion.christian": 931,
+    "comp.sys.ibm.pc.hardware": 904,
+    "sci.med": 904,
+    "comp.windows.x": 898,
+    "sci.crypt": 885,
+    "sci.space": 881,
+    "sci.electronics": 876,
+    "rec.sport.hockey": 870,
+    "comp.os.ms-windows.misc": 862,
+    "comp.graphics": 857,
+    "misc.forsale": 857,
+    "talk.politics.mideast": 845,
+    "rec.autos": 835,
+    "comp.sys.mac.hardware": 833,
+    "rec.sport.baseball": 825,
+    "talk.politics.guns": 816,
+    "rec.motorcycles": 815,
+    "talk.politics.misc": 699,
+    "alt.atheism": 694,
+    "talk.religion.misc": 532
+  }
+}

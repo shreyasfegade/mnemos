@@ -1,0 +1,205 @@
+{
+ "experiment": "E20",
+ "buckets": 32,
+ "capacity": 32,
+ "dedup_threshold": 0.9,
+ "probes": 400,
+ "note": "held-out AUC of the best trace statistic per arm",
+ "rows": [
+  {
+   "arm": "M sweep",
+   "engine": "m",
+   "learned": {
+    "auc": 0.5049999999999999,
+    "lo": 0.4751103974307507,
+    "hi": 0.5383674591019385,
+    "sign": 1.0,
+    "statistic": "writes_to_content_region"
+   },
+   "hand_built": {
+    "auc": 0.5,
+    "lo": 0.5,
+    "hi": 0.5,
+    "sign": 1.0,
+    "statistic": "flushes_per_turn"
+   },
+   "per_statistic": {
+    "flushes_per_turn": {
+     "auc": 0.5,
+     "lo": 0.5,
+     "hi": 0.5,
+     "sign": 1.0
+    },
+    "region_writes_per_turn": {
+     "auc": 0.5,
+     "lo": 0.5,
+     "hi": 0.5,
+     "sign": 1.0
+    },
+    "writes_to_content_region": {
+     "auc": 0.5049999999999999,
+     "lo": 0.4751103974307507,
+     "hi": 0.5383674591019385,
+     "sign": 1.0
+    }
+   },
+   "seconds": 12.112102031707764
+  },
+  {
+   "arm": "M regions",
+   "engine": "m",
+   "learned": {
+    "auc": 0.48975,
+    "lo": 0.4561811563567735,
+    "hi": 0.5228365384615384,
+    "sign": -1.0,
+    "statistic": "writes_to_content_region"
+   },
+   "hand_built": {
+    "auc": 0.5,
+    "lo": 0.5,
+    "hi": 0.5,
+    "sign": 1.0,
+    "statistic": "flushes_per_turn"
+   },
+   "per_statistic": {
+    "flushes_per_turn": {
+     "auc": 0.5,
+     "lo": 0.5,
+     "hi": 0.5,
+     "sign": 1.0
+    },
+    "region_writes_per_turn": {
+     "auc": 0.5,
+     "lo": 0.5,
+     "hi": 0.5,
+     "sign": 1.0
+    },
+    "writes_to_content_region": {
+     "auc": 0.48975,
+     "lo": 0.4561811563567735,
+     "hi": 0.5228365384615384,
+     "sign": -1.0
+    }
+   },
+   "seconds": 15.020257711410522
+  },
+  {
+   "arm": "M flush on write",
+   "engine": "m",
+   "learned": {
+    "auc": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "sign": -1.0,
+    "statistic": "flushes_per_turn"
+   },
+   "hand_built": {
+    "auc": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "sign": -1.0,
+    "statistic": "flushes_per_turn"
+   },
+   "per_statistic": {
+    "flushes_per_turn": {
+     "auc": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "sign": -1.0
+    },
+    "region_writes_per_turn": {
+     "auc": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "sign": -1.0
+    },
+    "writes_to_content_region": {
+     "auc": 0.53,
+     "lo": 0.5096877333831217,
+     "hi": 0.5561224489795918,
+     "sign": -1.0
+    }
+   },
+   "seconds": 18.534200429916382
+  },
+  {
+   "arm": "M content placement",
+   "engine": "m",
+   "learned": {
+    "auc": 0.9756,
+    "lo": 0.9512304316463426,
+    "hi": 0.9949503059499046,
+    "sign": -1.0,
+    "statistic": "writes_to_content_region"
+   },
+   "hand_built": {
+    "auc": 0.5,
+    "lo": 0.5,
+    "hi": 0.5,
+    "sign": 1.0,
+    "statistic": "flushes_per_turn"
+   },
+   "per_statistic": {
+    "flushes_per_turn": {
+     "auc": 0.5,
+     "lo": 0.5,
+     "hi": 0.5,
+     "sign": 1.0
+    },
+    "region_writes_per_turn": {
+     "auc": 0.5,
+     "lo": 0.5,
+     "hi": 0.5,
+     "sign": 1.0
+    },
+    "writes_to_content_region": {
+     "auc": 0.9756,
+     "lo": 0.9512304316463426,
+     "hi": 0.9949503059499046,
+     "sign": -1.0
+    }
+   },
+   "seconds": 15.20693564414978
+  },
+  {
+   "arm": "P shipped",
+   "engine": "p",
+   "learned": {
+    "auc": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "sign": -1.0,
+    "statistic": "flushes_per_turn"
+   },
+   "hand_built": {
+    "auc": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "sign": -1.0,
+    "statistic": "flushes_per_turn"
+   },
+   "per_statistic": {
+    "flushes_per_turn": {
+     "auc": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "sign": -1.0
+    },
+    "region_writes_per_turn": {
+     "auc": 1.0,
+     "lo": 1.0,
+     "hi": 1.0,
+     "sign": -1.0
+    },
+    "writes_to_content_region": {
+     "auc": 0.5449999999999999,
+     "lo": 0.504995433560819,
+     "hi": 0.5873374349739896,
+     "sign": -1.0
+    }
+   },
+   "seconds": 27.258121728897095
+  }
+ ]
+}

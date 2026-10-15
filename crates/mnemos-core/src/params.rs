@@ -1,11 +1,11 @@
 //! Loader for `params.toml` — **the single source of truth**.
 //!
 //! Rust reads it here, Python reads it via `mnemos.params`, and the paper's configuration
-//! table is generated from it. If a number appears in `the specification` §6, in `ARCHITECTURE.md`,
+//! table is generated from it. If a number appears in the paper,
 //! or in any source file, it comes from here.
 //!
 //! Why this matters beyond tidiness: a paper and an implementation that disagree about
-//! `k_probe` is a finding a reviewer makes *for* you. [`Params::hash`] is recorded in every
+//! `k_probe` is a finding a reader makes *for* you. [`Params::hash`] is recorded in every
 //! experiment's output JSON so a figure can always be traced to the exact configuration that
 //! produced it.
 
@@ -81,8 +81,8 @@ pub struct MParams {
     pub probe_width: u32,
     /// What a clocked flush writes.
     ///
-    /// `"regions"`: `epoch_writes + 1` whole regions, each uniformly distributed (the design the
-    /// first submission measured). `"sweep"`: the next `sweep_slots` slots after a cursor, a
+    /// `"regions"`: `epoch_writes + 1` whole regions, each uniformly distributed (the original
+    /// design). `"sweep"`: the next `sweep_slots` slots after a cursor, a
     /// deterministic function of the flush count, in the manner of a write-only ORAM; a staged
     /// record is placed in the first free slot the cursor reaches and is held until then in a
     /// fixed-size sealed journal rewritten every flush. The sweep writes `C` times fewer bytes per
@@ -245,7 +245,7 @@ pub struct MemoryParams {
 pub struct KeystoreParams {
     /// Providers in preference order; the first available wins.
     pub providers: Vec<String>,
-    /// When true, refuse to start if no hardware provider is available. See ADR-0005.
+    /// When true, refuse to start if no hardware provider is available. See the paper, Section 6.4.
     pub require_hardware: bool,
 }
 
@@ -374,7 +374,7 @@ pub struct IndexParams {
     pub n_max: u64,
     /// Partitioning algorithm.
     pub partitioner: String,
-    /// Collision policy. Must be uniquely representing — see ADR-0003.
+    /// Collision policy. Must be uniquely representing — see the paper, Section 5.
     pub collision_policy: String,
 }
 
@@ -461,11 +461,11 @@ impl Params {
 
         // Robin Hood with a total order on tags is uniquely representing; plain linear probing
         // is not (the first of two colliding entries takes the home slot, so layout depends on
-        // arrival order). ADR-0003.
+        // arrival order). This is history independence.
         if self.index.collision_policy != "robin-hood" {
             return Err(Error::Params(format!(
                 "index.collision_policy = {:?} is not uniquely representing; history \
-                 independence would be violated (see docs/adr/0003)",
+                 independence would be violated",
                 self.index.collision_policy
             )));
         }

@@ -41,7 +41,7 @@
 //!   adversary here sees a map from *pseudorandom handles* to counts, and must solve the
 //!   assignment problem to learn anything. That is the strongest reasonable reading, and it is
 //!   why A3's measured advantage is capped near chance rather than trivially 1.0 — see
-//!   [F1](../../../the findings notes).
+//!
 //! - `ST_c` is stored as a compact per-keyword map, not a padded array, because that is what
 //!   the construction requires for its update rule. (Padding it would be a different scheme —
 //!   in fact it would be a step toward Mnemos.)
@@ -61,7 +61,7 @@
 //! What does not change: **the persisted state's shape** — a per-keyword counter map plus an
 //! append-ordered encrypted index. A3 consumes only persisted state, so the substitution is
 //! invisible to it. This is stated here rather than buried because it is the first thing a
-//! hostile reviewer should check, and they should find it already answered.
+//! careful reader should check, and they should find it already answered.
 //!
 //! If A3 still reaches `Adv_hist ≥ 0.50` against that, the finding stands. It does **not** —
 //! it caps near 0.12 — and that negative result is recorded as F1 and is what motivated the
@@ -103,7 +103,7 @@ pub struct SophosFp {
     dir: PathBuf,
     index: File,
     /// `ST_c` — the counter A3 harvests. Named to match the paper so the correspondence is
-    /// unmistakable when a reviewer reads this file.
+    /// unmistakable when a reader reads this file.
     ///
     /// **This field is the finding.** Its presence on disk is what makes a forward-private
     /// scheme snapshot-vulnerable. Keyed by the keyword's PRF token, not by the keyword.

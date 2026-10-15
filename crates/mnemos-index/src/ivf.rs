@@ -31,7 +31,7 @@
 //! means nothing without the embedding model — appeared right here, in this comment, and was
 //! wrong. Padding was working perfectly and concealing only occupancy while every stored
 //! embedding sat on disk readable with no key. See
-//! `the findings notes`.
+//!
 //!
 //! Live and dummy slots are now indistinguishable because a dummy is uniform random bytes and a
 //! live slot is a ciphertext; the only way to tell them apart is to hold the key and observe
@@ -848,7 +848,7 @@ mod tests {
         // because unencrypted dummy slots decoded successfully and became candidates. Sealed
         // dummies fail authentication and are dropped in memory after the read, so the
         // candidate count now tracks live entries while the I/O does not. The adversary in
-        // THREAT-MODEL.md observes the file system, so the I/O is the quantity that matters;
+        // the paper's threat model observes the file system, so the I/O is the quantity that matters;
         // asserting the old proxy would now be asserting something the threat model never
         // mentioned, and would fail for a reason that is not a leak.
         let dir = tempfile::tempdir().unwrap();

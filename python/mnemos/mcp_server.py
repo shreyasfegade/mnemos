@@ -1,6 +1,6 @@
 """MCP server -- the surface a real agent stores its real memories through.
 
-Stage 4, and per decision D9 it is **required for the paper**, not optional: the empirical
+It is required for the paper, not optional: the empirical
 asymmetry measurement is only credible on a corpus a real agent actually wrote.
 
 Tools exposed
@@ -22,9 +22,9 @@ Two things worth knowing before wiring this up
 ----------------------------------------------
 **``update`` returns a new id.** Updates are delete-then-put, never in-place, because an
 in-place rewrite is a same-slot write -- exactly the correlation signal a live adversary wants
-(ADR-0004). Agents that cache memory ids must handle the change. This is a visible API cost
-paid for a security property, and it is the kind of honest consequence that makes a systems
-paper credible rather than the kind that gets quietly hidden behind a compatibility shim.
+(Type-II backward privacy). Agents that cache memory ids must handle the change. This is a
+visible API cost paid for a security property, and it is stated rather than hidden behind a
+compatibility shim.
 
 **Writes are not immediately durable.** ``put`` returns as soon as the record is staged; it
 lands at the next epoch flush (500 ms or 16 writes, whichever first). That batching is what
@@ -42,7 +42,7 @@ process per write, so it flushes every time.
 Plaintext residency
 -------------------
 This process holds plaintext before ``put`` and after ``search``, unprotected. Declared and
-argued in ``ARCHITECTURE.md`` s6.3: pre-tau the machine is clean by assumption TA-2, and
+argued in the paper (Section 6): pre-tau the machine is clean by assumption TA-2, and
 post-tau the adversary reads process memory by definition, so nothing is lost that was not
 already gone. Do not paper over this -- it is in the paper's limitations section on purpose.
 """

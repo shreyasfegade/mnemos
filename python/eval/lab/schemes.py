@@ -6,7 +6,7 @@ assumptions are written out in full rather than buried in the code.
 The fairness contract
 =====================
 Attack A3 is an attack on *baselines*. A weakened baseline invalidates the finding, and it is
-the first thing a hostile reviewer checks. So every scheme here is modelled under the **most
+the first thing a careful reader checks. So every scheme here is modelled under the **most
 conservative reading** -- the one that leaks least -- and every judgement call is recorded.
 
 Applied uniformly to all schemes:
@@ -161,7 +161,7 @@ class SophosLocal(Scheme):
             # region size gives occupancy and position within a region gives arrival order,
             # both without any key. We model the stricter keyword-index case instead, because
             # it matches Sophos as published and because a finding that survives the
-            # conservative model survives review.
+            # conservative model survives scrutiny.
             insertion_positions={},
             total_entries=len(entries),
             scheme=self.name,
@@ -201,7 +201,7 @@ class DianaLocal(Scheme):
     tree, puncturing ``n`` leaves leaves roughly ``n * log2(depth)`` residual keys. So update
     counts leak through the *size of a structure* rather than the value of a counter.
 
-    Same consequence, different mechanism. That matters: a reviewer's first instinct on seeing
+    Same consequence, different mechanism. That matters: a reader's first instinct on seeing
     the Sophos result is "then use Diana", and this is the answer.
 
     Mnemos uses the same GGM primitive and does not leak, because it pads every chain's
@@ -262,7 +262,7 @@ class DianaLocal(Scheme):
 class MnemosHI(Scheme):
     """Mnemos: history-independent, fully padded.
 
-    Three mechanisms, all from ``docs/adr/0003``:
+    Three mechanisms, all from `history independence`:
 
     - **Buckets are padded to capacity.** Occupancy is constant on disk, so there is no
       per-keyword count to read. This is the direct answer to Sophos and Diana.

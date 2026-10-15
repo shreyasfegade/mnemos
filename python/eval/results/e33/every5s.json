@@ -1,0 +1,21 @@
+{
+ "experiment": "E33",
+ "syncthing": "v2.1.5",
+ "versioning": "staggered, cleanup every 60 s",
+ "fs_watcher_delay_s": 10,
+ "minutes": 30.0,
+ "write_every_s": 5.0,
+ "pace": "fast",
+ "flushes": 361,
+ "versions_retained": 26,
+ "versions_unmatched": 0,
+ "mean_flushes_per_version": 13.88,
+ "median_flushes_per_version": 14.0,
+ "records_covered": 346,
+ "precision": 0.022551994180387627,
+ "lo": 0.02236693311184916,
+ "hi": 0.02273433928988254,
+ "null_precision": 0.015625,
+ "exposure": 1.0,
+ "seconds": 1892.3823866844177
+}

@@ -1,6 +1,6 @@
 [package]
 name = "mnemos-keystore"
-description = "Hardware key custody (TPM 2.0 / Secure Enclave) for Mnemos. See docs/adr/0005."
+description = "Hardware key custody (TPM 2.0 / Secure Enclave) for Mnemos. See the paper, Section 6.4."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -13,7 +13,7 @@ authors.workspace = true
 # and tested; turning it off yields a crate the compiler proves contains no unsafe code at all.
 default = ["ncrypt-unsafe"]
 ncrypt-unsafe = []
-# CI only. Also requires MNEMOS_I_ACCEPT_INSECURE=1 at runtime. See docs/adr/0005.
+# CI only. Also requires MNEMOS_I_ACCEPT_INSECURE=1 at runtime. See the paper, Section 6.4.
 insecure-software-keystore = []
 
 [lints]

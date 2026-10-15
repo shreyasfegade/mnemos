@@ -1,6 +1,6 @@
 """E9: the refusal channel, and the capacity-confidentiality trade-off behind it.
 
-The channel 
+The channel
 =======================
 Mnemos-P refuses a ``put`` whose partition is full. A refusal that writes nothing is observable:
 an adversary that has labelled regions sees the region it expected to receive the write did not,

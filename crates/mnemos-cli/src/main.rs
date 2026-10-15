@@ -7,10 +7,9 @@
 //! mnemos stat   <path>                    non-secret shape data
 //! mnemos bench  <path> --n 10000          E2 performance run
 //! mnemos attack <path> --which a3         run an attack against a store
-//! mnemos demo   --port 8080               serve the live compromise visualisation
 //! ```
 //!
-//! `attack` and `demo` are as much the point of this binary as `put` and `search`. A store you
+//! `attack` is as much the point of this binary as `put` and `search`. A store you
 //! can only use is a product; a store you can also attack, in one command, is an artifact.
 //!
 //! ## The embedder problem, and how this binary handles it
@@ -80,7 +79,6 @@ fn run() -> Result<()> {
             Ok(())
         }
         "attack" => cmd_attack(&params, rest),
-        "demo" => cmd_demo(rest),
         "params" => {
             println!("{params:#?}");
             println!("params_hash = {}", params.hash());
@@ -284,41 +282,10 @@ fn cmd_attack(_params: &Params, args: &[String]) -> Result<()> {
             Ok(())
         }
         "a1" | "a2" | "a5" => Err(Error::Params(format!(
-            "attack {which} is not implemented; see the project notes research debt"
+            "attack {which} is not implemented"
         ))),
         other => Err(Error::Params(format!("unknown attack {other}"))),
     }
-}
-
-fn cmd_demo(args: &[String]) -> Result<()> {
-    let flags = flags_only(args);
-    let port: u16 = flags
-        .get("port")
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(8080);
-    let root = repo_root().join("demo");
-
-    if !root.join("index.html").exists() {
-        return Err(Error::Params(format!(
-            "demo assets not found at {} — run from the repository, or open demo/index.html \
-             directly (it is self-contained)",
-            root.display()
-        )));
-    }
-    println!("The demo is a self-contained page with no server requirement.");
-    println!();
-    println!("  open {}", root.join("index.html").display());
-    println!();
-    println!("To serve it over HTTP instead (e.g. for a remote machine):");
-    println!();
-    println!(
-        "    python -m http.server {port} --directory {}",
-        root.display()
-    );
-    println!();
-    println!("It replays a recorded attack transcript from demo/transcript.json, produced by");
-    println!("`python -m eval.experiments.e4_transfer --emit-demo`.");
-    Ok(())
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -384,7 +351,7 @@ fn embed(text: &str, dim: usize) -> QuantVec {
 /// Select a key-custody provider.
 ///
 /// Prefers a real one. Reaching the software fallback needs **three** independent acts, and the
-/// CLI widens ADR-0005's gate by exactly one notch rather than removing it:
+/// CLI widens the key-custody gate by exactly one notch rather than removing it:
 ///
 /// 1. compile with `--features insecure-software-keystore`,
 /// 2. pass `--insecure` on the command line,
@@ -459,17 +426,6 @@ fn human(bytes: u64) -> String {
     }
 }
 
-fn repo_root() -> PathBuf {
-    let mut dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-    loop {
-        if dir.join("params.toml").is_file() {
-            return dir;
-        }
-        if !dir.pop() {
-            return std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-        }
-    }
-}
 
 /// Split `<path> --flag value --bare` into a path and a flag map.
 ///
@@ -516,7 +472,6 @@ fn print_usage() {
          mnemos stat   <path>\n  \
          mnemos bench  <path> --n <count>\n  \
          mnemos attack <path> --which <a3|a4>\n  \
-         mnemos demo   [--port 8080]\n  \
          mnemos params\n\n\
          Add --insecure to any command to permit the software keystore (needs the\n\
          insecure-software-keystore feature and MNEMOS_I_ACCEPT_INSECURE=1).\n\n\

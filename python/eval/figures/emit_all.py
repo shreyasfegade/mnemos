@@ -1,6 +1,6 @@
 """Regenerate every figure the paper includes, from the results currently on disk.
 
-One entry point, so `eval.repro` has one thing to call and a reviewer has one command to run. It
+One entry point, so `eval.repro` has one thing to call and a reader has one command to run. It
 is deliberately dumb: each figure module already knows where its inputs are and where its output
 goes, and duplicating that knowledge here would give the two copies somewhere to disagree.
 

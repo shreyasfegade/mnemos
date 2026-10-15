@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # E16: structure transfer against a real, deployed content-placed on-disk store -- pgvector ivfflat
-# -- inside a gocryptfs volume. a reader: attack a real system with incremental content-addressed
+# -- inside a gocryptfs volume. Attack a real system with incremental content-addressed
 # persistent list layout, or say plainly the growing layout is hypothetical.
 #
 # pgvector needs the e8venv python (pgserver + pgvector); it runs on the Linux filesystem, not /mnt/c,

@@ -1,0 +1,752 @@
+[
+  {
+    "skew": 0.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.006109979633401222,
+    "tie_ceiling": 0.12423625254582485,
+    "dominant_topic_share": 0.1115
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.008064516129032258,
+    "tie_ceiling": 0.12096774193548387,
+    "dominant_topic_share": 0.118
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.010121457489878543,
+    "tie_ceiling": 0.12550607287449392,
+    "dominant_topic_share": 0.11
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.010040160642570281,
+    "tie_ceiling": 0.1144578313253012,
+    "dominant_topic_share": 0.1175
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.012195121951219513,
+    "tie_ceiling": 0.12601626016260162,
+    "dominant_topic_share": 0.1175
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.010940919037199124,
+    "tie_ceiling": 0.13129102844638948,
+    "dominant_topic_share": 0.197
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.013015184381778741,
+    "tie_ceiling": 0.1279826464208243,
+    "dominant_topic_share": 0.1955
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.010683760683760684,
+    "tie_ceiling": 0.12179487179487179,
+    "dominant_topic_share": 0.185
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.02145922746781116,
+    "tie_ceiling": 0.12660944206008584,
+    "dominant_topic_share": 0.22
+  },
+  {
+    "skew": 0.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.017204301075268817,
+    "tie_ceiling": 0.12688172043010754,
+    "dominant_topic_share": 0.197
+  },
+  {
+    "skew": 0.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.02,
+    "tie_ceiling": 0.26,
+    "dominant_topic_share": 0.209
+  },
+  {
+    "skew": 0.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.008,
+    "tie_ceiling": 0.256,
+    "dominant_topic_share": 0.2055
+  },
+  {
+    "skew": 0.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.048,
+    "tie_ceiling": 0.24,
+    "dominant_topic_share": 0.2185
+  },
+  {
+    "skew": 0.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.032,
+    "tie_ceiling": 0.24,
+    "dominant_topic_share": 0.2315
+  },
+  {
+    "skew": 0.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.014336917562724014,
+    "tie_ceiling": 0.22939068100358423,
+    "dominant_topic_share": 0.208
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.010183299389002037,
+    "tie_ceiling": 0.12423625254582485,
+    "dominant_topic_share": 0.206
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.008097165991902834,
+    "tie_ceiling": 0.12550607287449392,
+    "dominant_topic_share": 0.2135
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.012295081967213115,
+    "tie_ceiling": 0.12704918032786885,
+    "dominant_topic_share": 0.198
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.012295081967213115,
+    "tie_ceiling": 0.13114754098360656,
+    "dominant_topic_share": 0.2145
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.010183299389002037,
+    "tie_ceiling": 0.12016293279022404,
+    "dominant_topic_share": 0.1975
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.01288659793814433,
+    "tie_ceiling": 0.16752577319587628,
+    "dominant_topic_share": 0.344
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.06188888888888888,
+    "keyword_recovery": 0.028720626631853787,
+    "tie_ceiling": 0.16449086161879894,
+    "dominant_topic_share": 0.351
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0473888888888889,
+    "keyword_recovery": 0.019851116625310174,
+    "tie_ceiling": 0.1513647642679901,
+    "dominant_topic_share": 0.344
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.02284263959390863,
+    "tie_ceiling": 0.1649746192893401,
+    "dominant_topic_share": 0.351
+  },
+  {
+    "skew": 0.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.017766497461928935,
+    "tie_ceiling": 0.1548223350253807,
+    "dominant_topic_share": 0.345
+  },
+  {
+    "skew": 0.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.04,
+    "tie_ceiling": 0.31,
+    "dominant_topic_share": 0.413
+  },
+  {
+    "skew": 0.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.05,
+    "tie_ceiling": 0.33,
+    "dominant_topic_share": 0.4055
+  },
+  {
+    "skew": 0.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.015,
+    "tie_ceiling": 0.33,
+    "dominant_topic_share": 0.408
+  },
+  {
+    "skew": 0.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0665,
+    "keyword_recovery": 0.0707070707070707,
+    "tie_ceiling": 0.3434343434343434,
+    "dominant_topic_share": 0.4175
+  },
+  {
+    "skew": 0.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.06060606060606061,
+    "tie_ceiling": 0.3383838383838384,
+    "dominant_topic_share": 0.408
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.045999999999999985,
+    "keyword_recovery": 0.019148936170212766,
+    "tie_ceiling": 0.125531914893617,
+    "dominant_topic_share": 0.3415
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.014799154334038054,
+    "tie_ceiling": 0.12473572938689217,
+    "dominant_topic_share": 0.354
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.04299999999999998,
+    "keyword_recovery": 0.0211864406779661,
+    "tie_ceiling": 0.1228813559322034,
+    "dominant_topic_share": 0.3455
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.02145922746781116,
+    "tie_ceiling": 0.1223175965665236,
+    "dominant_topic_share": 0.3565
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.008403361344537815,
+    "tie_ceiling": 0.12394957983193278,
+    "dominant_topic_share": 0.324
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.055999999999999994,
+    "keyword_recovery": 0.030959752321981424,
+    "tie_ceiling": 0.19195046439628483,
+    "dominant_topic_share": 0.4975
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.018461538461538463,
+    "tie_ceiling": 0.19384615384615383,
+    "dominant_topic_share": 0.514
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.015060240963855422,
+    "tie_ceiling": 0.18373493975903615,
+    "dominant_topic_share": 0.505
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.068,
+    "keyword_recovery": 0.024691358024691357,
+    "tie_ceiling": 0.19444444444444445,
+    "dominant_topic_share": 0.5205
+  },
+  {
+    "skew": 1.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.01899999999999999,
+    "keyword_recovery": 0.018691588785046728,
+    "tie_ceiling": 0.20249221183800623,
+    "dominant_topic_share": 0.4875
+  },
+  {
+    "skew": 1.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.05,
+    "tie_ceiling": 0.56,
+    "dominant_topic_share": 0.683
+  },
+  {
+    "skew": 1.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.09,
+    "tie_ceiling": 0.62,
+    "dominant_topic_share": 0.6955
+  },
+  {
+    "skew": 1.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.11,
+    "tie_ceiling": 0.66,
+    "dominant_topic_share": 0.6935
+  },
+  {
+    "skew": 1.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.13,
+    "tie_ceiling": 0.6,
+    "dominant_topic_share": 0.7005
+  },
+  {
+    "skew": 1.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.08,
+    "tie_ceiling": 0.62,
+    "dominant_topic_share": 0.665
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.11699999999999999,
+    "keyword_recovery": 0.022779043280182234,
+    "tie_ceiling": 0.13895216400911162,
+    "dominant_topic_share": 0.5155
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.035,
+    "keyword_recovery": 0.016317016317016316,
+    "tie_ceiling": 0.13986013986013987,
+    "dominant_topic_share": 0.52
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.11149999999999999,
+    "keyword_recovery": 0.016203703703703703,
+    "tie_ceiling": 0.13194444444444445,
+    "dominant_topic_share": 0.508
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.08499999999999999,
+    "keyword_recovery": 0.011990407673860911,
+    "tie_ceiling": 0.1342925659472422,
+    "dominant_topic_share": 0.507
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.00909090909090909,
+    "tie_ceiling": 0.13863636363636364,
+    "dominant_topic_share": 0.49
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.06383333333333335,
+    "keyword_recovery": 0.03065134099616858,
+    "tie_ceiling": 0.24904214559386972,
+    "dominant_topic_share": 0.6545
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.09314285714285714,
+    "keyword_recovery": 0.03787878787878788,
+    "tie_ceiling": 0.23484848484848486,
+    "dominant_topic_share": 0.658
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.31714285714285717,
+    "keyword_recovery": 0.03942652329749104,
+    "tie_ceiling": 0.2222222222222222,
+    "dominant_topic_share": 0.6605
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.13114285714285717,
+    "keyword_recovery": 0.03435114503816794,
+    "tie_ceiling": 0.22900763358778625,
+    "dominant_topic_share": 0.6485
+  },
+  {
+    "skew": 1.5,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.14914285714285713,
+    "keyword_recovery": 0.032846715328467155,
+    "tie_ceiling": 0.24452554744525548,
+    "dominant_topic_share": 0.637
+  },
+  {
+    "skew": 1.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.22,
+    "tie_ceiling": 0.86,
+    "dominant_topic_share": 1.0
+  },
+  {
+    "skew": 1.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.16,
+    "tie_ceiling": 0.78,
+    "dominant_topic_share": 1.0
+  },
+  {
+    "skew": 1.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.22,
+    "tie_ceiling": 0.84,
+    "dominant_topic_share": 1.0
+  },
+  {
+    "skew": 1.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.22,
+    "tie_ceiling": 0.88,
+    "dominant_topic_share": 1.0
+  },
+  {
+    "skew": 1.5,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.14864864864864866,
+    "tie_ceiling": 0.6216216216216216,
+    "dominant_topic_share": 0.994
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.126,
+    "keyword_recovery": 0.02710027100271003,
+    "tie_ceiling": 0.17073170731707318,
+    "dominant_topic_share": 0.653
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.1195,
+    "keyword_recovery": 0.01358695652173913,
+    "tie_ceiling": 0.16847826086956522,
+    "dominant_topic_share": 0.6635
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.19499999999999998,
+    "keyword_recovery": 0.02425876010781671,
+    "tie_ceiling": 0.15363881401617252,
+    "dominant_topic_share": 0.636
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.18199999999999997,
+    "keyword_recovery": 0.025210084033613446,
+    "tie_ceiling": 0.18207282913165265,
+    "dominant_topic_share": 0.6325
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0865,
+    "keyword_recovery": 0.0160857908847185,
+    "tie_ceiling": 0.16353887399463807,
+    "dominant_topic_share": 0.6295
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.3513333333333334,
+    "keyword_recovery": 0.06511627906976744,
+    "tie_ceiling": 0.30697674418604654,
+    "dominant_topic_share": 0.7585
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.06533333333333335,
+    "keyword_recovery": 0.02242152466367713,
+    "tie_ceiling": 0.27802690582959644,
+    "dominant_topic_share": 0.7675
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.32333333333333336,
+    "keyword_recovery": 0.047619047619047616,
+    "tie_ceiling": 0.26406926406926406,
+    "dominant_topic_share": 0.7485
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.17583333333333337,
+    "keyword_recovery": 0.03879310344827586,
+    "tie_ceiling": 0.25862068965517243,
+    "dominant_topic_share": 0.742
+  },
+  {
+    "skew": 2.0,
+    "clustering": 0.5,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.09383333333333335,
+    "keyword_recovery": 0.043478260869565216,
+    "tie_ceiling": 0.27391304347826084,
+    "dominant_topic_share": 0.7355
+  },
+  {
+    "skew": 2.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 0,
+    "advantage": 0.0,
+    "keyword_recovery": 0.22,
+    "tie_ceiling": 0.86,
+    "dominant_topic_share": 1.0
+  },
+  {
+    "skew": 2.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 1,
+    "advantage": 0.0,
+    "keyword_recovery": 0.16,
+    "tie_ceiling": 0.78,
+    "dominant_topic_share": 1.0
+  },
+  {
+    "skew": 2.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 2,
+    "advantage": 0.0,
+    "keyword_recovery": 0.22,
+    "tie_ceiling": 0.84,
+    "dominant_topic_share": 1.0
+  },
+  {
+    "skew": 2.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 3,
+    "advantage": 0.0,
+    "keyword_recovery": 0.22,
+    "tie_ceiling": 0.88,
+    "dominant_topic_share": 1.0
+  },
+  {
+    "skew": 2.0,
+    "clustering": 1.0,
+    "aux_fraction": 0.25,
+    "seed": 4,
+    "advantage": 0.0,
+    "keyword_recovery": 0.18,
+    "tie_ceiling": 0.82,
+    "dominant_topic_share": 1.0
+  }
+]

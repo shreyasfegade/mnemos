@@ -1,4 +1,4 @@
-"""E5: the dual-epoch game, redone to 
+"""E5: the dual-epoch game.
 
 What was wrong with the previous run
 ====================================
@@ -14,7 +14,7 @@ What this run does instead
 1. **Admissibility is constructed, then verified.** A history only accepts a record if its
    partition still has room, and every instance asserts the engine's ``refused`` counter is zero.
 2. **An inadmissible arm is run on purpose**, in both refusal modes, so the refusal channel is
-   measured as its own row rather than contaminating the others .
+   measured as its own row rather than contaminating the others.
 3. **Held-out evaluation.** The classifier is fitted on a training split and scored on a disjoint
    test split, so the reported AUC is not an in-sample artifact, and an AUC below 0.5 is reported
    as the anti-learning it is rather than as a distinguisher.

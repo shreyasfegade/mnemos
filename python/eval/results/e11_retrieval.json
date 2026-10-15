@@ -1,0 +1,306 @@
+{
+ "experiment": "E11",
+ "kprobe": 4,
+ "domains": [
+  {
+   "domain": "scifact",
+   "n_corpus": 5183,
+   "n_queries": 300,
+   "buckets": 128,
+   "plaintext_exhaustive": {
+    "ndcg": 0.7376262824405598,
+    "ndcg_lo": 0.6961993887301666,
+    "ndcg_hi": 0.7775993726274448,
+    "recall": 0.8658888888888888,
+    "recall_lo": 0.8265555555555556,
+    "recall_hi": 0.9023388888888888
+   },
+   "plaintext_ivf_matched": {
+    "ndcg": 0.6573821197586872,
+    "ndcg_lo": 0.6099641958492057,
+    "ndcg_hi": 0.7036164481708205,
+    "recall": 0.7625555555555555,
+    "recall_lo": 0.7132194444444443,
+    "recall_hi": 0.8087805555555554
+   },
+   "m_int8_exhaustive": {
+    "ndcg": 0.7374855889071635,
+    "ndcg_lo": 0.6960008081516313,
+    "ndcg_hi": 0.7776186802496952,
+    "recall": 0.8658888888888888,
+    "recall_lo": 0.8265555555555556,
+    "recall_hi": 0.9023388888888888,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "p_s1": {
+    "ndcg": 0.6547242072402897,
+    "ndcg_lo": 0.6069438543173865,
+    "ndcg_hi": 0.700976267679823,
+    "recall": 0.7592222222222221,
+    "recall_lo": 0.7097722222222222,
+    "recall_hi": 0.8055555555555556,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "p_s2": {
+    "ndcg": 0.6578264624338677,
+    "ndcg_lo": 0.6103136937518299,
+    "ndcg_hi": 0.7042910123893147,
+    "recall": 0.7625555555555555,
+    "recall_lo": 0.7127749999999999,
+    "recall_hi": 0.8091138888888888,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "p_grouped": {
+    "ndcg": 0.43490449613288906,
+    "ndcg_lo": 0.3824430042914478,
+    "ndcg_hi": 0.48714538908761434,
+    "recall": 0.4958888888888888,
+    "recall_lo": 0.43822222222222224,
+    "recall_hi": 0.5510027777777777,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "m_ivf_k4": {
+    "ndcg": 0.6547242072402897,
+    "ndcg_lo": 0.6069438543173865,
+    "ndcg_hi": 0.700976267679823,
+    "recall": 0.7592222222222221,
+    "recall_lo": 0.7097722222222222,
+    "recall_hi": 0.8055555555555556,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "m_ivf_k8": {
+    "ndcg": 0.7031738899264901,
+    "ndcg_lo": 0.6594107398618356,
+    "ndcg_hi": 0.7457221597601998,
+    "recall": 0.8258888888888889,
+    "recall_lo": 0.782,
+    "recall_hi": 0.8668888888888889,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "m_ivf_k16": {
+    "ndcg": 0.7247106561291508,
+    "ndcg_lo": 0.6821564456631812,
+    "ndcg_hi": 0.7657428320592562,
+    "recall": 0.8458888888888889,
+    "recall_lo": 0.8041083333333333,
+    "recall_hi": 0.884888888888889,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "seconds": 26.930808305740356
+  },
+  {
+   "domain": "nfcorpus",
+   "n_corpus": 3633,
+   "n_queries": 323,
+   "buckets": 64,
+   "plaintext_exhaustive": {
+    "ndcg": 0.3700234369358559,
+    "ndcg_lo": 0.3346291279831402,
+    "ndcg_hi": 0.4063426577713716,
+    "recall": 0.17563869773151328,
+    "recall_lo": 0.15008690215524956,
+    "recall_hi": 0.20259382091827316
+   },
+   "plaintext_ivf_matched": {
+    "ndcg": 0.3127329416301818,
+    "ndcg_lo": 0.2769787403275777,
+    "ndcg_hi": 0.3484488854874956,
+    "recall": 0.12949415184919477,
+    "recall_lo": 0.10731171681040456,
+    "recall_hi": 0.15230813570313786
+   },
+   "m_int8_exhaustive": {
+    "ndcg": 0.3690244035155785,
+    "ndcg_lo": 0.33392766542887514,
+    "ndcg_hi": 0.404994685118391,
+    "recall": 0.17519763121919146,
+    "recall_lo": 0.14971693693997293,
+    "recall_hi": 0.20208010434736895,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 171,
+    "slots": 10944
+   },
+   "p_s1": {
+    "ndcg": 0.31374023535735573,
+    "ndcg_lo": 0.2780502302474618,
+    "ndcg_hi": 0.34919651862006984,
+    "recall": 0.12820291938750727,
+    "recall_lo": 0.10651663335094373,
+    "recall_hi": 0.15087154954798115,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 171,
+    "slots": 10944
+   },
+   "p_s2": {
+    "ndcg": 0.31906490901936013,
+    "ndcg_lo": 0.28320316103638116,
+    "ndcg_hi": 0.3545617578319356,
+    "recall": 0.13186319621700285,
+    "recall_lo": 0.11012720824194824,
+    "recall_hi": 0.15454009002036795,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 171,
+    "slots": 10944
+   },
+   "p_grouped": {
+    "ndcg": 0.25578441517500755,
+    "ndcg_lo": 0.2223319458198562,
+    "ndcg_hi": 0.29006216424149917,
+    "recall": 0.10242206346401907,
+    "recall_lo": 0.08318139731485001,
+    "recall_hi": 0.12258670786025644,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 171,
+    "slots": 10944
+   },
+   "m_ivf_k4": {
+    "ndcg": 0.31373472499697563,
+    "ndcg_lo": 0.27802107417961164,
+    "ndcg_hi": 0.3491914122704472,
+    "recall": 0.12820291938750727,
+    "recall_lo": 0.10651663335094373,
+    "recall_hi": 0.15087154954798115,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 171,
+    "slots": 10944
+   },
+   "m_ivf_k8": {
+    "ndcg": 0.34184107800816493,
+    "ndcg_lo": 0.30598469823930163,
+    "ndcg_hi": 0.3775416092197042,
+    "recall": 0.15358591305286654,
+    "recall_lo": 0.12929189250184792,
+    "recall_hi": 0.17856963117324198,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 171,
+    "slots": 10944
+   },
+   "m_ivf_k16": {
+    "ndcg": 0.35273437636276544,
+    "ndcg_lo": 0.3168997804315344,
+    "ndcg_hi": 0.3880201188315721,
+    "recall": 0.16050238341232295,
+    "recall_lo": 0.13623232465990343,
+    "recall_hi": 0.1855052720602188,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 171,
+    "slots": 10944
+   },
+   "seconds": 20.375006198883057
+  },
+  {
+   "domain": "fiqa",
+   "n_corpus": 57638,
+   "n_queries": 400,
+   "buckets": 256,
+   "plaintext_exhaustive": {
+    "ndcg": 0.38438823416842227,
+    "ndcg_lo": 0.348897784297281,
+    "ndcg_hi": 0.4197961532376335,
+    "recall": 0.4486723137973138,
+    "recall_lo": 0.40837400030525034,
+    "recall_hi": 0.4878504407051281
+   },
+   "plaintext_ivf_matched": {
+    "ndcg": 0.3268756209602003,
+    "ndcg_lo": 0.2922501431669294,
+    "ndcg_hi": 0.3621981897020343,
+    "recall": 0.37271398046398047,
+    "recall_lo": 0.33361560019841274,
+    "recall_hi": 0.4115443223443223
+   },
+   "m_int8_exhaustive": {
+    "ndcg": 0.38418939890118897,
+    "ndcg_lo": 0.3487569933263182,
+    "ndcg_hi": 0.4196504337940325,
+    "recall": 0.4467973137973138,
+    "recall_lo": 0.40660869772588526,
+    "recall_hi": 0.48612333829365073,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 676,
+    "slots": 173056
+   },
+   "p_s1": {
+    "ndcg": 0.32760403738426047,
+    "ndcg_lo": 0.29255878007204333,
+    "ndcg_hi": 0.36260440573461905,
+    "recall": 0.37296398046398044,
+    "recall_lo": 0.333851314484127,
+    "recall_hi": 0.41146145833333325,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 676,
+    "slots": 173056
+   },
+   "p_s2": {
+    "ndcg": 0.3294684764659063,
+    "ndcg_lo": 0.2940602851993919,
+    "ndcg_hi": 0.3648267930134607,
+    "recall": 0.37483898046398045,
+    "recall_lo": 0.3355519841269841,
+    "recall_hi": 0.41383994772588517,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 676,
+    "slots": 173056
+   },
+   "p_grouped": {
+    "ndcg": 0.22356905723603224,
+    "ndcg_lo": 0.19128121119145616,
+    "ndcg_hi": 0.2558456460400518,
+    "recall": 0.25312652625152626,
+    "recall_lo": 0.21747967605311358,
+    "recall_hi": 0.28892457837301583,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 676,
+    "slots": 173056
+   },
+   "m_ivf_k4": {
+    "ndcg": 0.32760403738426047,
+    "ndcg_lo": 0.29255878007204333,
+    "ndcg_hi": 0.36260440573461905,
+    "recall": 0.37296398046398044,
+    "recall_lo": 0.333851314484127,
+    "recall_hi": 0.41146145833333325,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 676,
+    "slots": 173056
+   },
+   "m_ivf_k8": {
+    "ndcg": 0.3575199578299956,
+    "ndcg_lo": 0.3218028600811698,
+    "ndcg_hi": 0.3930926503055433,
+    "recall": 0.4115086233211233,
+    "recall_lo": 0.3711861607142857,
+    "recall_hi": 0.4510116243131867,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 676,
+    "slots": 173056
+   },
+   "m_ivf_k16": {
+    "ndcg": 0.37208860966123714,
+    "ndcg_lo": 0.33652394299778104,
+    "ndcg_hi": 0.4075778313042845,
+    "recall": 0.42956517094017094,
+    "recall_lo": 0.38962268582112336,
+    "recall_hi": 0.46871450892857136,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 676,
+    "slots": 173056
+   },
+   "seconds": 1087.1936075687408
+  }
+ ]
+}

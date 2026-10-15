@@ -16,7 +16,7 @@ This does five things, and records honestly which of them needed privileges it d
 4. **Hibernation and the pagefile.** ``hiberfil.sys`` captures physical memory, including a locked
    arena and an unwrapped master key: page locking prevents paging, not hibernation. If
    hibernation is enabled while a store can be unlocked, key custody is defeated for an imaging
-   adversary .
+   adversary.
 5. **Lock-on-suspend.** Whether the engine zeroises on the power events that precede hibernation.
 
     cd python && python -m eval.exp2.e13_artifacts

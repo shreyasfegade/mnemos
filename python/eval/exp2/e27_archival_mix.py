@@ -1,7 +1,7 @@
 """E27: how much historical knowledge the adversary needs.
 
 E4 compares an adversary that induces entirely with archival content (cohort H's own era) against
-one that induces entirely with current content. A reader asked how much alignment is required.
+one that induces entirely with current content. The question is how much alignment is required.
 This mixes the two: per topic, a fraction ``alpha`` of the induction budget is drawn from the
 archive and the rest from the current era, and reports the advantage on cohort H as alpha grows.
 Everything else -- corpus, eras, partitioning, estimator, scoring -- is E4's.

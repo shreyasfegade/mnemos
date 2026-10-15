@@ -1,4 +1,4 @@
-"""Word (.docx) versions of the paper, the supplement and the response, laid out like the PDFs.
+"""Word (.docx) versions of the paper and the supplement, laid out like the PDFs.
 
     cd python && python -m eval.make_docx          (after python -m eval.build_paper)
 
@@ -507,32 +507,23 @@ def flatten(root: str, fields: bool) -> tuple[str, Source]:
     labels = labels_from(PAPER / f"{root}.aux")
     if root != "main":
         labels = {**labels_from(PAPER / "main.aux"), **labels}
-    if root == "response":  # \externaldocument[supp-]{supplement}
-        labels.update({"supp-" + k: v for k, v in labels_from(PAPER / "supplement.aux").items()})
     s = Source(
         root, labels, pages_from(PAPER / f"{root}.aux"), citations_from(PAPER / "main.aux"), fields
     )
 
-    if root == "response":
-        title, _ = brace_arg(src, src.index("\\title{") + len("\\title"))
-        head, _, sub = title.partition("\\\\")
-        sub = sub.replace("\\large", "").strip()
-        front = f"{s.tok.add('RT')} {head.strip()}\n\n{s.tok.add('RS')} {sub}\n\n"
-        body = front + body.replace("\\maketitle", "", 1)
-    else:
-        for marker in ("\\IEEEpeerreviewmaketitle", "\\maketitle"):
-            if marker in body:
-                body = body[body.index(marker) + len(marker) :]
-                break
-        abstract = keywords = None
-        if root == "main":
-            abstract = strip_comments((PAPER / "sections" / "00-abstract.tex").read_text("utf-8"))
-            keywords = " ".join(
-                re.search(r"\\begin\{IEEEkeywords\}(.*?)\\end\{IEEEkeywords\}", src, re.S)
-                .group(1)
-                .split()
-            )
-        body = ieee_front(src, s, abstract, keywords) + body
+    for marker in ("\\IEEEpeerreviewmaketitle", "\\maketitle"):
+        if marker in body:
+            body = body[body.index(marker) + len(marker) :]
+            break
+    abstract = keywords = None
+    if root == "main":
+        abstract = strip_comments((PAPER / "sections" / "00-abstract.tex").read_text("utf-8"))
+        keywords = " ".join(
+            re.search(r"\\begin\{IEEEkeywords\}(.*?)\\end\{IEEEkeywords\}", src, re.S)
+            .group(1)
+            .split()
+        )
+    body = ieee_front(src, s, abstract, keywords) + body
 
     body = s.floats_pass(body)
     body = s.headings_pass(body)
@@ -1973,7 +1964,7 @@ def build(root: str, layout: Layout) -> Path:
     )
     if not pdf.exists() or pdf.stat().st_mtime < newest:
         sys.exit(f"{pdf.name} is older than its sources; build the paper first")
-    doc, src = flatten(root, fields=root != "response")
+    doc, src = flatten(root, fields=True)
     DIST.mkdir(parents=True, exist_ok=True)
     out = DIST / f"{root}.docx"
     if "--keep-flat" in sys.argv:
@@ -1996,7 +1987,6 @@ def main() -> None:
             "main", Layout(ieee=True, header="IEEE Transactions on Dependable and Secure Computing")
         ),
         build("supplement", Layout(ieee=True, header="Supplementary Material")),
-        build("response", Layout(ieee=False)),
     ]
     word_pass(outs)
     for o in outs:

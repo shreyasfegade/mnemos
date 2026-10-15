@@ -1,6 +1,6 @@
 """E1: a longitudinal case study, and the paper's headline comparison.
 
-The review asks for one figure that puts the whole argument in one place: a real stream of
+One figure is needed that puts the whole argument in one place: a real stream of
 timestamped work, processed month by month, compromised partway through, and the exposure of the
 records written *before* that moment measured for each design and each adversary class.
 
@@ -401,7 +401,7 @@ def main() -> None:
             ("p", "RW"),
             ("m", "W"),
             ("m", "RW"),
-            # Mnemos-RS for the write observer: the review's figure 2 names it. Its read-side
+            # Mnemos-RS for the write observer: it is the third design. Its read-side
             # channel is result-dependent reads (sec:eval-search), measured there, not here.
             ("rs", "W"),
         ):

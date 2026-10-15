@@ -1,4 +1,4 @@
-"""The supplement's table of every round-4 registered prediction and its outcome.
+"""The supplement's table of every registered prediction and its outcome.
 
 Each row is a check from ``verify_r4``: the claim it binds, the range registered before the run
 as read from the registration commits in git (so a failed prediction shows what was predicted, not
@@ -17,9 +17,9 @@ from eval.exp2 import verify_r4
 from eval.lab import corpus as C
 
 OUT = C.repo_root() / "paper" / "tables" / "supp_registered.tex"
-#: The commits that registered round-4 predictions, before their runs: the original ranges are read
+#: The commits that registered the predictions, before their runs: the original ranges are read
 #: from them, so a failed prediction shows what was predicted, not the widened range.
-REGISTRATIONS = ("4a62664", "45ccabe")
+REGISTRATIONS = ("c5a2300", "c302948")
 
 
 def registered_ranges() -> dict[str, tuple[float, float]]:
@@ -67,7 +67,7 @@ def main() -> None:
     OUT.write_text(
         r"""\begin{table*}[t]
 \centering
-\caption{Every prediction registered for the pre-submission experiments, committed before its run,
+\caption{Every prediction registered for the later experiments, committed before its run,
 with the measured value. A failed prediction is kept; the verifier's range for it is widened only
 to the claim that survives, and its note records the original prediction and the numbers.}
 \label{tab:supp-registered}

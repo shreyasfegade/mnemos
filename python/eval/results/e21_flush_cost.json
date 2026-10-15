@@ -1,0 +1,305 @@
+{
+ "experiment": "E21",
+ "tbw_assumed": 600000000000000.0,
+ "deltas_s": [
+  0.5,
+  1.0,
+  5.0,
+  10.0,
+  30.0,
+  60.0
+ ],
+ "geometries": {
+  "shipped": {
+   "regions": {
+    "mode": "regions",
+    "buckets": 256,
+    "capacity": 64,
+    "slots": 16384,
+    "slot_len": 4964,
+    "file_bytes": 81330240,
+    "bytes_per_flush": 5468484,
+    "bytes_per_flush_one_staged": 5468484,
+    "flush_ms_p50": 24.41614999952435,
+    "flush_ms_p95": 33.9433100005408,
+    "gb_per_day": {
+     "0.5": 944.9540352,
+     "1.0": 472.4770176,
+     "5.0": 94.49540352,
+     "10.0": 47.24770176,
+     "30.0": 15.74923392,
+     "60.0": 7.87461696
+    },
+    "gb_per_8h_day": {
+     "0.5": 314.9846784,
+     "1.0": 157.4923392,
+     "5.0": 31.49846784,
+     "10.0": 15.74923392,
+     "30.0": 5.24974464,
+     "60.0": 2.62487232
+    },
+    "sync_upload_per_flush": {
+     "syncthing_128k": 7276612,
+     "dropbox_4m": 48302148
+    },
+    "sync_upload_gb_per_day_at_10s": {
+     "syncthing_128k": 62.86992768,
+     "dropbox_4m": 417.33055872
+    },
+    "drive_years_at_600tbw": {
+     "0.5": 1.7395932026370335,
+     "1.0": 3.479186405274067,
+     "5.0": 17.395932026370335,
+     "10.0": 34.79186405274067,
+     "30.0": 104.37559215822202,
+     "60.0": 208.75118431644404
+    }
+   },
+   "sweep": {
+    "mode": "sweep",
+    "buckets": 256,
+    "capacity": 64,
+    "slots": 16384,
+    "slot_len": 4964,
+    "file_bytes": 81330240,
+    "bytes_per_flush": 70000,
+    "bytes_per_flush_one_staged": 70000,
+    "flush_ms_p50": 8.084200000666897,
+    "flush_ms_p95": 10.02874499936297,
+    "gb_per_day": {
+     "0.5": 12.096,
+     "1.0": 6.048,
+     "5.0": 1.2096,
+     "10.0": 0.6048,
+     "30.0": 0.2016,
+     "60.0": 0.1008
+    },
+    "gb_per_8h_day": {
+     "0.5": 4.032,
+     "1.0": 2.016,
+     "5.0": 0.4032,
+     "10.0": 0.2016,
+     "30.0": 0.0672,
+     "60.0": 0.0336
+    },
+    "sync_upload_per_flush": {
+     "syncthing_128k": 161360,
+     "dropbox_4m": 4224592
+    },
+    "sync_upload_gb_per_day_at_10s": {
+     "syncthing_128k": 1.3941504,
+     "dropbox_4m": 36.50047488
+    },
+    "drive_years_at_600tbw": {
+     "0.5": 135.89910850184822,
+     "1.0": 271.79821700369644,
+     "5.0": 1358.9910850184822,
+     "10.0": 2717.9821700369644,
+     "30.0": 8153.9465101108935,
+     "60.0": 16307.893020221787
+    }
+   },
+   "p_lock": {
+    "buckets": 256,
+    "capacity": 64,
+    "store_bytes": 81596860,
+    "lock_seconds": 0.24929310000152327
+   }
+  },
+  "131k": {
+   "regions": {
+    "mode": "regions",
+    "buckets": 1024,
+    "capacity": 128,
+    "slots": 131072,
+    "slot_len": 4964,
+    "file_bytes": 650641472,
+    "bytes_per_flush": 10883652,
+    "bytes_per_flush_one_staged": 10883652,
+    "flush_ms_p50": 38.151899998410954,
+    "flush_ms_p95": 43.287725001209765,
+    "gb_per_day": {
+     "0.5": 1880.6950656,
+     "1.0": 940.3475328,
+     "5.0": 188.06950656,
+     "10.0": 94.03475328,
+     "30.0": 31.34491776,
+     "60.0": 15.67245888
+    },
+    "gb_per_8h_day": {
+     "0.5": 626.8983552,
+     "1.0": 313.4491776,
+     "5.0": 62.68983552,
+     "10.0": 31.34491776,
+     "30.0": 10.44830592,
+     "60.0": 5.22415296
+    },
+    "sync_upload_per_flush": {
+     "syncthing_128k": 13058116,
+     "dropbox_4m": 73482308
+    },
+    "sync_upload_gb_per_day_at_10s": {
+     "syncthing_128k": 112.82212224,
+     "dropbox_4m": 634.88714112
+    },
+    "drive_years_at_600tbw": {
+     "0.5": 0.8740574942243078,
+     "1.0": 1.7481149884486156,
+     "5.0": 8.740574942243079,
+     "10.0": 17.481149884486157,
+     "30.0": 52.443449653458465,
+     "60.0": 104.88689930691693
+    }
+   },
+   "sweep": {
+    "mode": "sweep",
+    "buckets": 1024,
+    "capacity": 128,
+    "slots": 131072,
+    "slot_len": 4964,
+    "file_bytes": 650641472,
+    "bytes_per_flush": 84336,
+    "bytes_per_flush_one_staged": 84336,
+    "flush_ms_p50": 7.993000001079054,
+    "flush_ms_p95": 10.340534998977091,
+    "gb_per_day": {
+     "0.5": 14.5732608,
+     "1.0": 7.2866304,
+     "5.0": 1.45732608,
+     "10.0": 0.72866304,
+     "30.0": 0.24288768,
+     "60.0": 0.12144384
+    },
+    "gb_per_8h_day": {
+     "0.5": 4.8577536,
+     "1.0": 2.4288768,
+     "5.0": 0.48577536,
+     "10.0": 0.24288768,
+     "30.0": 0.08096256,
+     "60.0": 0.04048128
+    },
+    "sync_upload_per_flush": {
+     "syncthing_128k": 175696,
+     "dropbox_4m": 4238928
+    },
+    "sync_upload_gb_per_day_at_10s": {
+     "syncthing_128k": 1.51801344,
+     "dropbox_4m": 36.62433792
+    },
+    "drive_years_at_600tbw": {
+     "0.5": 112.79806482557125,
+     "1.0": 225.5961296511425,
+     "5.0": 1127.9806482557124,
+     "10.0": 2255.9612965114247,
+     "30.0": 6767.883889534274,
+     "60.0": 13535.767779068548
+    }
+   },
+   "p_lock": {
+    "buckets": 1024,
+    "capacity": 128,
+    "store_bytes": 651518396,
+    "lock_seconds": 1.2855338999979722
+   }
+  }
+ },
+ "lock_residual": [
+  {
+   "rate": 0.1,
+   "load": 0.5,
+   "placement_capacity_per_flush": 4.0,
+   "sustainable": true,
+   "sessions": 40,
+   "flushes_per_session": 200,
+   "residual_sessions": 0,
+   "residual_rate": 0.0,
+   "max_backlog": 4,
+   "mean_backlog_at_lock": 0.0
+  },
+  {
+   "rate": 0.5,
+   "load": 0.5,
+   "placement_capacity_per_flush": 4.0,
+   "sustainable": true,
+   "sessions": 40,
+   "flushes_per_session": 200,
+   "residual_sessions": 0,
+   "residual_rate": 0.0,
+   "max_backlog": 9,
+   "mean_backlog_at_lock": 0.0
+  },
+  {
+   "rate": 1.0,
+   "load": 0.5,
+   "placement_capacity_per_flush": 4.0,
+   "sustainable": true,
+   "sessions": 40,
+   "flushes_per_session": 200,
+   "residual_sessions": 0,
+   "residual_rate": 0.0,
+   "max_backlog": 6,
+   "mean_backlog_at_lock": 0.0
+  },
+  {
+   "rate": 2.0,
+   "load": 0.5,
+   "placement_capacity_per_flush": 4.0,
+   "sustainable": true,
+   "sessions": 40,
+   "flushes_per_session": 200,
+   "residual_sessions": 0,
+   "residual_rate": 0.0,
+   "max_backlog": 9,
+   "mean_backlog_at_lock": 0.275
+  },
+  {
+   "rate": 0.1,
+   "load": 0.9,
+   "placement_capacity_per_flush": 0.7999999999999998,
+   "sustainable": true,
+   "sessions": 40,
+   "flushes_per_session": 200,
+   "residual_sessions": 0,
+   "residual_rate": 0.0,
+   "max_backlog": 5,
+   "mean_backlog_at_lock": 0.15
+  },
+  {
+   "rate": 0.5,
+   "load": 0.9,
+   "placement_capacity_per_flush": 0.7999999999999998,
+   "sustainable": true,
+   "sessions": 40,
+   "flushes_per_session": 200,
+   "residual_sessions": 0,
+   "residual_rate": 0.0,
+   "max_backlog": 18,
+   "mean_backlog_at_lock": 0.55
+  },
+  {
+   "rate": 1.0,
+   "load": 0.9,
+   "placement_capacity_per_flush": 0.7999999999999998,
+   "sustainable": false,
+   "sessions": 40,
+   "flushes_per_session": 200,
+   "residual_sessions": 10,
+   "residual_rate": 0.25,
+   "max_backlog": 27,
+   "mean_backlog_at_lock": 2.725
+  },
+  {
+   "rate": 2.0,
+   "load": 0.9,
+   "placement_capacity_per_flush": 0.7999999999999998,
+   "sustainable": false,
+   "sessions": 40,
+   "flushes_per_session": 200,
+   "residual_sessions": 14,
+   "residual_rate": 0.35,
+   "max_backlog": 47,
+   "mean_backlog_at_lock": 3.525
+  }
+ ],
+ "seconds": 353.2013645172119
+}

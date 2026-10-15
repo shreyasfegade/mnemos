@@ -19,7 +19,7 @@ D3 is *synthetic and template-assembled*. Its tag distribution is realistic (hea
 many ties) and that is all attack A3 consumes -- counts and order, never semantics. But recall
 and nDCG numbers measured on D3 would be optimistic, because template text separates more
 cleanly in embedding space than real prose. **Utility numbers come from D2 (MS MARCO / NQ),
-not from here.** See ``the evaluation plan`` s5.
+not from here.** See
 """
 
 from __future__ import annotations
@@ -113,7 +113,7 @@ def load(
     tau_fraction
         Where compromise happens, as a fraction of the corpus. **0.5 by default so the two
         cohorts are the same size** -- an unequal split would confound the H-vs-P comparison
-        with a sample-size effect, which is precisely the confound a reviewer looks for first.
+        with a sample-size effect, which is precisely the confound a reader looks for first.
     interleave_seed
         Deterministic reshuffle of authoring order. **Required for a valid experiment**, see
         below. Pass ``None`` to keep the corpus's own ``seq`` order.

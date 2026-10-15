@@ -2,7 +2,7 @@
 //!
 //! Sophos and Diana are *keyword* schemes; Mnemos is a *vector* store. Comparing them requires
 //! fixing a correspondence, and the one used everywhere in this project — in the Python attack
-//! lab, in `THREAT-MODEL.md` §3.4, and here — is:
+//! lab, in the paper's threat model (Section 3), and here — is:
 //!
 //! > **keyword ≡ semantic partition.**
 //!

@@ -1,7 +1,7 @@
 //! **The paper's central table, as an executable assertion.**
 //!
 //! `leakage_profile.rs` checks that Mnemos leaks what `docs/leakage-profile.md` says it leaks.
-//! This file checks the other half of the claim, and it is the half a reviewer actually cares
+//! This file checks the other half of the claim, and it is the half a reader actually cares
 //! about: that the *baselines* leak something Mnemos does not, on the same corpus, at the same
 //! moment, read by the same adversary.
 //!

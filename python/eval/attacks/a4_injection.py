@@ -1,8 +1,7 @@
 """A4 -- induced-write injection, and the **structure-transfer** attack it enables.
 
-This is the attack the prior-work check pointed at: *"the intersection -- an autonomous agent as
-the writer, whose writes an adversary can induce post-compromise, analyzed through a DSSE
-leakage lens -- is an open seam."*
+This is the attack at the intersection the paper studies: an autonomous agent as the writer,
+whose writes an adversary can induce after the compromise, analyzed through a DSSE leakage lens.
 
 Why injection is fundamentally stronger than snapshot counting
 ==============================================================

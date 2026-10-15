@@ -46,7 +46,7 @@ def test_quantisation_is_canonical():
     """Two equal embeddings must produce identical bytes.
 
     If they did not, two stores holding the same logical content would differ on disk -- the
-    exact property docs/adr/0003 exists to guarantee.
+    exact property history independence exists to guarantee.
     """
     v = np.array([[0.3, -0.7, 0.2, 0.6]], dtype=np.float32)
     a, b = embedding.quantise(v)[0], embedding.quantise(v.copy())[0]
@@ -154,7 +154,7 @@ def test_metadata_survives_the_roundtrip(server: MnemosMemoryServer):
 
 
 def test_update_returns_a_new_id(server: MnemosMemoryServer):
-    """ADR-0004's visible API cost, asserted so it cannot regress into a compatibility shim."""
+    """Type-II backward privacy's visible API cost, asserted so it cannot become a shim."""
     original = server.put("the first version of this note")
     for i in range(16):
         server.put(f"filler {i}")

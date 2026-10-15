@@ -12,7 +12,7 @@ This module exists to test that claim rather than assert it.
 
 Why this file is in the repository
 ----------------------------------
-A paper that only runs attacks its scheme survives reads as marketing, and reviewers in this
+A paper that only runs attacks its scheme survives reads as marketing, and readers in this
 area recognise the pattern in about thirty seconds. Running the strongest known attack against
 our own construction, and reporting whatever it finds, is the cheapest credibility we can buy.
 
@@ -143,7 +143,7 @@ def measure_volume_variance(trace_path: Path) -> float:
 
     This is also asserted in Rust by ``tests/leakage_profile.rs``; having it in both places is
     deliberate. The Rust test catches it at development time; this one catches it in the
-    artifact a reviewer runs.
+    artifact a reader runs.
     """
     searches = split_searches(load_events(trace_path))
     if not searches:

@@ -390,7 +390,7 @@ impl SearchableMemory for Engine {
     ) -> Result<MemoryId> {
         // delete + put, never in-place: an in-place rewrite is a same-slot write, which is the
         // correlation signal a live adversary most wants. Returns a NEW id — a visible API cost
-        // paid for a security property (ADR-0004).
+        // paid for a security property (Type-II backward privacy).
         self.delete(id)?;
         self.put(text, meta, embedding)
     }

@@ -1,4 +1,4 @@
-"""Figure 1 -- structure transfer. The image the paper and the portfolio both rest on.
+"""Figure 1 -- structure transfer. The paper's central image.
 
 Two panels, one story:
 
@@ -16,7 +16,7 @@ drawn in the wrong place makes an advantage plot unreadable.
 **Right (epoch schedule).** Batching degrades the attack monotonically but only reaches zero at
 ``epoch_writes = B``, which is unaffordable. Padding is flat at zero throughout. The visual
 contrast between "a defence that trails off" and "a defence that holds" is the argument for
-ADR-0003, made without words.
+History independence, made without words.
 
 Note that the Mnemos curve here is the *analytical model* of a padded store, which is zero by
 construction. For the attack driven against the compiled engine, see
@@ -123,7 +123,7 @@ def main() -> None:
     # results, then the TF-IDF substitute. Each fallback understates the attack relative to the
     # one before it, so a figure built from a fallback is conservative rather than wrong; but the
     # caption beside it quotes D2, and a figure disagreeing with its own caption is the kind of
-    # discrepancy a reviewer finds first.
+    # discrepancy a reader finds first.
     for name in ("e4_transfer_bge_d2-beir.json", "e4_transfer_bge.json", "e4_transfer.json"):
         results = root / "python/eval/results" / name
         if results.is_file():

@@ -1,0 +1,23 @@
+{
+ "experiment": "E11",
+ "buckets": 64,
+ "capacity": 32,
+ "n_writes": 1500,
+ "zipf_a": 1.4,
+ "max_partition_load_fraction": 0.05466666666666667,
+ "runs": [
+  {
+   "engine": "v2",
+   "params_hash": "9c6d057d096406ef5468a50dce27a71fd8af59dbd8dbfa9d30f05d0874fe92e5",
+   "usable_before_refusal": 634,
+   "median_bytes_per_memory": 1095108.0,
+   "final_live": 634
+  },
+  {
+   "engine": "v1",
+   "params_hash": "4bab7c1bfbbc661bab30cb884968c294782d2635b853b3c52434eb46e7be7b7e",
+   "usable_before_refusal": 121,
+   "note": "v1 preallocates, so bytes/memory is measured via the write model, not file growth"
+  }
+ ]
+}

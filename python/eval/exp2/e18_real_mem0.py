@@ -1,8 +1,7 @@
 """E18: the deduplication membership oracle against the real mem0 library.
 
-The derived-write attack (\\cref{prop:derived}) and E3 measured a mem0-*style* pipeline. A reader
-asked for the real library: ``Run it against actual mem0 2.2.1 with local Qdrant inside gocryptfs,
-observing the full directory.'' This runs real mem0 2.2.1, with a local on-disk Qdrant and a local
+The derived-write attack (\\cref{prop:derived}) and E3 measured a mem0-*style* pipeline.
+This runs real mem0 2.2.1, with a local on-disk Qdrant and a local
 Ollama model making the add/skip decision, and measures the write-occurrence oracle: the adversary
 supplies a fact and sees only whether the vector store's files changed.
 

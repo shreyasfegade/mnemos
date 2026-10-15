@@ -10,8 +10,7 @@ infer.** This file is the source of Table 5 in the paper (`paper/sections/06-mne
 > event. **If the code writes something no event describes, CI fails** (for the operations the
 > enumeration covers; see §4.9).
 >
-> **Updated 2026-09-15** to match the revised paper and finding F7. The adversary is storage-level
-> (`THREAT-MODEL.md` §2.2): it reads every file, sees which byte ranges are written and read and
+> The adversary is storage-level (the paper's threat model, Section 3): it reads every file, sees which byte ranges are written and read and
 > when, and never reads the memory of the unlocked process.
 
 Notation: `B` partitions, `C` = `bucket_capacity`, `k` = `probe_width`, `s` = `probe_spread`,
@@ -170,28 +169,24 @@ ORAM over partitions.
    whole region. This was invisible to both event checks because `IndexWrite` names a partition,
    not a slot.
 
-Write-up: `the findings notes`.
-
 ### 4.4 F5: index writes were not padded (fixed 2026-08-27)
 
 Dummy partition ids were unbounded `u32`s, rejected by the index, with the error discarded; every
 flush wrote only its real records' partitions. Kept as the `index_write_padding` ablation. Against
 the compiled engine the defect gives accuracy 0.467 [0.435, 0.499] (advantage 0.367) at 8 induced
-writes per topic. Write-up: `the findings notes`.
+writes per topic.
 
 ### 4.5 F4: index slots were not encrypted (fixed 2026-08-14)
 
 Index slots were written as `tag ‖ int8 vector` in the clear. Regression test
-`the_index_never_holds_a_plaintext_embedding`. Write-up:
-`the findings notes`.
+`the_index_never_holds_a_plaintext_embedding`.
 
 ### 4.6 Compaction reveals occupied slab positions over time
 
 Compaction rewrites only the *free* slots in its window, and F6 made the event name them, so a
 persistent observer accumulates the slab occupancy map within about `n_max / 64` epochs. Slab
 placement depends only on uniformly random identifiers, so this reveals the number of occupied
-slots (real records plus never-reclaimed dummies), not contents or topics. Write-up of the event
-fix: `the findings notes`.
+slots (real records plus never-reclaimed dummies), not contents or topics.
 
 ### 4.7 Instrumentation fidelity (fixed 2026-08-12)
 

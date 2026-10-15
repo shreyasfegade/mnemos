@@ -219,7 +219,7 @@ impl SearchableMemory for PlaintextIvf {
             vector: embedding.clone(),
         });
         // Appended in arrival order. That ordering is readable straight off the structure and
-        // is the artifact `docs/adr/0003` removes from Mnemos.
+        // is the artifact history independence removes from Mnemos.
         self.partitions[b.0 as usize].push(idx);
         self.by_id.insert(id, idx);
         Ok(id)
@@ -247,7 +247,7 @@ impl SearchableMemory for PlaintextIvf {
         meta: &str,
         embedding: &QuantVec,
     ) -> Result<MemoryId> {
-        // In place, keeping the id — the cheap thing Mnemos refuses to do (ADR-0004), because
+        // In place, keeping the id — the cheap thing Mnemos refuses to do (Type-II backward privacy), because
         // a same-slot rewrite is the correlation signal a live adversary most wants.
         let idx = *self.by_id.get(&id).ok_or(Error::NotFound)?;
         let old_bucket = self.assign(&self.rows[idx].vector);
@@ -348,7 +348,7 @@ mod tests {
 
     #[test]
     fn update_keeps_the_id() {
-        // Contrast with Mnemos, where update() returns a NEW id by design (ADR-0004). The
+        // Contrast with Mnemos, where update() returns a NEW id by design (Type-II backward privacy). The
         // difference is a documented API cost paid for a security property.
         let (vecs, _) = corpus(20, 8, 3, 1);
         let mut ivf = PlaintextIvf::build(&vecs, 4, 8, 2, 5, 1).unwrap();

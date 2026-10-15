@@ -4,7 +4,7 @@
 
 The previous ``paper/dist/`` was a hand-made export that outlived the text it was made from: it
 carried retracted numbers and sixteen instances of revision-history language, and nothing
-regenerated it. This module makes the bundle a build product. It copies only what a reviewer or an
+regenerated it. This module makes the bundle a build product. It copies only what a reader or an
 editor needs -- the two PDFs, and a source archive holding exactly the files the two ``.tex``
 roots include -- and refuses to run on a build that is older than its sources, so the bundle can
 never again describe a paper that no longer exists.
@@ -25,7 +25,7 @@ from eval.lab import corpus as C
 
 PAPER = C.repo_root() / "paper"
 DIST = PAPER / "dist"
-ROOTS = ("main", "supplement", "response")
+ROOTS = ("main", "supplement")
 INCLUDE = re.compile(r"\\(?:input|include|includegraphics(?:\[[^\]]*\])?)\{([^}]+)\}")
 
 
@@ -55,7 +55,7 @@ def main() -> None:
     if "ANONYMIZED" in (PAPER / "repo.tex").read_text(encoding="utf-8"):
         print(
             "WARNING: paper/repo.tex still holds the placeholder repository URL; the paper's "
-            "Availability section and the response letter both quote it. Set the real URL there."
+            "Availability section quotes it. Set the real URL there."
         )
 
     newest_source = max(f.stat().st_mtime for f in files)

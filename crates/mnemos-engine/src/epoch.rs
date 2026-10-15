@@ -16,7 +16,7 @@
 //! That limiting behaviour is what makes Theorem 1's "δ is a function of the epoch schedule
 //! alone" both true and testable, and it is what E5/E6 sweep. **If the measured Δ does not
 //! respond to this parameter, either the batching is broken or the leakage was never there** —
-//! and both are findings worth having in September rather than in November.
+//! and both are findings worth having early.
 //!
 //! The time trigger exists so a quiet agent still makes progress. It is also a leakage channel
 //! of its own: at `epoch_ms = 500` an adversary learns activity to within half a second. Both

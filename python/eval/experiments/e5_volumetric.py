@@ -35,7 +35,7 @@ Mitigations, none of them free
   ``probe_retention``) and measured by :mod:`eval.experiments.e10_probe_spread`; this
   experiment establishes the ``s = 1, p = 1.0`` baseline it is measured against.
 * Full ORAM over the partition table closes it properly, and is the cost this design exists to
-  avoid (ADR-0002).
+  avoid (the bucketed-index design).
 """
 
 from __future__ import annotations

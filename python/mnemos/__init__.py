@@ -1,8 +1,8 @@
 """Mnemos -- Python layer.
 
 This package is **outside the trusted computing base** for plaintext-residency purposes. The
-security guarantees in ``THREAT-MODEL.md`` are made by ``crates/``; everything here handles
-plaintext by design, and does so knowingly (``ARCHITECTURE.md`` s6.3, ADR-0001).
+security guarantees in the paper's threat model are made by ``crates/``; everything here handles
+plaintext by design, and does so knowingly (the paper (Section 6)).
 
 +-------------------+------------------------------------------------------------------+
 | :mod:`params`     | Reads ``params.toml`` -- the same file Rust reads                 |
@@ -12,7 +12,7 @@ plaintext by design, and does so knowingly (``ARCHITECTURE.md`` s6.3, ADR-0001).
 +-------------------+------------------------------------------------------------------+
 
 The engine itself is ``mnemos_native`` (the PyO3 extension from ``crates/mnemos-ffi``), landing
-at Stage 4. Until then the CLI is the interface.
+through the MCP server; the CLI is the other interface.
 """
 
 from __future__ import annotations

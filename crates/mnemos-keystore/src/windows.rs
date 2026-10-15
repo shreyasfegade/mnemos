@@ -318,7 +318,7 @@ impl KeyStore for WindowsCngPcp {
     }
 
     fn attest(&self) -> Result<Option<Vec<u8>>> {
-        // Future work per ADR-0005: seal the master key to a PCR set so a modified binary
+        // Future work for key custody: seal the master key to a PCR set so a modified binary
         // cannot unwrap it. The seam exists; v1 does not use it.
         Ok(None)
     }

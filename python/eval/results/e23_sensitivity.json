@@ -1,0 +1,98 @@
+{
+ "experiment": "E23",
+ "zipf_values": [
+  0.8,
+  1.0,
+  1.2
+ ],
+ "grid": [
+  {
+   "buckets": 64,
+   "capacity": 16,
+   "zipf": 1.0,
+   "p_util": 0.240234375,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 64,
+   "capacity": 32,
+   "zipf": 1.0,
+   "p_util": 0.16845703125,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 64,
+   "capacity": 64,
+   "zipf": 1.0,
+   "p_util": 0.18359375,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 128,
+   "capacity": 16,
+   "zipf": 1.0,
+   "p_util": 0.111328125,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 128,
+   "capacity": 32,
+   "zipf": 1.0,
+   "p_util": 0.098388671875,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 128,
+   "capacity": 64,
+   "zipf": 1.0,
+   "p_util": 0.105224609375,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 256,
+   "capacity": 16,
+   "zipf": 1.0,
+   "p_util": 0.073486328125,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 256,
+   "capacity": 32,
+   "zipf": 1.0,
+   "p_util": 0.075439453125,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 256,
+   "capacity": 64,
+   "zipf": 1.0,
+   "p_util": 0.072021484375,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 256,
+   "capacity": 32,
+   "zipf": 0.8,
+   "p_util": 0.091064453125,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 256,
+   "capacity": 32,
+   "zipf": 1.0,
+   "p_util": 0.075439453125,
+   "m_util": 1.0
+  },
+  {
+   "buckets": 256,
+   "capacity": 32,
+   "zipf": 1.2,
+   "p_util": 0.060791015625,
+   "m_util": 1.0
+  }
+ ],
+ "p_util_worst": 0.060791015625,
+ "p_util_best": 0.240234375,
+ "m_util_worst": 1.0,
+ "seconds": 140.89638233184814
+}

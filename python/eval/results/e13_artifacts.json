@@ -1,0 +1,82 @@
+{
+ "experiment": "E13",
+ "platform": "Microsoft Windows 11 Home Single Language 10.0.26200.0",
+ "store": {
+  "dir": "C:\\Users\\Admin\\mnemos-audit-tfk7ma46\\store",
+  "files": [
+   "manifest.enc",
+   "partitions.bin",
+   "table.enc",
+   "wrapped.key"
+  ]
+ },
+ "usn": {
+  "enabled": true,
+  "journal_id": null,
+  "records_for_store": [
+   {
+    "file": "manifest.enc",
+    "readdata": "Major Version    : 0x3\nMinor Version    : 0x0\nFileRef#         : 0x000000000000000000620000000352f6\nParent FileRef#  : 0x000000000000000001020000000329fa\nUsn              : 0x000000049cec7108\nTime Stamp       : 0x0000000000000000 00:00:00 01-01-1601\nReason           : 0x0\nSource Info      : 0x0\nSecurity Id      : 0x0\nFile Attributes  : 0x20\nFile Name Length : 0x18\nFile Name Offset : 0x4c\nFileName         : manifest.enc"
+   },
+   {
+    "file": "partitions.bin",
+    "readdata": "Major Version    : 0x3\nMinor Version    : 0x0\nFileRef#         : 0x0000000000000000016a000000035287\nParent FileRef#  : 0x000000000000000001020000000329fa\nUsn              : 0x000000049cec7160\nTime Stamp       : 0x0000000000000000 00:00:00 01-01-1601\nReason           : 0x0\nSource Info      : 0x0\nSecurity Id      : 0x0\nFile Attributes  : 0x20\nFile Name Length : 0x1c\nFile Name Offset : 0x4c\nFileName         : partitions.bin"
+   },
+   {
+    "file": "table.enc",
+    "readdata": "Major Version    : 0x3\nMinor Version    : 0x0\nFileRef#         : 0x000000000000000000b200000003512e\nParent FileRef#  : 0x000000000000000001020000000329fa\nUsn              : 0x000000049cec5958\nTime Stamp       : 0x0000000000000000 00:00:00 01-01-1601\nReason           : 0x0\nSource Info      : 0x0\nSecurity Id      : 0x0\nFile Attributes  : 0x20\nFile Name Length : 0x12\nFile Name Offset : 0x4c\nFileName         : table.enc"
+   },
+   {
+    "file": "wrapped.key",
+    "readdata": "Major Version    : 0x3\nMinor Version    : 0x0\nFileRef#         : 0x00000000000000000065000000035996\nParent FileRef#  : 0x000000000000000001020000000329fa\nUsn              : 0x000000049cec5d18\nTime Stamp       : 0x0000000000000000 00:00:00 01-01-1601\nReason           : 0x0\nSource Info      : 0x0\nSecurity Id      : 0x0\nFile Attributes  : 0x20\nFile Name Length : 0x16\nFile Name Offset : 0x4c\nFileName         : wrapped.key"
+   }
+  ],
+  "error": null,
+  "queryjournal": "Usn Journal ID   : 0x01dbf7df81001c96\nFirst Usn        : 0x000000049a800000\nNext Usn         : 0x000000049cec9380\nLowest Valid Usn : 0x0000000000000000\nMax Usn          : 0x00000fffffff0000\nMaximum Size     : 0x0000000002000000 (32.0 MB)\nAllocation Delta : 0x0000000000800000 ( 8.0 MB)\nMinimum record version supported : 2\nMaximum record version supported : 4\nWrite range tracking: Disabled"
+ },
+ "vss": {
+  "queried": true,
+  "needs_elevation": true,
+  "shadow_copies_found": 0,
+  "raw": "vssadmin 1.1 - Volume Shadow Copy Service administrative command-line tool\n(C) Copyright 2001-2013 Microsoft Corp.\n\nError: You don't have the correct permissions to run this command.  Please run this utility from a command\nwindow that has elevated administrator privileges."
+ },
+ "sync": {
+  "clients_installed": [
+   "OneDrive"
+  ],
+  "client_roots": {
+   "OneDrive": "C:\\Users\\Admin\\OneDrive"
+  },
+  "store_inside_synced_tree": [],
+  "sync_processes_running": [
+   "OneDrive.Sync.Service"
+  ]
+ },
+ "hibernation": {
+  "powercfg_available_states": "The following sleep states are available on this system:\n    Standby (S0 Low Power Idle) Network Connected\n\nThe following sleep states are not available on this system:\n    Standby (S1)\n\tThe system firmware does not support this standby state.\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Standby (S2)\n\tThe system firmware does not support this standby state.\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Standby (S3)\n\tThis standby state is disabled when S0 low power idle is supported.\n\n    Hibernate\n\tHibernation has not been enabled.\n\n    Hybrid Sleep\n\tStandby (S3) is not available.\n\tHibernation is not available.\n\tThe hypervisor does not support this standby state.\n\n    Fast Startup\n\tHibernation is not available.",
+  "hibernation_enabled": true,
+  "hiberfil.sys": {
+   "exists": false,
+   "bytes": 0
+  },
+  "pagefile.sys": {
+   "exists": true,
+   "bytes": 5100273664
+  },
+  "implication": "A hibernation image captures physical memory, locked pages included. Page locking prevents paging, not hibernation, so an imaging adversary who takes the disk after the machine hibernated while the store was unlocked recovers the unwrapped master key and the resident plaintext. The mitigation is to lock the store on suspend and hibernate events, which is a deployment requirement rather than a storage-layer property."
+ },
+ "lock_on_suspend": {
+  "p": {
+   "unlocked_before": true,
+   "unlocked_after_lock": false,
+   "search_succeeded_while_locked": false,
+   "ok": true
+  },
+  "m": {
+   "unlocked_before": true,
+   "unlocked_after_lock": false,
+   "search_succeeded_while_locked": false,
+   "ok": true
+  }
+ }
+}

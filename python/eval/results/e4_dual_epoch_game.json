@@ -1,0 +1,55 @@
+{
+ "experiment": "E4",
+ "buckets": 32,
+ "instances_per_bit": 60,
+ "rows": [
+  {
+   "ablation": "shipped",
+   "auc": 0.5525,
+   "auc_lo": 0.45147155310676634,
+   "auc_hi": 0.6548271489555179,
+   "advantage": 0.05249999999999999,
+   "distinguishable": false
+  },
+  {
+   "ablation": "growing_regions",
+   "auc": 1.0,
+   "auc_lo": 1.0,
+   "auc_hi": 1.0,
+   "advantage": 0.5,
+   "distinguishable": true
+  },
+  {
+   "ablation": "unsealed_slots",
+   "auc": 1.0,
+   "auc_lo": 1.0,
+   "auc_hi": 1.0,
+   "advantage": 0.5,
+   "distinguishable": true
+  },
+  {
+   "ablation": "slot_writes_only",
+   "auc": 0.3486111111111111,
+   "auc_lo": 0.24888367139020096,
+   "auc_hi": 0.44855563895835254,
+   "advantage": 0.1513888888888889,
+   "distinguishable": true
+  },
+  {
+   "ablation": "no_padding",
+   "auc": 0.45527777777777784,
+   "auc_lo": 0.3479708193041526,
+   "auc_hi": 0.5602920344339108,
+   "advantage": 0.04472222222222216,
+   "distinguishable": false
+  },
+  {
+   "ablation": "identity_permutation",
+   "auc": 0.6558333333333333,
+   "auc_lo": 0.5552424916012022,
+   "auc_hi": 0.7530646483660944,
+   "advantage": 0.15583333333333327,
+   "distinguishable": true
+  }
+ ]
+}

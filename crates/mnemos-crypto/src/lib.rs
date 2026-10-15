@@ -1,14 +1,14 @@
 //! # mnemos-crypto
 //!
 //! Primitives, composed. **No new cryptography is invented here** — that is an explicit
-//! non-goal (`the specification` §5.3). Everything is `RustCrypto`, wired together to satisfy the
+//! non-goal. Everything is `RustCrypto`, wired together to satisfy the
 //! threat model.
 //!
 //! ## Layout
 //!
 //! | Module | Role |
 //! |---|---|
-//! | [`arena`] | The locked plaintext region. **TA-4's mechanism**; see ADR-0001. |
+//! | [`arena`] | The locked plaintext region. **TA-4's mechanism**; see the paper, Section 6. |
 //! | [`kdf`] | HKDF-SHA-256 key hierarchy: `RK → MK → {K_content, K_tag, K_idx, K_bucket, K_e}` |
 //! | [`aead`] | XChaCha20-Poly1305 for contents, AES-256-GCM for metadata |
 //! | [`prf`] | HMAC-SHA-256, truncated to 128 bits: tags and slot addresses |

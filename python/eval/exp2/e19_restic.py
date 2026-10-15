@@ -1,6 +1,6 @@
 """E19: the multi-version channel through a real backup tool.
 
-E8 diffs file versions it captures itself. A reader asked whether a real versioning tool keeps
+E8 diffs file versions it captures itself. The question is whether a real versioning tool keeps
 versions at a granularity the attack can use, and what its own chunking does to the diff. This backs
 the store up with restic 0.19 (content-defined chunking, encrypted repository) after every flush or
 every few flushes, then plays two adversaries against the repository:

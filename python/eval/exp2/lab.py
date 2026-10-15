@@ -1,6 +1,6 @@
 """Shared construction for the three designs, so an experiment names a design and not a shape.
 
-The review's §4 asks for a design space rather than a construction, which means every experiment
+The paper evaluates a design space rather than one construction, which means every experiment
 has to be able to build all three engines at *one* geometry and drive them through one interface:
 
 ``rs``  Mnemos-RS -- the two-file record-store design (the crate is ``mnemos-engine``).

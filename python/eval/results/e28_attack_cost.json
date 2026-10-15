@@ -1,0 +1,111 @@
+{
+ "experiment": "E28",
+ "kind": "descriptive (computed from E2 results; no registered prediction)",
+ "n_topics": 10,
+ "models": [
+  {
+   "model": "ollama:qwen2.5:7b-instruct",
+   "seconds_per_turn": 3.4523984360694886,
+   "write_probability": 0.81,
+   "writes_per_turn": 2.47
+  },
+  {
+   "model": "ollama:llama3.1:8b",
+   "seconds_per_turn": 4.938071219921112,
+   "write_probability": 0.92,
+   "writes_per_turn": 3.72
+  }
+ ],
+ "minimum_detectable_budget": [
+  {
+   "layout": "growing",
+   "w_real": 1,
+   "min_budget_turns_per_topic": 4,
+   "budgets_tested": [
+    4,
+    8,
+    16,
+    32
+   ],
+   "adversary_messages": 40,
+   "agent_minutes_slowest_model": 3.292047479947408,
+   "adv_H_at_min": 0.04058647026732133,
+   "lo_at_min": 0.024034369885433712
+  },
+  {
+   "layout": "growing",
+   "w_real": 2,
+   "min_budget_turns_per_topic": 4,
+   "budgets_tested": [
+    4,
+    8,
+    16,
+    32
+   ],
+   "adversary_messages": 40,
+   "agent_minutes_slowest_model": 3.292047479947408,
+   "adv_H_at_min": 0.10876159301691216,
+   "lo_at_min": 0.08470765139116203
+  },
+  {
+   "layout": "growing",
+   "w_real": 4,
+   "min_budget_turns_per_topic": 4,
+   "budgets_tested": [
+    4,
+    8,
+    16,
+    32
+   ],
+   "adversary_messages": 40,
+   "agent_minutes_slowest_model": 3.292047479947408,
+   "adv_H_at_min": 0.0846290234588107,
+   "lo_at_min": 0.07576091107474085
+  },
+  {
+   "layout": "p",
+   "w_real": 1,
+   "min_budget_turns_per_topic": 32,
+   "budgets_tested": [
+    4,
+    8,
+    16,
+    32
+   ],
+   "adversary_messages": 320,
+   "agent_minutes_slowest_model": 26.336379839579266,
+   "adv_H_at_min": 0.008611565739225311,
+   "lo_at_min": 0.00043623840698308697
+  },
+  {
+   "layout": "p",
+   "w_real": 2,
+   "min_budget_turns_per_topic": 4,
+   "budgets_tested": [
+    4,
+    8,
+    16,
+    32
+   ],
+   "adversary_messages": 40,
+   "agent_minutes_slowest_model": 3.292047479947408,
+   "adv_H_at_min": 0.017768685215493723,
+   "lo_at_min": 0.010356655755591925
+  },
+  {
+   "layout": "p",
+   "w_real": 4,
+   "min_budget_turns_per_topic": 4,
+   "budgets_tested": [
+    4,
+    8,
+    16,
+    32
+   ],
+   "adversary_messages": 40,
+   "agent_minutes_slowest_model": 3.292047479947408,
+   "adv_H_at_min": 0.04530278232405891,
+   "lo_at_min": 0.03289661756683032
+  }
+ ]
+}

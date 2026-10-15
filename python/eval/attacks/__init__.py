@@ -25,7 +25,7 @@ just no longer measures what its name claims.
 A5 is aimed at Mnemos. Xu et al. showed volumetric and query-equality leakage survives forward
 *and* backward privacy; our answer is the constant-volume invariant, and A5 is how that answer
 gets tested rather than asserted. If it partially succeeds, the residual is reported. A paper
-that only runs the attacks its scheme survives reads as marketing, and reviewers in this area
+that only runs the attacks its scheme survives reads as marketing, and readers in this area
 recognise the pattern immediately.
 """
 

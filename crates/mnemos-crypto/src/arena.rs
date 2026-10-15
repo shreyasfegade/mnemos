@@ -1,7 +1,7 @@
 //! The locked plaintext arena.
 //!
 //! **This module is the mechanism behind threat-model assumption TA-4**, and it is the reason
-//! the core is Rust rather than Python (ADR-0001):
+//! the core is Rust rather than Python (the Rust-core design):
 //!
 //! > plaintext resides only in a locked, promptly-zeroised arena of ≤ 2 MiB, never on disk,
 //! > swap, or in logs.

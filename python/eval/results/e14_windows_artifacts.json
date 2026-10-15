@@ -1,0 +1,18 @@
+{
+ "experiment": "E14",
+ "store": "C:\\Users\\Admin\\AppData\\Local\\Temp\\tmpve0ae9n9\\store",
+ "drive": "C:",
+ "artifacts": {
+  "ntfs": false,
+  "usn_journal_active": true,
+  "usn_records_store_writes": false,
+  "vss_readable": false,
+  "vss_requires_admin": false,
+  "mtime_spread_seconds": 0.1349797248840332,
+  "distinct_mtimes": 1,
+  "under_onedrive": false,
+  "onedrive_present": true
+ },
+ "fsutil_volumeinfo_rc": 1,
+ "usn_query_rc": 0
+}

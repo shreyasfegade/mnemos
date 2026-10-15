@@ -1,4 +1,4 @@
-//! The history-independent slab. **This is where ADR-0003 becomes code.**
+//! The history-independent slab. **This is where history independence becomes code.**
 //!
 //! The whole security argument for the historical cohort reduces to one property of this file:
 //!
@@ -20,7 +20,7 @@
 //!    distribution.
 //!
 //! The property is machine-checked by [`tests::layout_is_independent_of_insertion_order`],
-//! a direct instance of Definition 1(iii) in `THREAT-MODEL.md`.
+//! a direct instance of Definition 1(iii) in the paper's threat model.
 //!
 //! # On-disk layout
 //!
@@ -485,7 +485,7 @@ mod tests {
         /// **The paper's core hypothesis, machine-checked.**
         ///
         /// For any two insertion orders of the same entry set, the resulting slabs must agree
-        /// slot-for-slot on `(occupied, tag)`. This is Definition 1(iii) of `THREAT-MODEL.md`
+        /// slot-for-slot on `(occupied, tag)`. This is Definition 1(iii) of the paper's threat model
         /// as an executable statement — the test that catches a regression quietly
         /// reintroducing arrival-order dependence.
         #[test]

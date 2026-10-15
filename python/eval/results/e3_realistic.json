@@ -1,0 +1,57 @@
+{
+ "experiment": "E3",
+ "n_buckets": 128,
+ "budget_per_topic": 100,
+ "w": 16,
+ "corpora": [
+  {
+   "corpus": "github",
+   "n_records": 5870,
+   "n_topics": 12,
+   "splits": {
+    "chronological": {
+     "adv_H_mean": 0.1107893242475866,
+     "adv_H_std": 0.028180050692488953,
+     "acc_H_mean": 0.19412265758091993,
+     "H_minus_P_mean": -0.2234558390889183,
+     "H_minus_P_std": 0.02808836660326541,
+     "chance": 0.08333333333333333
+    },
+    "shuffled": {
+     "adv_H_mean": 0.31453719477569564,
+     "adv_H_std": 0.026847835715963112,
+     "acc_H_mean": 0.39787052810902895,
+     "H_minus_P_mean": 0.012135657792026064,
+     "H_minus_P_std": 0.01097961104797729,
+     "chance": 0.08333333333333333
+    }
+   }
+  },
+  {
+   "corpus": "newsgroups",
+   "n_records": 6000,
+   "n_topics": 20,
+   "splits": {
+    "shuffled": {
+     "adv_H_mean": 0.5559166666666666,
+     "adv_H_std": 0.006452282111349763,
+     "acc_H_mean": 0.6059166666666667,
+     "H_minus_P_mean": 0.011916666666666687,
+     "H_minus_P_std": 0.012088504640543615,
+     "chance": 0.05
+    }
+   }
+  }
+ ],
+ "open_world": {
+  "corpus": "github_open_world",
+  "n_coarse_topics": 4,
+  "split": "chronological",
+  "adv_H": -0.000596252129471897,
+  "adv_P": 0.10463510848126234,
+  "acc_H": 0.2494037478705281,
+  "coverage_H": 0.6170357751277683,
+  "chance": 0.25,
+  "H_minus_P": -0.10523136061073424
+ }
+}

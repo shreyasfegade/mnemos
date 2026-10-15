@@ -1,6 +1,6 @@
 """E23: sensitivity of the capacity/refusal behaviour to geometry and skew.
 
-a reader and a reader checklist ask how the designs depend on the parameters. The
+The question is how the designs depend on the parameters. The
 capacity--confidentiality trade-off (prop:capacity) is the one most sensitive to geometry and
 workload skew, and the cheapest to sweep: it needs only puts, no attack. This measures, for
 Mnemos-P and Mnemos-M, the utilisation at the first refusal as a function of the partition count

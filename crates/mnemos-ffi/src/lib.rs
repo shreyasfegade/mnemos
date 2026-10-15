@@ -9,7 +9,7 @@
 //! ## The residency boundary lives here
 //!
 //! Python holds plaintext before `put` and after `search`. That is unavoidable — the embedder
-//! is Python — and it is declared, argued and bounded in `ARCHITECTURE.md` §6.3 rather than
+//! is Python — and it is declared, argued and bounded in the paper (Section 6) rather than
 //! hidden. Two rules keep the gap as narrow as it can be:
 //!
 //! 1. **Take plaintext as early as possible, return it as late as possible.** Text crosses into
@@ -124,7 +124,7 @@ impl PyEngine {
     /// Not a convenience. If Python quantised and handed over codes, two representations of the
     /// same vector could differ by a rounding step, and two stores holding the same logical
     /// content would stop being byte-identical — which is the history-independence property
-    /// `docs/adr/0003` exists to guarantee. Taking floats and quantising here makes that
+    /// history independence exists to guarantee. Taking floats and quantising here makes that
     /// impossible to get wrong from the Python side.
     fn quantise(&self, v: Vec<f32>) -> PyResult<QuantVec> {
         if v.len() != self.dim {
@@ -232,7 +232,7 @@ impl PyEngine {
 
     /// Replace a memory. **Returns a NEW id** — updates are delete-then-put, never in-place,
     /// because an in-place rewrite is a same-slot write and therefore the correlation signal a
-    /// live adversary most wants (ADR-0004).
+    /// live adversary most wants (Type-II backward privacy).
     #[pyo3(signature = (memory_id, text, embedding, meta="{}"))]
     fn update(
         &mut self,
@@ -819,7 +819,7 @@ fn load_params(path: Option<&str>) -> PyResult<Params> {
 /// `allow_insecure` clears `require_hardware` **for this call only** — `params.toml` still says
 /// `true`, so the shipped configuration is unchanged and no other caller is affected. Reaching
 /// the software keystore still needs the compile feature and `MNEMOS_I_ACCEPT_INSECURE=1`, so
-/// this widens ADR-0005's gate by exactly one notch and keeps the opt-in visible at the call
+/// this widens the key-custody gate by exactly one notch and keeps the opt-in visible at the call
 /// site rather than hidden in an environment variable.
 fn select_keystore(
     params: &Params,

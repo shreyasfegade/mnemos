@@ -34,7 +34,7 @@ Why ``IndexWrite`` is a fair thing to give the adversary
 It is not a courtesy. The flush path writes each record into its partition at file offset
 ``HEADER_LEN + bucket * capacity * slot_len``, so the partition of every index write is
 recoverable from block-level write observation -- and the tau-arrival adversary is defined as
-seeing every disk delta after tau (the specification s4). The event is the honest model of a channel
+seeing every disk delta after tau. The event is the honest model of a channel
 the implementation genuinely has. Finding F5 is what happens when that channel has no event:
 nothing in the test suite, the leakage table, or the attack lab could see it, and it leaked
 completely for the entire life of the project.

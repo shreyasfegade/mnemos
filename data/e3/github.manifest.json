@@ -1,0 +1,19 @@
+{
+  "corpus": "github",
+  "count": 13894,
+  "sha256": "8aee8394e3e9735f5128873bb3d21aa11d25f82cfcd3a1a9092c10c7d3e3139c",
+  "topics": {
+    "scheduling": 1560,
+    "storage": 1536,
+    "node": 1504,
+    "network": 1503,
+    "cli": 1496,
+    "api-machinery": 1491,
+    "apps": 1457,
+    "auth": 983,
+    "testing": 972,
+    "cloud-provider": 513,
+    "windows": 509,
+    "instrumentation": 370
+  }
+}

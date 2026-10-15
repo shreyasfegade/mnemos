@@ -1,4 +1,4 @@
-"""Registered checks for the third review round (the two reader reports of 2026-09-28).
+"""Registered checks for the reactive game, flush cost and the later experiments.
 
 Every check here is committed to git **before** the experiment it binds is run, so the commit
 that adds a check is a timestamp a reader can verify against the result file's. A check whose
@@ -237,7 +237,7 @@ CHECKS = [
         4.5,
         6.5,
         "17 whole regions x 64 slots x 4,964 B = 5.4 MB plus a 4,096-tombstone manifest of "
-        "66 KB: about 5.2 MiB. This is the number a reader computed from Table 5.",
+        "66 KB: about 5.2 MiB. This is the number that follows from the region size.",
         "e21",
     ),
     _check(

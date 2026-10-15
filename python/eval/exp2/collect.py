@@ -1,6 +1,6 @@
-"""E14: gather the review-round results, and check that every reported number carries an interval.
+"""E14: gather the results, and check that every reported number carries an interval.
 
-The review's last experiment item is not an experiment: it asks that every table carry confidence
+This step is not an experiment: it checks that every table carries confidence
 intervals, and that a corpus listed in the setup either be used or removed. This collects the
 results of the 2026-09-16 round into one file and audits them for exactly that.
 
@@ -20,7 +20,7 @@ from eval.lab import corpus as C
 R = C.repo_root() / "python" / "eval" / "results"
 OUT = R / "ALL2.json"
 
-# The review's numbering for this round, and the file each experiment writes.
+# The experiment numbering, and the file each experiment writes.
 EXPECTED = {
     "E1": "e1_longitudinal.json",
     "E2": "e2_agent_attack.json",
@@ -35,7 +35,7 @@ EXPECTED = {
     "E11": "e11_retrieval.json",
     "E12": "e12_oblivious.json",
     "E13": "e13_artifacts.json",
-    # Not in the review's numbering: the query-equality re-measurement it asked for (the numbers
+    # The query-equality re-measurement (the numbers
     # the paper quoted came from an earlier harness with no interval).
     "E15": "e15_query_equality.json",
 }

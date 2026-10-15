@@ -1,0 +1,72 @@
+{
+ "experiment": "E3",
+ "attack": "deduplication membership inference",
+ "n_probes_per_class": 80,
+ "dedup_threshold": 0.95,
+ "models": [
+  "ollama:qwen2.5:7b-instruct",
+  "ollama:llama3.1:8b"
+ ],
+ "rows": [
+  {
+   "engine": "p",
+   "dedup": "threshold",
+   "auc": 1.0,
+   "lo": 1.0,
+   "hi": 1.0,
+   "accuracy": 1.0,
+   "advantage": 0.5,
+   "write_rate_member": 0.0,
+   "write_rate_nonmember": 1.0,
+   "observed_flushes_member": 0.0,
+   "observed_flushes_nonmember": 1.0,
+   "n_probes": 160,
+   "model": null
+  },
+  {
+   "engine": "m",
+   "dedup": "threshold",
+   "auc": 0.5,
+   "lo": 0.5,
+   "hi": 0.5,
+   "accuracy": 0.5,
+   "advantage": 0.0,
+   "write_rate_member": 0.0,
+   "write_rate_nonmember": 1.0,
+   "observed_flushes_member": 1.0,
+   "observed_flushes_nonmember": 1.0,
+   "n_probes": 160,
+   "model": null
+  },
+  {
+   "engine": "p",
+   "dedup": "llm",
+   "auc": 0.61875,
+   "lo": 0.56875,
+   "hi": 0.6702179221055713,
+   "accuracy": 0.61875,
+   "advantage": 0.11875000000000002,
+   "write_rate_member": 0.7375,
+   "write_rate_nonmember": 0.975,
+   "observed_flushes_member": 0.7375,
+   "observed_flushes_nonmember": 0.975,
+   "n_probes": 160,
+   "model": "ollama:qwen2.5:7b-instruct"
+  },
+  {
+   "engine": "m",
+   "dedup": "llm",
+   "auc": 0.5,
+   "lo": 0.5,
+   "hi": 0.5,
+   "accuracy": 0.5,
+   "advantage": 0.0,
+   "write_rate_member": 0.7375,
+   "write_rate_nonmember": 0.975,
+   "observed_flushes_member": 1.0,
+   "observed_flushes_nonmember": 1.0,
+   "n_probes": 160,
+   "model": "ollama:qwen2.5:7b-instruct"
+  }
+ ]
+}

@@ -5,7 +5,7 @@
 //! - `tag = PRF(K_tag, memory_id ‖ chunk_idx)` — an entry's identity in the store.
 //! - `slot = PRF(K_idx, tag) mod slot_count` — **where** it lives.
 //!
-//! The second is the mechanism of history independence (ADR-0003): physical position is a
+//! The second is the mechanism of history independence: physical position is a
 //! function of identity, never of arrival time. Since `memory_id` is random rather than a
 //! counter or a content hash, position carries no information at all — which is exactly what
 //! attack A3 needs to find, and does not.

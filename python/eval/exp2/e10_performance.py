@@ -14,7 +14,7 @@ are fixed here.
    the one a deployment actually sees, and it is reported beside the amortised one.
 
 It also measures what decides between Mnemos-M and Mnemos-P: resident memory, unlock time, and
-bytes written per memory. That is the crossover the review asks for.
+bytes written per memory. That is the crossover.
 
     cd python && python -m eval.exp2.e10_performance
 """

@@ -4,7 +4,7 @@ Why this module exists
 ======================
 Every advantage figure in this project was, until now, a **point estimate**: the mean over
 eight seeds, reported bare. A bare mean answers "what happened when we ran it" and not "what
-would happen if we ran it again", and the second question is the one a reviewer asks. Three
+would happen if we ran it again", and the second question is the one a reader asks. Three
 specific gaps are closed here.
 
 **1. Confidence intervals, via a cluster bootstrap.**

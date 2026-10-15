@@ -1,0 +1,870 @@
+{
+ "experiment": "E29",
+ "arm": "qdrant",
+ "library": "mem0 2.2.1",
+ "model": "qwen2.5:7b-instruct",
+ "embedder": "nomic-embed-text",
+ "seed_size": 60,
+ "probes_each": 60,
+ "window_s": 16.0,
+ "window_overruns": 0,
+ "clock_s": null,
+ "auc_blocks": 0.8302777777777778,
+ "lo_blocks": 0.7624312210321115,
+ "hi_blocks": 0.8952100815850816,
+ "auc_any": 0.8083333333333333,
+ "lo_any": 0.7416666666666667,
+ "hi_any": 0.8727561891233765,
+ "member_blocks": 2.1,
+ "nonmember_blocks": 7.466666666666667,
+ "member_any": 0.3333333333333333,
+ "nonmember_any": 0.95,
+ "event_counts": {
+  "ADD": 77,
+  "NONE": 43
+ },
+ "clock_errors": [],
+ "rows": [
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.000218391418457,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.94793701171875,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 0.7922496795654297,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.7296922206878662,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 22,
+   "any": 1,
+   "latency": 8.71932077407837,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.1159048080444336,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.0074751377105713,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.7639796733856201,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 4.781928062438965,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 3.5663561820983887,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 3.0091660022735596,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.2140705585479736,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.7828381061553955,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.22274112701416,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.722480058670044,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 5.682461738586426,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.9301693439483643,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.84352445602417,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.6003994941711426,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 0.7764499187469482,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 25,
+   "any": 1,
+   "latency": 8.247043132781982,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.014220952987671,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.8637123107910156,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.1676783561706543,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.1999452114105225,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.5663928985595703,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 7,
+   "any": 1,
+   "latency": 2.2858448028564453,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.2001702785491943,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.499577522277832,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 3.023580312728882,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.0216774940490723,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 11,
+   "any": 1,
+   "latency": 5.407060623168945,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.8456881046295166,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 8,
+   "any": 1,
+   "latency": 1.6900315284729004,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.9298176765441895,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.183241844177246,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 8.427434206008911,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.8349623680114746,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.8083596229553223,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.1959009170532227,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 25,
+   "any": 1,
+   "latency": 7.732859134674072,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.186431884765625,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.0816638469696045,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.810274600982666,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.968729019165039,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.8159222602844238,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 3.3603851795196533,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 6.151213884353638,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.1787726879119873,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.0023205280303955,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.2597339153289795,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.213838815689087,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.0318870544433594,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.7454423904418945,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.034700870513916,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.3771605491638184,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 28,
+   "any": 1,
+   "latency": 10.771504640579224,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 14,
+   "any": 1,
+   "latency": 4.256035327911377,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.0550477504730225,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.2094626426696777,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.8299012184143066,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.9525995254516602,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.2576398849487305,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 8,
+   "any": 1,
+   "latency": 5.357644557952881,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.8901784420013428,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 8,
+   "any": 1,
+   "latency": 1.7544989585876465,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.4092462062835693,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.922450065612793,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.874258041381836,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.1665406227111816,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.428039073944092,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.0684289932250977,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.9622888565063477,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.114842414855957,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.1566340923309326,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 8,
+   "any": 1,
+   "latency": 2.450456380844116,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 9,
+   "any": 1,
+   "latency": 2.017505407333374,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.2533986568450928,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.0603625774383545,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.195387601852417,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 26,
+   "any": 1,
+   "latency": 7.4221649169921875,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 8,
+   "any": 1,
+   "latency": 2.3661534786224365,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.8638200759887695,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.1682238578796387,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.8094942569732666,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 8,
+   "any": 1,
+   "latency": 1.7167613506317139,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.7212460041046143,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.183340072631836,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.5453495979309082,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 9.220103740692139,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.000800132751465,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 8,
+   "any": 1,
+   "latency": 1.6411585807800293,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 8,
+   "any": 1,
+   "latency": 2.644955635070801,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 0.9499650001525879,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.0702500343322754,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.055866241455078,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 0.9156699180603027,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.567833662033081,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 26,
+   "any": 1,
+   "latency": 6.846787691116333,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.1246516704559326,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.440732717514038,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.400583505630493,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.3576593399047852,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 0.9818811416625977,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.096920967102051,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 0.9586501121520996,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.2010655403137207,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.2810425758361816,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.1365041732788086,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.949506998062134,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 4.586691856384277,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 2.5073201656341553,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.302659511566162,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 5.797067403793335,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.2126057147979736,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 1.1266272068023682,
+   "event": "NONE"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 0,
+   "any": 0,
+   "latency": 0.7947037220001221,
+   "event": "NONE"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 27,
+   "any": 1,
+   "latency": 8.622342109680176,
+   "event": "ADD"
+  },
+  {
+   "member": 1,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 1.9099130630493164,
+   "event": "ADD"
+  },
+  {
+   "member": 0,
+   "changed_blocks": 5,
+   "any": 1,
+   "latency": 2.0589845180511475,
+   "event": "ADD"
+  }
+ ],
+ "seconds": 2084.844111442566
+}

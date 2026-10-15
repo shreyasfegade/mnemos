@@ -1,4 +1,4 @@
-"""Registered checks for the fourth round (pre-submission, 2026-10-13).
+"""Registered checks for the library, granularity and sync experiments (2026-10-13).
 
 Committed to git **before** any of these experiments ran; the commit that adds a check is its
 timestamp. As in ``verify_r3``, a failed prediction is never deleted: its range is widened only to

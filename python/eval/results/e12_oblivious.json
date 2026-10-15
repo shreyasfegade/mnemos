@@ -1,0 +1,166 @@
+{
+ "experiment": "E12",
+ "top_k": 10,
+ "oram_bucket_size": 4,
+ "rows": [
+  {
+   "n": 1000,
+   "added": 1000,
+   "method": "resident",
+   "measured": true,
+   "latency_ms": {
+    "p50": 0.15895000024102046,
+    "p95": 0.2083750003293971
+   },
+   "slot_reads_per_search": 0.0,
+   "bytes_read_per_search": 0.0,
+   "leaks_result_positions": false,
+   "note": ""
+  },
+  {
+   "n": 1000,
+   "added": 1000,
+   "method": "position",
+   "measured": true,
+   "latency_ms": {
+    "p50": 0.2260500000375032,
+    "p95": 0.29181500071899785
+   },
+   "slot_reads_per_search": 10.0,
+   "bytes_read_per_search": 18920.0,
+   "leaks_result_positions": true,
+   "note": ""
+  },
+  {
+   "n": 1000,
+   "added": 1000,
+   "method": "read_all",
+   "measured": true,
+   "latency_ms": {
+    "p50": 3.07056799977299,
+    "p95": 3.1629279998262945
+   },
+   "slot_reads_per_search": 10.0,
+   "bytes_read_per_search": 5691136,
+   "leaks_result_positions": false,
+   "note": "read_all latency adds the store scan at 2 GB/s; the engine ranks in memory"
+  },
+  {
+   "method": "path_oram",
+   "measured": false,
+   "bucket_size_Z": 4,
+   "tree_height": 10,
+   "blocks_per_access": 88,
+   "leaks_result_positions": false,
+   "n": 1000,
+   "bytes_read_per_search": 1664960
+  },
+  {
+   "n": 10000,
+   "added": 10000,
+   "method": "resident",
+   "measured": true,
+   "latency_ms": {
+    "p50": 1.750950000314333,
+    "p95": 2.210795000246434
+   },
+   "slot_reads_per_search": 0.0,
+   "bytes_read_per_search": 0.0,
+   "leaks_result_positions": false,
+   "note": ""
+  },
+  {
+   "n": 10000,
+   "added": 10000,
+   "method": "position",
+   "measured": true,
+   "latency_ms": {
+    "p50": 1.7873500000860076,
+    "p95": 2.498940000305083
+   },
+   "slot_reads_per_search": 10.0,
+   "bytes_read_per_search": 18920.0,
+   "leaks_result_positions": true,
+   "note": ""
+  },
+  {
+   "n": 10000,
+   "added": 10000,
+   "method": "read_all",
+   "measured": true,
+   "latency_ms": {
+    "p50": 30.476679999786,
+    "p95": 31.206640000093984
+   },
+   "slot_reads_per_search": 10.0,
+   "bytes_read_per_search": 56911360,
+   "leaks_result_positions": false,
+   "note": "read_all latency adds the store scan at 2 GB/s; the engine ranks in memory"
+  },
+  {
+   "method": "path_oram",
+   "measured": false,
+   "bucket_size_Z": 4,
+   "tree_height": 13,
+   "blocks_per_access": 112,
+   "leaks_result_positions": false,
+   "n": 10000,
+   "bytes_read_per_search": 2119040
+  },
+  {
+   "n": 50000,
+   "added": 50000,
+   "method": "resident",
+   "measured": true,
+   "latency_ms": {
+    "p50": 12.5324499999806,
+    "p95": 14.275269999825468
+   },
+   "slot_reads_per_search": 0.0,
+   "bytes_read_per_search": 0.0,
+   "leaks_result_positions": false,
+   "note": ""
+  },
+  {
+   "n": 50000,
+   "added": 50000,
+   "method": "position",
+   "measured": true,
+   "latency_ms": {
+    "p50": 12.21354999961477,
+    "p95": 14.127975000292281
+   },
+   "slot_reads_per_search": 10.0,
+   "bytes_read_per_search": 18920.0,
+   "leaks_result_positions": true,
+   "note": ""
+  },
+  {
+   "n": 50000,
+   "added": 50000,
+   "method": "read_all",
+   "measured": true,
+   "latency_ms": {
+    "p50": 154.07213600011565,
+    "p95": 155.48946599966476
+   },
+   "slot_reads_per_search": 10.0,
+   "bytes_read_per_search": 283830272,
+   "leaks_result_positions": false,
+   "note": "read_all latency adds the store scan at 2 GB/s; the engine ranks in memory"
+  },
+  {
+   "method": "path_oram",
+   "measured": false,
+   "bucket_size_Z": 4,
+   "tree_height": 16,
+   "blocks_per_access": 136,
+   "leaks_result_positions": false,
+   "n": 50000,
+   "bytes_read_per_search": 2573120
+  }
+ ],
+ "provenance_notes": [
+  "2026-09-27: the computed path_oram rows stored their cost under 'bytes_per_search' while the measured rows used 'bytes_read_per_search'; readers defaulted the missing key to 0 and would have tabled Path ORAM as reading 0 kB per search. Renamed in place (3 rows); the values are unchanged and the generator now writes the shared key."
+ ]
+}

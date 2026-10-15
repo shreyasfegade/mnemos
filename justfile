@@ -3,8 +3,8 @@
 #   just              list recipes
 #   just setup        one-time toolchain + deps
 #   just test         everything CI runs
-#   just repro        E1-E6 on the public corpus at N=1k, < 30 min, regenerates figures
-#   just demo         the live compromise visualisation
+#   just verify       check the stored results against the paper
+#   just paper        rebuild tables, numbers, figures and the PDFs
 
 set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
 
@@ -13,7 +13,7 @@ default:
 
 # ---------------------------------------------------------------- setup
 
-# One command, from a fresh clone, to a state where `just test` and `just repro` both work.
+# One command, from a fresh clone, to a state where `just test` and `just verify` both work.
 #
 # Builds into a project-local `.venv` on purpose. The evaluation harness needs torch and
 # sentence-transformers at specific versions, and installing those into a machine-wide Python is
@@ -43,7 +43,7 @@ setup-posix:
 build:
     cargo build --workspace --release
 
-# The FFI extension module. Needed from Stage 4 (the MCP server).
+# The FFI extension module. Needed by the MCP server.
 build-py:
     maturin develop --release -m crates/mnemos-ffi/Cargo.toml
 
@@ -130,20 +130,8 @@ e3:
 e6:
     python -m eval.experiments.e6_delta
 
-# Reproduction: the load-bearing experiments on the public corpus (D2).
-# This is what a reviewer runs, so it must stay working. Every headline number it produces is
-# checked against the range the paper claims for it -- running is not reproducing.
-repro:
-    python -m eval.repro --quick
-
-# Everything: all N, all sweeps, all figures. Hours.
-repro-full:
-    python -m eval.repro --full
-
 # Check the results already on disk against the paper's claims. Runs nothing, takes a second.
-# Run this before building the paper. This is eval.exp2.verify: eval.repro --verify encodes the
-# claims of the earlier E1-E6 harness (adv_hist = 0.587, query equality closed at s = 2), which
-# the paper no longer makes, so a pass there certifies nothing about the paper as it stands.
+# Run this before building the paper.
 verify:
     python -m eval.exp2.verify
 
@@ -151,11 +139,9 @@ verify:
 figures:
     python -m eval.figures.emit_all
 
-# ---------------------------------------------------------------- review round 2 (2026-09-16)
+# ---------------------------------------------------------------- the paper's experiments
 #
-# The experiment set for the current paper. Numbering follows the review notes,
-# which is NOT the numbering in the evaluation plan or in round 1 -- see the banner at the top of
-# the evaluation plan for the mapping between the three.
+# E-numbers follow the paper and its supplementary material.
 
 # Everything that needs no LLM and no WSL. Hours; safe to run unattended.
 exp2:
@@ -183,7 +169,7 @@ exp2-agent:
 exp2-stores:
     python -m eval.exp2.e6_stores --n 3000 --hist 300 --budget 30
 
-# ---------------------------------------------------------------- pre-submission (round 4)
+# ---------------------------------------------------------------- the longer experiments
 #
 # Every pending experiment (E16 extension, E6 extension, E29-E33), then aggregation, verifier,
 # checked paper build and export (PDF, DOCX, LaTeX). Three lanes run in parallel: GPU/Ollama,
@@ -201,7 +187,7 @@ overnight-plan:
 overnight-resume:
     cd python; ..\.venv\Scripts\python.exe -u -m eval.overnight --resume
 
-# Gather every round-2 result and audit that each point estimate carries an interval.
+# Gather every result and audit that each point estimate carries an interval.
 exp2-collect:
     python -m eval.exp2.collect
 
@@ -224,23 +210,18 @@ paper:
     python -m eval.exp2.make_tables
     python -m eval.exp2.numbers
     python -m eval.exp2.make_figures
+    python -m eval.figures.fig2_threat_model
     python -m eval.build_paper
 
-# The submission bundle: the two PDFs and the LaTeX sources they were built from, and nothing
-# else. It refuses to exist unless the verifier passes, the lint gate is clean and every number
-# the prose quotes has been measured (--strict), so a stale export -- which is what paper/dist/
-# was, with retracted numbers and revision-history language in it -- cannot be produced again.
+# The paper bundle: the two PDFs and the LaTeX sources they were built from, and nothing else.
+# It refuses to build unless the verifier passes, the lint gate is clean and every number the
+# prose quotes has been measured (--strict).
 dist: verify lint-paper paper
     python -m eval.exp2.numbers --strict
-    python -m eval.check_response
     python -m eval.make_dist
     python -m eval.make_docx
 
 # ---------------------------------------------------------------- artifacts
-
-# The Stage 3 deliverable: side-by-side live compromise, three minutes, unattended.
-demo:
-    cargo run --release -p mnemos-cli -- demo --port 8080
 
 # Regenerate the paper's configuration table from params.toml, so the paper and the
 # implementation cannot drift apart on a number.
@@ -249,4 +230,4 @@ paper-params:
 
 clean:
     cargo clean
-    rm -rf python/eval/results/*.json paper/figures/*.pdf
+    rm -rf paper/figures/*.pdf

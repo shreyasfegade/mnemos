@@ -1,0 +1,62 @@
+{
+ "experiment": "E11",
+ "description": "store build cost vs corpus size; the write-path scaling wall",
+ "dim": 768,
+ "rows": [
+  {
+   "n": 1000,
+   "buckets": 32,
+   "capacity": 64,
+   "n_max": 4096,
+   "build_seconds": 0.09595809999973426,
+   "per_entry_us": 95.95809999973426,
+   "flushes": 62,
+   "manifest_bytes_total": 1571328,
+   "store_bytes": 6142884
+  },
+  {
+   "n": 2000,
+   "buckets": 64,
+   "capacity": 64,
+   "n_max": 8192,
+   "build_seconds": 0.19351449999976467,
+   "per_entry_us": 96.75724999988233,
+   "flushes": 125,
+   "manifest_bytes_total": 6336000,
+   "store_bytes": 12263204
+  },
+  {
+   "n": 4000,
+   "buckets": 64,
+   "capacity": 128,
+   "n_max": 16384,
+   "build_seconds": 0.3701680000003762,
+   "per_entry_us": 92.54200000009405,
+   "flushes": 250,
+   "manifest_bytes_total": 13056000,
+   "store_bytes": 24454436
+  },
+  {
+   "n": 8000,
+   "buckets": 128,
+   "capacity": 128,
+   "n_max": 32768,
+   "build_seconds": 0.866355800000747,
+   "per_entry_us": 108.29447500009337,
+   "flushes": 500,
+   "manifest_bytes_total": 52224000,
+   "store_bytes": 48886308
+  },
+  {
+   "n": 16000,
+   "buckets": 128,
+   "capacity": 256,
+   "n_max": 65536,
+   "build_seconds": 1.8242931999993743,
+   "per_entry_us": 114.0183249999609,
+   "flushes": 1000,
+   "manifest_bytes_total": 110592000,
+   "store_bytes": 97651236
+  }
+ ]
+}

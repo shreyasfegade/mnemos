@@ -65,7 +65,7 @@ def fano_bits(acc: float, k: int, h_x: float | None = None) -> float:
     """Fano lower bound on ``I(X;V)`` for a K-ary secret guessed with accuracy ``acc``.
 
     Fano's inequality gives ``H(X | V) <= h(Pe) + Pe*log2(K-1)``, hence
-    ``I(X;V) = H(X) - H(X|V) >= H(X) - h(Pe) - Pe*log2(K-1)``. The submission used
+    ``I(X;V) = H(X) - H(X|V) >= H(X) - h(Pe) - Pe*log2(K-1)``. An earlier version used
     ``H(X) = log2 K``, which holds only for a **uniform** prior; under a skewed
     topic prior ``H(X) < log2 K``, so the ``log2 K`` form can exceed the true mutual information and
     is not a valid lower bound. We pass the **empirical** entropy ``h_x`` of the secret, measured

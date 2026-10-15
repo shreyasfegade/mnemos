@@ -1,0 +1,11 @@
+{
+  "params_hash": "c976000f4b4c5a1a1bcfec540324f434f92bcb30c2ca3f00204a88ca2fd3f85f",
+  "git_sha": "unknown",
+  "machine": "Windows 10 AMD64",
+  "python_version": "3.11.9",
+  "keystore_provider": "windows-cng-pcp",
+  "native_extension": "C:\\Users\\Admin\\Desktop\\Projects\\Code\\03_Apps-Products\\cybsersec\\.venv\\Lib\\site-packages\\mnemos_native\\__init__.py",
+  "native_mtime": "2026-09-15T18:53:28",
+  "quick": true,
+  "started": "2026-09-15T19:07:26"
+}

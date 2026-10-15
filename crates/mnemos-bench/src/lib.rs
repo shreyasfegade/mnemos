@@ -3,7 +3,7 @@
 //! Corpus generation, query sets, and the metadata block every result is stamped with. Kept in
 //! a library rather than inside the bench file so `python/eval/` can reproduce the exact same
 //! fixtures when generating figures — a benchmark and a figure disagreeing about their input
-//! is a mistake that is very hard to notice and very embarrassing to have found for you.
+//! is a mistake that is very hard to notice.
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]

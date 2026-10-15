@@ -1,6 +1,6 @@
 """E10: query-equality leakage under smarter adversaries, and bucketed probes as the alternative.
 
-with probe_spread s = 2 the shipped v1 config reports pairwise recovery 0.000,
+With probe_spread s = 2 the shipped v1 config reports pairwise recovery 0.000,
 but that pairwise adversary tests *exact* equality of read sets, which is a strawman. Two searches
 for the same query share all k genuine probes; two unrelated queries share about one partition by
 chance. An adversary that thresholds the overlap, or clusters the overlap graph, should recover
@@ -15,7 +15,7 @@ This experiment runs, against the live v2 engine, four adversaries on a stream o
 for two probe modes:
 
 - ``spread``  s genuine-plus-random superset (v1's mitigation, ported to v2).
-- ``grouped`` fixed disjoint groups; a search reads exactly one whole group (the review's
+- ``grouped`` fixed disjoint groups; a search reads exactly one whole group (the
   bucketed-probes alternative, whose equality leaks only at group granularity but with a
   deterministic, provable anonymity set).
 

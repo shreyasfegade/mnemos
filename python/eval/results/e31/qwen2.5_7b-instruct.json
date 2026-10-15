@@ -1,0 +1,907 @@
+{
+ "experiment": "E31",
+ "library": "mem0 2.2.1",
+ "model": "qwen2.5:7b-instruct",
+ "paraphrase_model": "qwen2.5:7b-instruct",
+ "k": 3,
+ "seed_size": 60,
+ "probes_each": 60,
+ "auc_k1": 0.7416666666666667,
+ "lo_k1": 0.6746384872080089,
+ "hi_k1": 0.8095582393135228,
+ "auc_k": 0.745,
+ "lo_k": 0.6758947971954888,
+ "hi_k": 0.8114850853596188,
+ "auc_gain": 0.0033333333333332993,
+ "auc_gain_lo": 0.0,
+ "auc_gain_hi": 0.008839646464646484,
+ "member_write_first": 0.4666666666666667,
+ "nonmember_write_first": 0.95,
+ "mean_probes_per_fact": 1.3583333333333334,
+ "rows": [
+  {
+   "member": 0,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    0,
+    1
+   ],
+   "quiet_before_write": 2
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    0,
+    1
+   ],
+   "quiet_before_write": 2
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    0,
+    0
+   ],
+   "quiet_before_write": 3
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    0,
+    0
+   ],
+   "quiet_before_write": 3
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    0,
+    1
+   ],
+   "quiet_before_write": 2
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    0,
+    0
+   ],
+   "quiet_before_write": 3
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    0,
+    1
+   ],
+   "quiet_before_write": 2
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    0,
+    1
+   ],
+   "quiet_before_write": 2
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 1,
+   "outcomes": [
+    0,
+    1
+   ],
+   "quiet_before_write": 1
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  },
+  {
+   "member": 0,
+   "outcomes": [
+    1
+   ],
+   "quiet_before_write": 0
+  }
+ ],
+ "seconds": 583.6738636493683
+}

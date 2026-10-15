@@ -29,7 +29,7 @@ eval = [
     "tqdm>=4.66",
 ]
 mcp = [
-    "mcp>=1.0",             # the Stage 4 agent integration
+    "mcp>=1.0",             # the MCP agent integration
 ]
 paper = [
     "pypandoc_binary>=1.13",  # LaTeX -> Word (eval.make_docx)

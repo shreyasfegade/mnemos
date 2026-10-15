@@ -1,6 +1,6 @@
 """E12: what it costs to fetch payloads obliviously, for the read-observing adversary.
 
-The review's §4 asks what the alternatives are once reads are visible. A search has to get its
+The question is what the alternatives are once reads are visible. A search has to get its
 ``top_k`` payloads from somewhere, and the choice of where decides both the leakage and the cost:
 
 ``position``   read the result slots by offset. Cheapest, and it re-opens the result channel: the

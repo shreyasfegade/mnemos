@@ -2,7 +2,7 @@
 
 One file, one set of numbers, read by the implementation, the evaluation harness, and the
 paper's configuration table. A paper and an implementation that disagree about ``k_probe`` is
-a finding a reviewer makes for you.
+a finding a reader makes for you.
 """
 
 from __future__ import annotations
@@ -83,7 +83,7 @@ def _validate(p: dict[str, Any]) -> None:
     if p["index"]["collision_policy"] != "robin-hood":
         raise ValueError(
             f"index.collision_policy = {p['index']['collision_policy']!r} is not uniquely "
-            "representing; history independence would be violated (docs/adr/0003)"
+            "representing; history independence would be violated"
         )
 
     spread = p["index"].get("probe_spread", 1)

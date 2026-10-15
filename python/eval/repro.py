@@ -1,4 +1,4 @@
-"""Reproduction driver -- what a reviewer runs, and what catches us lying to ourselves.
+"""Reproduction driver -- what a reader runs, and what catches us lying to ourselves.
 
     just repro        the load-bearing experiments on D2. Tens of minutes on a laptop.
     just repro-full   everything, every sweep, all figures. Hours.

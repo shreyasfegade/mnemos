@@ -15,7 +15,7 @@ matters enormously:
     A partition is a contiguous region of a file. Its size is visible to anyone who can read
     the directory entry. No key is involved, no token chain, no cryptanalysis -- just ``ls``.
 
-That is why ``ARCHITECTURE.md`` s5.2 pads every bucket to capacity and why ``docs/adr/0003``
+That is why the paper (Section 6) pads every bucket to capacity and why `history independence`
 treats padding as load-bearing rather than as a storage tax. The padding defends against
 occupancy leakage, which means occupancy leakage was always the threat the design had in mind.
 The keyword model simply was not it.
@@ -34,7 +34,7 @@ consumes only partition occupancy and arrival order -- never embedding quality.
 
 It would **not** be legitimate for the utility numbers (Recall@10, nDCG), which depend
 directly on embedding quality. Those must wait for the real model, and this substitution is
-recorded in ``the evaluation plan`` so the two never get conflated.
+recorded ino the two never get conflated.
 """
 
 from __future__ import annotations

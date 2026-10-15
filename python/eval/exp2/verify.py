@@ -1,8 +1,8 @@
-"""Check the round-2 results on disk against the claims the **current** paper makes.
+"""Check the results on disk against the claims the **current** paper makes.
 
     python -m eval.exp2.verify
 
-This is the round-2 counterpart to ``eval.repro --verify``. It exists because that one's ranges
+This is the counterpart to ``eval.repro --verify``. It exists because that one's ranges
 encode the *previous* paper's claims -- ``adv_hist = 0.587``, ``adv_hist/adv_post = 0.943``, "query
 equality closed outright at s = 2" -- and this round retired or reversed all three. A check whose
 claim the paper no longer makes is worse than no check: it fails for the wrong reason, or passes
@@ -1039,7 +1039,7 @@ def _with_round3() -> None:
     CHECKS.extend(verify_r3.CHECKS)
     EXTRACTORS.update(verify_r3.EXTRACTORS)
 
-    # Round four (pre-submission), registered 2026-10-13 before any of its experiments ran.
+    # The library, granularity and sync experiments, registered 2026-10-13 before any ran.
     from eval.exp2 import verify_r4
 
     CHECKS.extend(verify_r4.CHECKS)

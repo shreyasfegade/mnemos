@@ -4,13 +4,13 @@ Model: ``BAAI/bge-base-en-v1.5``, 768-d, cosine. ``all-MiniLM-L6-v2`` (384-d) fo
 Both from ``params.toml``.
 
 The model is public and the adversary knows it (assumption TA-5). We claim **no** security from
-its secrecy -- a reviewer will ask, and "none, deliberately" is the only defensible answer.
+its secrecy -- a reader will ask, and "none, deliberately" is the only defensible answer.
 Anything else would be security through obscurity dressed up as a design choice.
 
 Quantisation must match ``mnemos_core::types::QuantVec`` **exactly**, including the f16 scale
 grid. Two representations of the same vector that differ by a rounding step would break history
 independence: two stores holding the same logical set would no longer be byte-identical, which
-is precisely the property ``docs/adr/0003`` exists to guarantee and the ``proptest`` in
+is precisely the property history independence exists to guarantee and the ``proptest`` in
 ``mnemos-store::slab`` exists to check.
 
 The backend is recorded, never assumed
@@ -24,7 +24,7 @@ That distinction is load-bearing, so it is enforced rather than documented:
 :func:`require_semantic_backend` raises unless a real model is loaded, and every caller that
 computes a *utility* number (Recall, nDCG) must call it first. Security results -- A3, A4,
 leakage volume, history independence -- do not depend on where vectors come from and are valid
-under either backend. This is research debt R1 made mechanical instead of remembered.
+under either backend.
 """
 
 from __future__ import annotations

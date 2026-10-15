@@ -1,7 +1,7 @@
 """E22: the probe-design privacy/utility frontier.
 
 The paper measured query equality at one operating point each for the spread (s = 1, 2, 4) and
-grouped (group size 8) mechanisms. A reader asked for the whole curve: how read amplification
+grouped (group size 8) mechanisms. The whole curve is measured: how read amplification
 trades against query-equality leakage as the knob moves. This sweeps the spread s in
 {1, 2, 3, 4, 6, 8} and the grouped group size in {2, 4, 8, 16, 32}, reporting the read amplification
 (regions read per search) and the held-out query-equality Youden J, over independent stores. It

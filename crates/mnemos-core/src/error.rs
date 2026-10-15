@@ -25,9 +25,9 @@ pub enum Error {
     /// No key-custody provider was usable.
     ///
     /// The common case is a machine without a TPM while `keystore.require_hardware = true`.
-    /// The message names ADR-0005 so whoever hits it learns *why* the software fallback is
+    /// The message names the key-custody design so whoever hits it learns *why* the software fallback is
     /// double-gated instead of just working.
-    #[error("key custody unavailable: {0} (see docs/adr/0005-hardware-key-custody.md)")]
+    #[error("key custody unavailable: {0} (see the paper, Section 6.4)")]
     KeyCustody(String),
 
     /// The engine is locked; the master key is not resident.

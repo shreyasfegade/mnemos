@@ -1,0 +1,18 @@
+[
+  {
+    "retriever": "plaintext-ivf",
+    "recall_at_10": 0.8679999999999999,
+    "ndcg_at_10": 0.91037571740238,
+    "self_retrieval": 1.0,
+    "n_queries": 150,
+    "embedding_backend": "bge"
+  },
+  {
+    "retriever": "mnemos",
+    "recall_at_10": 0.8626666666666665,
+    "ndcg_at_10": 0.9065805302509913,
+    "self_retrieval": 1.0,
+    "n_queries": 150,
+    "embedding_backend": "bge"
+  }
+]

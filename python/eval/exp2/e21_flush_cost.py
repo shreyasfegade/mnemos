@@ -1,6 +1,6 @@
 """E21: what Mnemos-M's clocked flush costs on disk, per flush and per day.
 
-The first submission never stated Delta. It was 500 ms, and a flush rewrote ``w + 1`` whole
+The original design's Delta was 500 ms, and a flush rewrote ``w + 1`` whole
 regions whether or not anything was written, which at the shipped geometry is about 5.4 MB per
 flush -- close to a terabyte a day for a store left unlocked. The revision replaces that flush with
 a sweep (``m.flush_mode = "sweep"``): the next ``sweep_slots`` slots after a cursor, a fixed-size

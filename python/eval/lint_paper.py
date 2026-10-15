@@ -50,7 +50,7 @@ MARKDOWN = [
 ]
 
 #: Revision-history language. A journal paper must not refer to its own unpublished earlier
-#: versions: the reviewer has not seen them, and the reference reads as an admission that the
+#: versions: the reader has not seen them, and the reference reads as an admission that the
 #: present claim is replacing a wrong one.
 #:
 #: This is a rule rather than a habit because the habit failed twice. Sixteen sites were
@@ -125,7 +125,7 @@ REVISION = [
 ]
 
 
-#: Stylistic tics a reader associated with LLM-drafted prose. Each
+#: Stylistic tics that make prose read as boilerplate. Each
 #: distinctive phrase is flagged wherever it occurs, so the human-plainness pass is enforced rather
 #: than remembered. These are deliberately narrow: a phrase here is one a careful human editor would
 #: not reach for twice in a paper, not ordinary connective tissue.

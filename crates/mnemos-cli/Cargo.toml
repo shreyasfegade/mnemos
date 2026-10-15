@@ -1,6 +1,6 @@
 [package]
 name = "mnemos-cli"
-description = "Command-line interface for Mnemos: store, search, attack, benchmark, demo."
+description = "Command-line interface for Mnemos: store, search, attack, benchmark."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -16,7 +16,7 @@ path = "src/main.rs"
 default = []
 # Propagates the keystore's CI-only fallback. Off by default, so a `cargo install` of this
 # binary CANNOT reach the software keystore however the environment is set. Turning it on is a
-# compile-time decision and still requires MNEMOS_I_ACCEPT_INSECURE=1 at runtime — ADR-0005's
+# compile-time decision and still requires MNEMOS_I_ACCEPT_INSECURE=1 at runtime — the key-custody design's
 # double gate, preserved through the CLI rather than quietly widened by it.
 insecure-software-keystore = ["mnemos-keystore/insecure-software-keystore"]
 

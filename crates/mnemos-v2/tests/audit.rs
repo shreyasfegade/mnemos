@@ -588,7 +588,7 @@ fn tombstoned_records_leave_the_disk_within_one_cursor_sweep() {
 /// re-sealed live slots under fresh nonces but left, say, a free slot's bytes or a payload tail
 /// untouched, a byte diff inside the region would still say which slots were live. Two sealings of
 /// anything agree on a given 16-byte chunk with probability 2^-128, so one unchanged chunk is a
-/// defect, not bad luck. a reader.
+/// defect, not bad luck.
 fn unchanged_chunks(e: &EngineV2, a: &Snapshot, b: &Snapshot, region: u32) -> usize {
     let g = e.geometry();
     let key = PathBuf::from("partitions.bin");

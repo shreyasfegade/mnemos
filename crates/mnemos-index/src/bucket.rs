@@ -25,7 +25,7 @@
 //! passed — the file really is a constant size. The attack simulations reported
 //! `Adv_hist = 0.000` because they model *the design*, in which slots are opaque, rather than
 //! the bytes this module was actually writing. Nothing in the suite compared the design to the
-//! disk, which is the same failure mode recorded in `the project notes` for the event stream, and the
+//! disk, which is the same failure mode recorded in the project notes for the event stream, and the
 //! reason `leakage_profile.rs` now derives its table from emitted events instead of from prose.
 //!
 //! Slots are now sealed with AES-256-GCM under `K_bucket`, with a per-slot random nonce stored

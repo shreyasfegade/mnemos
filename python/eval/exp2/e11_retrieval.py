@@ -1,6 +1,6 @@
 """E11: retrieval quality on the FULL BEIR corpora, with the losses separated.
 
-What was wrong before 
+What was wrong before
 =================================
 The earlier run truncated every corpus to 5,000 documents. FiQA has 57,638, so its plaintext
 nDCG@10 of 0.579 was measured on a ninth of the corpus, which is why it sat far above the ~0.40

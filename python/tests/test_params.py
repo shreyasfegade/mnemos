@@ -44,7 +44,7 @@ def test_wal_length_equals_batch_size() -> None:
 
 
 def test_collision_policy_is_uniquely_representing() -> None:
-    """Plain linear probing is not history-independent -- see docs/adr/0003."""
+    """Plain linear probing is not history-independent -- see the paper, Section 5."""
     p = params.load()
     assert p["index"]["collision_policy"] == "robin-hood"
 

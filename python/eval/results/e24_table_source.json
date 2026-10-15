@@ -1,0 +1,76 @@
+{
+ "experiment": "E24",
+ "domain": "scifact",
+ "buckets": 128,
+ "tables": {
+  "public": {
+   "max_partition_share": 0.09936330310630909,
+   "empty_partitions": 68,
+   "plaintext_ivf": {
+    "ndcg": 0.6717320635449634,
+    "ndcg_lo": 0.6250352818762636,
+    "ndcg_hi": 0.7172058086687263,
+    "recall": 0.7875555555555555,
+    "recall_lo": 0.7408888888888888,
+    "recall_hi": 0.8321111111111111
+   },
+   "p_s2": {
+    "ndcg": 0.44131140117733886,
+    "ndcg_lo": 0.39053692028575565,
+    "ndcg_hi": 0.4930333285036499,
+    "recall": 0.4979444444444444,
+    "recall_lo": 0.4426111111111111,
+    "recall_hi": 0.5534472222222221,
+    "refused_during_indexing": 2297,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "m_ivf_k8": {
+    "ndcg": 0.7078275525588976,
+    "ndcg_lo": 0.6630086782942761,
+    "ndcg_hi": 0.750455121524998,
+    "recall": 0.8192222222222222,
+    "recall_lo": 0.7753333333333333,
+    "recall_hi": 0.861,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   }
+  },
+  "corpus_trained": {
+   "max_partition_share": 0.019486783715994598,
+   "empty_partitions": 0,
+   "plaintext_ivf": {
+    "ndcg": 0.6573821197586872,
+    "ndcg_lo": 0.6099641958492057,
+    "ndcg_hi": 0.7036164481708205,
+    "recall": 0.7625555555555555,
+    "recall_lo": 0.7132194444444443,
+    "recall_hi": 0.8087805555555554
+   },
+   "p_s2": {
+    "ndcg": 0.6647242072402897,
+    "ndcg_lo": 0.6171534342363656,
+    "ndcg_hi": 0.711018628828012,
+    "recall": 0.7692222222222221,
+    "recall_lo": 0.7202222222222222,
+    "recall_hi": 0.8148888888888889,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   },
+   "m_ivf_k8": {
+    "ndcg": 0.7031738899264901,
+    "ndcg_lo": 0.6594107398618356,
+    "ndcg_hi": 0.7457221597601998,
+    "recall": 0.8258888888888889,
+    "recall_lo": 0.782,
+    "recall_hi": 0.8668888888888889,
+    "refused_during_indexing": 0,
+    "capacity_per_partition": 122,
+    "slots": 15616
+   }
+  }
+ },
+ "seconds": 52.45801877975464
+}

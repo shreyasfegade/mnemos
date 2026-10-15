@@ -1,0 +1,1106 @@
+{
+ "experiment": "E30",
+ "library": "langmem 0.0.30",
+ "component": "create_memory_store_manager (langmem/knowledge/extraction.py)",
+ "model": "qwen2.5:7b-instruct",
+ "embedder": "nomic-embed-text",
+ "store": "InMemoryStore with every put appended durably to one file",
+ "seed_size": 60,
+ "seed_errors": 0,
+ "probes_each": 60,
+ "probe_errors": 1,
+ "auc_blocks": 0.5324858757062148,
+ "lo_blocks": 0.47315568817842596,
+ "hi_blocks": 0.595590417484122,
+ "auc_bytes": 0.4615819209039548,
+ "lo_bytes": 0.34940431208715367,
+ "hi_bytes": 0.5707239728277674,
+ "auc_any": 0.5,
+ "lo_any": 0.5,
+ "hi_any": 0.5,
+ "member_write_rate": 1.0,
+ "nonmember_write_rate": 1.0,
+ "rows": [
+  {
+   "member": 1,
+   "bytes_added": 417,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.2665212154388428,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 449,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.4124345779418945,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 339,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.011331558227539,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 341,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0256974697113037,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 558,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.4999327659606934,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 288,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.802145004272461,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 352,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1340014934539795,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 345,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.8987479209899902,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 400,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.204935312271118,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 375,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0217580795288086,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 792,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 3.83199405670166,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 371,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0274648666381836,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 503,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 4.519496202468872,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 414,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.5342047214508057,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 361,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1675355434417725,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 396,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.34468412399292,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 486,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 5.482926845550537,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 403,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1535377502441406,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 478,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.3810198307037354,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 332,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9488520622253418,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 725,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.8976731300354004,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 324,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.8581905364990234,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 350,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.8875973224639893,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 888,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 3,
+   "latency": 5.665421485900879,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 469,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.341193914413452,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 393,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.949709415435791,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 438,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1680946350097656,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 354,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.94647216796875,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 647,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 3.618462085723877,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 322,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 4.0608603954315186,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 362,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 5.966264486312866,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 455,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.501086473464966,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 457,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.2173662185668945,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 432,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.209024429321289,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 1602,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 6,
+   "latency": 9.132411003112793,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 1080,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 5.197713851928711,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 533,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.516793727874756,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 567,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 6.74951434135437,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 298,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 3.8161377906799316,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 326,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9533233642578125,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 670,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.695683002471924,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 1182,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 5.23284387588501,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 460,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.141155242919922,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 972,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 9.965799570083618,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 325,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9699952602386475,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 470,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.819108486175537,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 1373,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 3,
+   "latency": 6.359112024307251,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 572,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.5213210582733154,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 391,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.342277765274048,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 325,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9877867698669434,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 353,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.086589813232422,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 590,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.5900328159332275,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 687,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.8439781665802,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 466,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1679534912109375,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 593,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.65590238571167,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 438,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.3531665802001953,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 332,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.017784833908081,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 333,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0234432220458984,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 1214,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 5.133214950561523,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 344,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.8595917224884033,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 1656,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 3,
+   "latency": 6.9223456382751465,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 2478,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 6,
+   "latency": 11.53292989730835,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 641,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.790017604827881,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 354,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9156749248504639,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 323,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9026002883911133,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 327,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9049196243286133,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 707,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.9856555461883545,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 333,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.011326789855957,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 334,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9481360912322998,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 394,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0122926235198975,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 394,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 4.388926267623901,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 486,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.383054494857788,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 598,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.7041540145874023,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 556,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.6228580474853516,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 492,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.615866184234619,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 444,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1096577644348145,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 372,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.056478261947632,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 349,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0583856105804443,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 336,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0883994102478027,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 368,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 3.896367073059082,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 1073,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 4.949928522109985,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 502,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.5493361949920654,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 381,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0259177684783936,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 332,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0240936279296875,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 881,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 9.527087211608887,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 416,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.036255121231079,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 318,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.9243249893188477,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 399,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.094710350036621,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 271,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.7641584873199463,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 329,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.916968822479248,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 447,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.2358057498931885,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 459,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 5.614816904067993,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 330,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1293609142303467,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 2956,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 6,
+   "latency": 13.526796102523804,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 817,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 3.6995019912719727,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 287,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1997158527374268,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 0,
+   "changed_blocks": 0,
+   "any": 0,
+   "puts": -1,
+   "latency": 28.85006618499756,
+   "error": "AttributeError: 'ExtractionState' object has no attribute 'tool_call_id'"
+  },
+  {
+   "member": 0,
+   "bytes_added": 323,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.097463846206665,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 346,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.176110029220581,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 651,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 3.0925981998443604,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 650,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 4.195803642272949,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 349,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 5.707057237625122,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 718,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 3.849067449569702,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 1036,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 2,
+   "latency": 5.233885288238525,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 285,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.8774282932281494,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 976,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 4.721104860305786,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 1223,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 5.726238489151001,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 347,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.209104299545288,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 354,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.1281306743621826,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 438,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.496285915374756,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 1081,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 6.187188148498535,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 566,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 3.9966654777526855,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 501,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.651428461074829,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 404,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.3298652172088623,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 400,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 4.222406387329102,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 650,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 4.127049684524536,
+   "error": null
+  },
+  {
+   "member": 0,
+   "bytes_added": 324,
+   "changed_blocks": 2,
+   "any": 1,
+   "puts": 1,
+   "latency": 2.0762405395507812,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 952,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 2,
+   "latency": 4.299120664596558,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 289,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 1.8935892581939697,
+   "error": null
+  },
+  {
+   "member": 1,
+   "bytes_added": 411,
+   "changed_blocks": 1,
+   "any": 1,
+   "puts": 1,
+   "latency": 4.38294792175293,
+   "error": null
+  }
+ ],
+ "seconds": 602.9847791194916
+}

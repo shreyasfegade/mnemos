@@ -5,11 +5,10 @@
 //! argument, with three consumers:
 //!
 //! 1. **The attack harness** (`python/eval/attacks/`) treats the event stream *as* the
-//!    transcript from `THREAT-MODEL.md` §2.2. Attacks import `mnemos.trace`, never
+//!    transcript from the paper's threat model (Section 3). Attacks import `mnemos.trace`, never
 //!    `mnemos.engine`, so an attack structurally cannot see more than the adversary sees.
 //! 2. **`crates/mnemos-engine/tests/leakage_profile.rs`** asserts the emitted variants match
 //!    `docs/leakage-profile.md` row for row. **Leak something undocumented and CI fails.**
-//! 3. **The demo** renders it live.
 //!
 //! ## The rule for adding a variant
 //!
@@ -80,8 +79,7 @@ pub enum LeakEvent {
     /// That is the structure-transfer signal in full, and no event described it.
     ///
     /// The invariant is that exactly `params.epoch.epoch_writes` of these occur per flush --
-    /// dummies included -- so the count reveals nothing about how many records were real. See
-    /// `the findings notes`.
+    /// dummies included -- so the count reveals nothing about how many records were real.
     IndexWrite {
         /// Which partition received the write.
         bucket: BucketId,
@@ -135,7 +133,7 @@ pub enum LeakEvent {
     },
 
     /// Capacity was exceeded and the store doubled. **A loud, unhidden event** — declared as
-    /// a non-goal in `the specification` §5.3 and as a row in the leakage profile.
+    /// a non-goal and as a row in the leakage profile.
     Grow {
         /// Capacity before.
         old_n_max: u64,

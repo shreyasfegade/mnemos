@@ -1,6 +1,6 @@
 //! # mnemos-keystore
 //!
-//! Custody of the root key. Small, load-bearing, and separately audited. See ADR-0005.
+//! Custody of the root key. Small, load-bearing, and separately audited. See the paper, Section 6.4.
 //!
 //! The root key **never crosses this crate's boundary**. Callers get the *master* key, which
 //! the hardware unwraps; the root key stays inside the TPM or enclave for its whole life.
@@ -21,7 +21,7 @@
 //! 1. **Compile-time:** `--features insecure-software-keystore`.
 //! 2. **Runtime:** `MNEMOS_I_ACCEPT_INSECURE=1`.
 //!
-//! The runtime error names this ADR, so anyone who trips it learns why rather than reaching
+//! The runtime error names this design, so anyone who trips it learns why rather than reaching
 //! for the flag.
 
 // `NCrypt` is a C API, so the Windows TPM provider needs FFI. The exception is scoped by a

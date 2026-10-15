@@ -1,6 +1,6 @@
 """E11: capacity and write amplification of v1 and v2 over a long sparse write trace.
 
-under sparse agent writes almost every v1 flush contains one real record and
+Under sparse agent writes almost every v1 flush contains one real record and
 15 dummies, so the index fills after ~1,024 real memories and topic-heavy partitions overflow
 far earlier, while each memory costs a full padded batch of slab and index writes. v2 stores no
 dummies, so capacity counts real records only.

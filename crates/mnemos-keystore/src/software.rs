@@ -4,7 +4,7 @@
 //! full host compromise reads the key file. It exists because CI runners have no TPM, and for
 //! no other reason.
 //!
-//! Two gates, both required (ADR-0005):
+//! Two gates, both required (key custody, paper Section 6.4):
 //! 1. `--features insecure-software-keystore` at compile time.
 //! 2. `MNEMOS_I_ACCEPT_INSECURE=1` at runtime.
 //!

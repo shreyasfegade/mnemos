@@ -18,7 +18,7 @@ use crate::types::{BucketId, Epoch, Hit, Memory, MemoryId, QuantVec, SlotAddr, T
 /// Custody of the root key.
 ///
 /// Deliberately tiny — four methods — so that three platform implementations stay cheap to
-/// keep correct. See ADR-0005.
+/// keep correct. See the paper, Section 6.4.
 ///
 /// The root key **never crosses this boundary**. `unwrap_master_key` returns the *master* key,
 /// which the hardware decrypts; the root key itself stays inside the TPM or enclave.
@@ -48,7 +48,7 @@ pub trait KeyStore: Send + Sync {
     /// Platform attestation of the running binary, if available.
     ///
     /// Returns `None` where unsupported. Present so the seam exists for the future-work item
-    /// in ADR-0005 (sealing the master key to a PCR set), not because v1 uses it.
+    /// in the key-custody design (sealing the master key to a PCR set), not because v1 uses it.
     ///
     /// # Errors
     /// [`crate::Error::KeyCustody`] if the platform supports attestation but the call fails.
@@ -191,7 +191,7 @@ pub trait SearchableMemory: Send + Sync {
 
     /// Replace a memory. Implemented as delete-then-put and therefore **returns a new
     /// [`MemoryId`]** — an in-place rewrite is a same-slot write, which is precisely the
-    /// correlation signal a live adversary wants. See ADR-0004.
+    /// correlation signal a live adversary wants. This is Type-II backward privacy.
     ///
     /// # Errors
     /// [`crate::Error::NotFound`] or I/O failures.

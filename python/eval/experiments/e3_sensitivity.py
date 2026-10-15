@@ -29,8 +29,8 @@ precise, falsifiable statement of the form:
     exceeds T; below that it is indistinguishable from guessing.
 
 That statement is publishable either way. If real agent memory sits above the threshold, the
-finding holds and we know why. If it sits below, the finding is dead and we know that in
-August rather than in November.
+finding holds and we know why. If it sits below, the finding is dead and we know that
+early.
 
 Axes
 ====

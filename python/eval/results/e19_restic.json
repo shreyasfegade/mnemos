@@ -1,0 +1,64 @@
+{
+ "experiment": "E19",
+ "restic": "0.19.1",
+ "buckets": 64,
+ "rows": [
+  {
+   "kind": "p",
+   "granularity_flushes": 1,
+   "trials": 5,
+   "mean_data_added": 1125514.7666666666,
+   "mean_rewritten_bytes": 87062.28,
+   "upload_amplification": 12.928369000763507,
+   "cv_data_added": 0.0657340212107275,
+   "mean_new_blobs": 1.3466666666666667,
+   "file_bytes": 1151040.0,
+   "precision": 0.20711111111111108,
+   "lo": 0.20524414945506378,
+   "hi": 0.20897807276715838,
+   "null_precision": 0.015625,
+   "exposure": 1.0,
+   "restored_byte_exact": true
+  },
+  {
+   "kind": "p",
+   "granularity_flushes": 4,
+   "trials": 5,
+   "mean_data_added": 1149503.8399999999,
+   "mean_rewritten_bytes": 313128.24,
+   "upload_amplification": 3.6714701970925594,
+   "cv_data_added": 0.0061826547099584446,
+   "mean_new_blobs": 1.3866666666666667,
+   "file_bytes": 1151040.0,
+   "precision": 0.05754319622585875,
+   "lo": 0.05666858528829884,
+   "hi": 0.05841780716341867,
+   "null_precision": 0.015625,
+   "exposure": 1.0,
+   "restored_byte_exact": true
+  },
+  {
+   "kind": "m",
+   "granularity_flushes": 1,
+   "trials": 5,
+   "mean_data_added": 981672.7033333334,
+   "mean_rewritten_bytes": 8957.606666666668,
+   "upload_amplification": 109.59082521909848,
+   "cv_data_added": 2.353857143851689e-06,
+   "mean_new_blobs": 1.0033333333333334,
+   "file_bytes": 1151040.0
+  },
+  {
+   "kind": "m",
+   "granularity_flushes": 4,
+   "trials": 5,
+   "mean_data_added": 994111.4,
+   "mean_rewritten_bytes": 35828.560000000005,
+   "upload_amplification": 27.746663553617747,
+   "cv_data_added": 7.412233785799506e-07,
+   "mean_new_blobs": 1.0,
+   "file_bytes": 1151040.0
+  }
+ ],
+ "seconds": 1032.3500092029572
+}

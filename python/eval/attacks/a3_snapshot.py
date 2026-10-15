@@ -41,7 +41,7 @@ Fairness
 --------
 This module reads ``SnapshotView`` and the auxiliary entries. It **must not** import the
 engine, read scheme internals, or use anything the adversary could not compute from disk.
-CI enforces the import half of that; the rest is on review.
+CI enforces the import half of that; the rest is on code review.
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ class AttackResult:
     def advantage(self) -> float:
         """**The headline metric.** Entry-level re-identification above chance.
 
-        This is what ``the specification`` s6.6 and the G2/G4 gates are stated in: the fraction of
+        This is what the G2/G4 gates are stated in: the fraction of
         *historical memories* whose topic the adversary correctly recovers, above what
         guessing the most likely topic would give.
         """

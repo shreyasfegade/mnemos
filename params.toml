@@ -2,7 +2,7 @@
 # Rust reads this via mnemos-core::Params; Python reads it via mnemos.params;
 # the paper's configuration table is generated from it by `just paper-params`.
 #
-# RULE: if a number appears in the specification §6, ARCHITECTURE.md, or any source file,
+# RULE: if a number appears in the paper or any source file,
 # it must come from here. No magic numbers anywhere else.
 
 schema_version = 2
@@ -24,7 +24,7 @@ block_size_bytes    = 4096         # record padding granularity
 max_entry_bytes     = 65536        # larger entries spill to a padded chunk chain
 
 [memory]
-# Locked plaintext arena. TA-4 in THREAT-MODEL.md.
+# Locked plaintext arena. TA-4 in the paper's threat model.
 arena_bytes         = 2097152      # 2 MiB
 lock_pages          = true         # VirtualLock / mlock
 zeroise_deadline_ms = 1
@@ -180,7 +180,7 @@ confidence           = 0.95
 aux_knowledge        = [0.10, 0.25, 0.50]
 
 [sweeps]
-# Ranges for the money figure (the evaluation plan §4).
+# Ranges for the main comparison figure.
 buckets             = [64, 128, 256, 512, 1024]
 probe_width         = [1, 2, 4, 8, 16]
 decoy_buckets       = [0, 2, 4, 8]
@@ -191,6 +191,6 @@ epoch_ms            = [100, 250, 500, 1000, 5000]
 corpus_sizes        = [1000, 10000, 100000]
 
 [datasets]
-d1_hermes           = "data/d1-hermes"      # self-authored, 10k — gated on the specification T2
+d1_hermes           = "data/d1-hermes"      # self-authored, 10k
 d2_public           = "data/d2-msmarco-nq"  # reproducible without Hermes — REQUIRED
 d3_procedural       = "data/d3-swebench"    # agent skill notes

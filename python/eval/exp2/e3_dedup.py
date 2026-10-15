@@ -1,6 +1,6 @@
 """E3: deduplication-based membership inference against a self-writing agent.
 
-This is the new attack the review asks for (C3), and it makes the derived-write proposition
+This attack makes the derived-write proposition
 concrete instead of circular. The earlier measurement -- "50 of 50 follow-ups landed in the
 retrieved memory's partition" -- held by construction, because the agent had been told to write
 about the retrieved subject. This one does not.

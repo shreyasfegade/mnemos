@@ -1,0 +1,20 @@
+{
+ "experiment": "E18",
+ "library": "mem0 2.2.1",
+ "model": "qwen2.5:7b-instruct",
+ "embedder": "nomic-embed-text",
+ "vector_store": "qdrant (on-disk, local)",
+ "note": "write-occurrence oracle; gocryptfs mirrors these files block-for-block",
+ "seed_size": 40,
+ "probes_each": 30,
+ "auc_write_vs_nonmember": 0.7999999999999999,
+ "lo": 0.7020044191919191,
+ "hi": 0.8958669947121032,
+ "member_write_rate": 0.3,
+ "nonmember_write_rate": 0.9,
+ "event_counts": {
+  "ADD": 36,
+  "NONE": 24
+ },
+ "seconds": 267.63169527053833
+}

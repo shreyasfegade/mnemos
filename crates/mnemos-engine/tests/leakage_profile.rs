@@ -300,7 +300,7 @@ fn no_event_carries_a_secret() {
 /// `docs/leakage-profile.md`, and vice versa.
 ///
 /// Deliberately strict — a new variant means the implementation leaks something new, and that
-/// fact must reach the document in the *same commit*, not at review time and not at submission.
+/// fact must reach the document in the *same commit*, not later.
 #[test]
 fn every_event_variant_appears_in_the_document() {
     let doc = include_str!("../../../docs/leakage-profile.md");

@@ -1,0 +1,20 @@
+{
+ "experiment": "E16",
+ "stores": [
+  {
+   "store": "pgvector",
+   "seeds": 20,
+   "placement": "content (ivfflat lists); an insert lands in its nearest list's pages after build",
+   "schema": "pgvector ivfflat (lists=64, vector_ip_ops); built on training set, then inserts",
+   "chance": 0.125,
+   "n_hist": 150,
+   "budget_per_topic": 20,
+   "block_size": 4096,
+   "adv_hist": 0.11849999999999998,
+   "adv_hist_lo": 0.09404166666666666,
+   "adv_hist_hi": 0.143,
+   "coverage_hist": 0.9133333333333333,
+   "mean_blocks_per_write": 55.00312499999999
+  }
+ ]
+}

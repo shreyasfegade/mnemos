@@ -1,0 +1,88 @@
+{
+ "experiment": "E8",
+ "buckets": 64,
+ "epoch_writes": 4,
+ "claim_under_test": "history independence does not bound what a SEQUENCE of versions reveals",
+ "granularity_sweep": [
+  {
+   "granularity_flushes": 1,
+   "precision": 0.20762499999999995,
+   "lo": 0.20701937499999998,
+   "hi": 0.20815006944444442,
+   "exposure": 1.0,
+   "mean_candidate_regions": 4.851500000000001,
+   "null_precision": 0.015625,
+   "advantage": 0.19199999999999995
+  },
+  {
+   "granularity_flushes": 2,
+   "precision": 0.10804722222222221,
+   "lo": 0.1076722189153439,
+   "hi": 0.10840319444444445,
+   "exposure": 1.0,
+   "mean_candidate_regions": 9.322,
+   "null_precision": 0.015625,
+   "advantage": 0.09242222222222221
+  },
+  {
+   "granularity_flushes": 4,
+   "precision": 0.05790960420155465,
+   "lo": 0.057657101166377484,
+   "hi": 0.05815247288737808,
+   "exposure": 1.0,
+   "mean_candidate_regions": 17.372666666666664,
+   "null_precision": 0.015625,
+   "advantage": 0.04228460420155465
+  },
+  {
+   "granularity_flushes": 16,
+   "precision": 0.021753494960147064,
+   "lo": 0.021633507960911666,
+   "hi": 0.021883301421138524,
+   "exposure": 1.0,
+   "mean_candidate_regions": 46.16066666666667,
+   "null_precision": 0.015625,
+   "advantage": 0.006128494960147064
+  },
+  {
+   "granularity_flushes": 64,
+   "precision": 0.015667304259385166,
+   "lo": 0.015654338096217392,
+   "hi": 0.015680393534257226,
+   "exposure": 1.0,
+   "mean_candidate_regions": 63.831333333333326,
+   "null_precision": 0.015625,
+   "advantage": 4.2304259385166076e-05
+  }
+ ],
+ "cross_session": [
+  {
+   "rewrite_at_lock": false,
+   "precision": 0.049179020509112034,
+   "lo": 0.047580884028252446,
+   "hi": 0.0507585607009949,
+   "exposure": 1.0,
+   "mean_candidate_regions": 20.45,
+   "null_precision": 0.015625
+  },
+  {
+   "rewrite_at_lock": true,
+   "precision": 0.015625,
+   "lo": 0.015625,
+   "hi": 0.015625,
+   "exposure": 1.0,
+   "mean_candidate_regions": 64.0,
+   "null_precision": 0.015625
+  }
+ ],
+ "real_client": {
+  "note": "locally observable only; retention policy needs provider API access",
+  "clients_present": {
+   "OneDrive": "C:\\Users\\Admin\\OneDrive"
+  },
+  "measured": true,
+  "writes": 10,
+  "distinct_mtimes": 10,
+  "comment": "Each local rewrite is a candidate upload. Whether the provider stores each as a retained version is a policy question this probe cannot answer, which is why the attack above treats capture granularity as an explicit parameter."
+ }
+}

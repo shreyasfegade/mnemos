@@ -1,0 +1,216 @@
+{
+ "experiment": "E5",
+ "buckets": 16,
+ "capacity": 64,
+ "instances_per_bit": 1000,
+ "note": "held-out AUC; the upper bound is the empirical ceiling for this attacker",
+ "rows": [
+  {
+   "arm": "P shipped",
+   "engine": "p",
+   "admissible": true,
+   "refusals_observed": 0,
+   "learned": {
+    "auc": 0.4885050572946674,
+    "lo": 0.45216552673606974,
+    "hi": 0.5243460181474292,
+    "advantage": 0.011494942705332578
+   },
+   "hand_built": {
+    "statistic": "rho_write_std",
+    "description": "spread of post-tau writes over regions",
+    "auc": 0.5362632834005505,
+    "lo": 0.5008841360797818,
+    "hi": 0.5717153748538855,
+    "advantage": 0.03626328340055052
+   },
+   "distinguishable": true,
+   "ceiling": 0.07171537485388546,
+   "seconds": 373.6101098060608
+  },
+  {
+   "arm": "P no S1 (growing regions)",
+   "engine": "p",
+   "admissible": true,
+   "refusals_observed": 0,
+   "learned": {
+    "auc": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "advantage": 0.5
+   },
+   "hand_built": {
+    "statistic": "region_size_std",
+    "description": "spread of per-region file sizes",
+    "auc": 1.0,
+    "lo": 0.9999999999999999,
+    "hi": 1.0,
+    "advantage": 0.5
+   },
+   "distinguishable": true,
+   "ceiling": 0.5,
+   "seconds": 4448.947755813599
+  },
+  {
+   "arm": "P no S2 (unsealed slots)",
+   "engine": "p",
+   "admissible": true,
+   "refusals_observed": 0,
+   "learned": {
+    "auc": 0.9974795059831727,
+    "lo": 0.9939981688773526,
+    "hi": 1.0,
+    "advantage": 0.4974795059831727
+   },
+   "hand_built": {
+    "statistic": "zero_blocks",
+    "description": "count of all-zero 512-byte blocks",
+    "auc": 0.9953230833243315,
+    "lo": 0.9924397905418172,
+    "hi": 0.9975781590048955,
+    "advantage": 0.4953230833243315
+   },
+   "distinguishable": true,
+   "ceiling": 0.5,
+   "seconds": 354.44343090057373
+  },
+  {
+   "arm": "P no S3 (per-slot writes)",
+   "engine": "p",
+   "admissible": true,
+   "refusals_observed": 0,
+   "learned": {
+    "auc": 0.5062980251921008,
+    "lo": 0.4709517216893667,
+    "hi": 0.5410775272113677,
+    "advantage": 0.006298025192100765
+   },
+   "hand_built": {
+    "statistic": "rho_slot_mean",
+    "description": "mean slot index of post-tau per-slot writes",
+    "auc": 0.48270793083172336,
+    "lo": 0.4467688690104847,
+    "hi": 0.5184558490186025,
+    "advantage": 0.017292069168276636
+   },
+   "distinguishable": false,
+   "ceiling": 0.041077527211367704,
+   "seconds": 430.1092162132263
+  },
+  {
+   "arm": "P identity permutation",
+   "engine": "p",
+   "admissible": true,
+   "refusals_observed": 0,
+   "learned": {
+    "auc": 0.510804117607051,
+    "lo": 0.4751068209332095,
+    "hi": 0.5460655760967779,
+    "advantage": 0.010804117607051023
+   },
+   "hand_built": {
+    "statistic": "rho_low_region_share",
+    "description": "share of post-tau writes in regions 0-3",
+    "auc": 0.5181255526083113,
+    "lo": 0.48220098897612823,
+    "hi": 0.5538811905344391,
+    "advantage": 0.01812555260831128
+   },
+   "distinguishable": false,
+   "ceiling": 0.05388119053443907,
+   "seconds": 435.2930557727814
+  },
+  {
+   "arm": "P inadmissible, padded refusal",
+   "engine": "p",
+   "admissible": false,
+   "refusals_observed": 7659,
+   "learned": {
+    "auc": 0.5370423707117256,
+    "lo": 0.5018975581542415,
+    "hi": 0.5721807345337069,
+    "advantage": 0.03704237071172556
+   },
+   "hand_built": {
+    "statistic": "rho_write_std",
+    "description": "spread of post-tau writes over regions",
+    "auc": 0.5266917082693292,
+    "lo": 0.4919159475390156,
+    "hi": 0.5633844135214543,
+    "advantage": 0.026691708269329206
+   },
+   "distinguishable": true,
+   "ceiling": 0.07218073453370688,
+   "seconds": 465.65400767326355
+  },
+  {
+   "arm": "P inadmissible, silent refusal",
+   "engine": "p",
+   "admissible": false,
+   "refusals_observed": 7659,
+   "learned": {
+    "auc": 0.9988313268442623,
+    "lo": 0.9977495523937608,
+    "hi": 0.9995998375424614,
+    "advantage": 0.49883132684426235
+   },
+   "hand_built": {
+    "statistic": "rho_write_std",
+    "description": "spread of post-tau writes over regions",
+    "auc": 0.9920874423668034,
+    "lo": 0.9881036347713998,
+    "hi": 0.9955065800680859,
+    "advantage": 0.49208744236680335
+   },
+   "distinguishable": true,
+   "ceiling": 0.4995998375424614,
+   "seconds": 450.405202627182
+  },
+  {
+   "arm": "M shipped",
+   "engine": "m",
+   "admissible": true,
+   "refusals_observed": 0,
+   "learned": {
+    "auc": 0.522596,
+    "lo": 0.48641592613595114,
+    "hi": 0.5585539197889293,
+    "advantage": 0.02259599999999995
+   },
+   "hand_built": {
+    "statistic": "rho_write_std",
+    "description": "spread of post-tau writes over regions",
+    "auc": 0.504516,
+    "lo": 0.4698057569851862,
+    "hi": 0.5397824310758401,
+    "advantage": 0.0045159999999999645
+   },
+   "distinguishable": false,
+   "ceiling": 0.05855391978892932,
+   "seconds": 289.429988861084
+  },
+  {
+   "arm": "M content placement",
+   "engine": "m",
+   "admissible": true,
+   "refusals_observed": 0,
+   "learned": {
+    "auc": 0.5055758065613258,
+    "lo": 0.47010156410589726,
+    "hi": 0.5412770377214321,
+    "advantage": 0.005575806561325836
+   },
+   "hand_built": {
+    "statistic": "rho_write_std",
+    "description": "spread of post-tau writes over regions",
+    "auc": 0.5146267390634566,
+    "lo": 0.4795086214390598,
+    "hi": 0.5508982568798404,
+    "advantage": 0.014626739063456573
+   },
+   "distinguishable": false,
+   "ceiling": 0.0508982568798404,
+   "seconds": 267.0822079181671
+  }
+ ]
+}

@@ -1,0 +1,82 @@
+{
+ "experiment": "E9",
+ "buckets": 64,
+ "capacity": 32,
+ "epoch_writes": 4,
+ "induced_per_region": 20,
+ "padding_base_rate": 0.07572144363075495,
+ "channel": [
+  {
+   "mode": "silent",
+   "auc_full_vs_open": 1.0,
+   "lo": 1.0,
+   "hi": 1.0,
+   "auc_pooled": 1.0,
+   "advantage": 0.5,
+   "mean_write_rate_full_regions": 0.07,
+   "mean_write_rate_open_regions": 1.0,
+   "gap": 0.93,
+   "gap_lo": 0.9222916666666666,
+   "gap_hi": 0.9375000000000002,
+   "refusals": 4800,
+   "ghost_writes": 0,
+   "trials": 20,
+   "n_regions_observed": 480,
+   "n_full": 240
+  },
+  {
+   "mode": "padded",
+   "auc_full_vs_open": 0.5,
+   "lo": 0.5,
+   "hi": 0.5,
+   "auc_pooled": 0.5,
+   "advantage": 0.0,
+   "mean_write_rate_full_regions": 1.0,
+   "mean_write_rate_open_regions": 1.0,
+   "gap": 0.0,
+   "gap_lo": 0.0,
+   "gap_hi": 0.0,
+   "refusals": 4800,
+   "ghost_writes": 4800,
+   "trials": 20,
+   "n_regions_observed": 480,
+   "n_full": 240
+  }
+ ],
+ "capacity_arm": [
+  {
+   "engine": "p",
+   "slots": 2048,
+   "admitted_total": 1845,
+   "first_refusal_after": 488,
+   "utilisation_at_first_refusal": 0.23828125,
+   "refusals_by_topic": {
+    "3": 1363,
+    "1": 518,
+    "7": 210,
+    "2": 64,
+    "5": 42,
+    "0": 31,
+    "6": 12,
+    "4": 11
+   }
+  },
+  {
+   "engine": "m",
+   "slots": 2048,
+   "admitted_total": 2048,
+   "first_refusal_after": 2048,
+   "utilisation_at_first_refusal": 1.0,
+   "refusals_by_topic": {
+    "3": 974,
+    "1": 363,
+    "7": 216,
+    "5": 137,
+    "4": 108,
+    "2": 91,
+    "6": 80,
+    "0": 79
+   }
+  }
+ ]
+}

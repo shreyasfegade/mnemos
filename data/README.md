@@ -24,10 +24,10 @@ traced back to the exact configuration that produced it.
 | `retrieval-clusters.jsonl` | 1,500 | Semantically clustered retrieval fixtures |
 | `manifest.json` | — | Machine-readable provenance (version, seed, params hash, schemas) |
 | `generate_data.py` | — | The generator |
-| `assemble.py` | — | (legacy, superseded) |
+| `assemble.py` | — | Older assembly script, kept for reference |
 
 `D1` (Hermes self-authored memory) and `D2` (MS MARCO / NQ) are **not** generated here:
-D1 is real agent output harvested by E7 (the specification T2), and D2 is a public corpus pulled by
+D1 is real agent output, and D2 is a public corpus pulled by
 its own script. This directory covers **D3 only**, plus the two supporting fixtures the
 pipeline needs to exercise D3.
 
@@ -70,9 +70,8 @@ skews toward Python/SQL and a `containers` topic toward Bash/Go, the way a real 
 would. `meta` is kept consistent with the top-level fields so downstream code can trust either
 view.
 
-**Why these shapes.** `params.toml` declares `d3_procedural = "data/d3-swebench"` and
-the evaluation plan §5 calls for "SWE-bench-style task logs → procedural skill notes ~5k", so 5,000
-is the agreed volume. The `text`/`meta` split mirrors `Memory { text, meta }`, and the
+**Why these shapes.** `params.toml` declares `d3_procedural = "data/d3-swebench"`, and the corpus
+is SWE-bench-style task logs turned into about 5,000 procedural skill notes. The `text`/`meta` split mirrors `Memory { text, meta }`, and the
 monotonic `written_at_ms` exists so the corpus can be written into a store in arrival order —
 which is what the epoch-flush machinery (`params.toml [epoch]`) and the E5/E6 injection
 experiments need.
@@ -132,7 +131,7 @@ measurable noise. Exactly 150 documents per cluster (10 × 150), each ≥ 30 wor
 
 ## 4. Judgment calls
 
-- **5000 / 1200 / 1500** match the evaluation plan §5's "~5k" D3 target and the pre-existing
+- **5000 / 1200 / 1500** match the D3 target size and the existing
   `data/` scaffold (5k notes / 1.2k tasks / 1.5k clusters), so nothing downstream needs to
   change.
 - **`attack` + `trigger` fields are additive.** The old scaffold had only `task`/`topic`.

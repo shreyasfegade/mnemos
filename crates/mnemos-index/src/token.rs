@@ -6,7 +6,7 @@
 //! The serialised state of every chain is padded to the same constant length. Without that
 //! padding the chain state would encode how many times its partition has been updated —
 //! reproducing, inside Mnemos, exactly the leak that attack A3 exploits in the Sophos and
-//! Diana baselines. That would be an embarrassing way to lose the paper.
+//! Diana baselines.
 //!
 //! ## Why every partition advances, not just the written ones
 //!

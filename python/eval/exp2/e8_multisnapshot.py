@@ -1,6 +1,6 @@
 """E8: what a sequence of file versions reveals about writes made *before* the compromise.
 
-The review's C2, which is the most serious factual error in the paper. The claim was: "the
+This corrects an earlier claim. The claim was: "the
 construction is history-independent, so multiple snapshots reveal no more about cohort H than one
 does." History independence (Naor-Teague) concerns **one** representation against the operation
 sequence that produced it. It says nothing about a **sequence** of representations. Two versions
@@ -253,7 +253,7 @@ def main() -> None:
     print(f"B={B} C={CAP} w={W}; null precision {1.0 / B:.4f}", flush=True)
 
     # Empirical entropy of the region prior (records placed by content are region-skewed by topic
-    # frequency), so the ledger's Fano bound uses the true H(X) rather than log2 B. a reader.
+    # frequency), so the ledger's Fano bound uses the true H(X) rather than log2 B.
     import math
 
     reg = np.argmax(vecs @ cents.T, axis=1)
